@@ -1,3 +1,4 @@
+import { isOnManuscript } from "./lib/manuscript-hit.js";
 import { TEXT } from "./rashomon.js";
 import { rainSchedule } from "./lib/rain.js";
 import { seeded } from "./lib/mapping.js";
@@ -27,6 +28,7 @@ function stop() {
   cancelAnimationFrame(raf);
   playing = false;
   $("play").textContent = "再生";
+  canvas.setAttribute("aria-label", "原稿をクリックして再生");
 }
 const gaiji = new Map();
 function drawCharacter(context, glyph, x, y, size) {
@@ -524,6 +526,7 @@ function loading(message, failed = false) {
   $("art").setAttribute("aria-busy", String(!failed));
 }
 function setBusy(busy) {
+  canvas.setAttribute("aria-disabled", String(busy));
   for (const el of document.querySelectorAll(
     "#panel input,#panel select,#panel button,.stage-tools button:not(#toggle)",
   ))
@@ -782,6 +785,7 @@ $("restart").onclick = () => {
   playStarted = performance.now();
   playing = true;
   $("play").textContent = "一時停止";
+  canvas.setAttribute("aria-label", "原稿をクリックして一時停止");
   raf = requestAnimationFrame(frame);
 };
 $("play").onclick = () => {
@@ -794,7 +798,37 @@ $("play").onclick = () => {
   playStarted = performance.now();
   playing = true;
   $("play").textContent = "一時停止";
+  canvas.setAttribute("aria-label", "原稿をクリックして一時停止");
   raf = requestAnimationFrame(frame);
+};
+// Only clicks on the projected paper count; the surrounding table is inactive.
+canvas.addEventListener("click", (event) => {
+  if ($("play").disabled || !$("loading").hidden) return;
+  const matrix =
+    $("effect").value === "paper"
+      ? transitionAt(exactProgress * playbackDuration()).matrix
+      : [1, 0, 0, 1, 0, 0];
+  if (
+    isOnManuscript(
+      event.clientX,
+      event.clientY,
+      canvas.getBoundingClientRect(),
+      W,
+      H,
+      matrix,
+    )
+  )
+    $("play").click();
+});
+canvas.addEventListener("keydown", (event) => {
+  if ((event.key === "Enter" || event.key === " ") && !event.repeat) {
+    event.preventDefault();
+    if (!$("play").disabled && $("loading").hidden) $("play").click();
+  }
+});
+$("close-panel").onclick = () => {
+  if (!$("panel").hidden) $("toggle").click();
+  $("toggle").focus();
 };
 $("save").onclick = () => {
   const a = document.createElement("a");
