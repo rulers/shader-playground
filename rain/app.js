@@ -11,11 +11,25 @@
   const reset = document.querySelector("#reset");
   const status = document.querySelector("#status");
   const controls = document.querySelector("#controls");
+  const controlsToggle = document.querySelector("#controls-toggle");
+  const controlsClose = document.querySelector("#controls-close");
   const controlsNotice = document.querySelector("#controls-notice");
-  controls.addEventListener("keydown", event => {
-    if (event.key === "Escape" && controls.open) {
-      controls.open = false;
-      controls.querySelector("summary").focus();
+  function setControlsOpen(open) {
+    controls.hidden = !open;
+    controlsToggle.setAttribute("aria-expanded", String(open));
+    controlsToggle.setAttribute("aria-label", open ? "調整UIを閉じる" : "調整UIを開く");
+    controlsToggle.querySelector("span").textContent = open ? "−" : "＋";
+    controlsToggle.closest(".control-dock").classList.toggle("is-open", open);
+  }
+  controlsToggle.addEventListener("click", () => setControlsOpen(controls.hidden));
+  controlsClose.addEventListener("click", () => {
+    setControlsOpen(false);
+    controlsToggle.focus();
+  });
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape" && !controls.hidden) {
+      setControlsOpen(false);
+      controlsToggle.focus();
     }
   });
   const reduced = matchMedia("(prefers-reduced-motion: reduce)");
