@@ -14,13 +14,19 @@ GitHub Pagesは `main` ブランチのルート `/` から公開します。
 
 ## 作品
 
-「墨の庭」と「雨粒と曇りガラス」を独立して育てるシェーダー実験集です。
+「墨の庭」「雨粒と曇りガラス」「言葉の肖像」を独立して育てるブラウザー表現の実験集です。
 [rulers/kodelife-leaning](https://github.com/rulers/kodelife-leaning) の教材10・11を、ソース・生成ツール・解説・画像とともに切り出しています。
 
 | 作品 | 動かし方 | 解説 | ライセンス |
 | --- | --- | --- | --- |
 | 墨の庭 / Ink Playground | [preview.html](inkplay/preview.html) をダウンロードしてブラウザーで開く | [操作と仕組み](tutorials/11_interactive_ink.md) | MIT |
 | Heartfelt：雨粒と曇りガラス | [ブラウザーで体験](https://rulers.github.io/shader-playground/rain/) | [設定と仕組み](tutorials/10_heartfelt.md) | CC BY-NC-SA 3.0 |
+| 言葉の肖像：芥川龍之介 × 羅生門 | [ブラウザーで体験](portraits/) | [操作と仕組み](portraits/README.md) | 実装MIT／フォントOFL等、[素材別条件](portraits/NOTICE.md) |
+
+## 言葉の肖像を動かす
+
+[ブラウザー版](portraits/)で芥川龍之介 × 羅生門を体験できます。添付肖像・Zen Antique Soft・本文を同梱し、外部素材配信に依存しません。Canvas 2DとModule Workerを使用します。
+操作・実装・検証方法は [portraits/README.md](portraits/README.md)、素材の条件は [NOTICE](portraits/NOTICE.md) を参照してください。
 
 ## 墨の庭を動かす
 

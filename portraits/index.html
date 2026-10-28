@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="ja">
+  <meta charset="utf-8" /><meta
+    name="viewport"
+    content="width=device-width,initial-scale=1"
+  /><title>言葉の肖像 — 芥川龍之介 × 羅生門</title>
+  <link
+    rel="preload"
+    href="assets/ZenAntiqueSoft-Regular.ttf"
+    as="font"
+    type="font/ttf"
+    crossorigin
+  />
+  <link rel="stylesheet" href="style.css" />
+  <header class="site-header">
+    <a href="../">↖ SHADER PLAYGROUND</a><span>PORTRAITS IN WORDS — 01</span>
+  </header>
+  <div class="work-intro">
+    <p class="eyebrow">A STUDY OF WORDS & PORTRAITS</p>
+    <h1>言葉の<br />肖像<span>AKUTAGAWA RYŪNOSUKE — RASHŌMON</span></h1>
+    <p class="description">
+      言葉が浮かぶ。文字が降り注ぐ。<br />『羅生門』から、芥川龍之介へ。
+    </p>
+  </div>
+  <div id="loading" role="status" aria-live="polite">
+    <span class="loading-mark" aria-hidden="true">文</span>
+    <p id="loading-message">作品を準備しています…</p>
+    <button id="retry" hidden>再試行</button>
+  </div>
+  <noscript
+    ><p class="no-script">
+      この作品にはJavaScriptが必要です。芥川龍之介『羅生門』の文字を使った肖像作品です。
+    </p></noscript
+  >
+  <main>
+    <aside id="panel" hidden>
+      <label
+        >演出パターン<select id="effect">
+          <option value="paper">紙面へ降り積もる</option>
+          <option value="story">文章から落下して再構成</option>
+        </select></label
+      ><label
+        >序盤の雨量 <output id="batchLabel"></output
+        ><input
+          id="batch"
+          type="range"
+          min="4"
+          max="64"
+          step="4"
+          value="16" /></label
+      ><label
+        >雨脚の強まり <output id="accelLabel"></output
+        ><input
+          id="accel"
+          type="range"
+          min="100"
+          max="180"
+          step="5"
+          value="135" /></label
+      ><label
+        >落下中の文字上限 <output id="maxBatchLabel"></output
+        ><input
+          id="maxBatch"
+          type="range"
+          min="64"
+          max="768"
+          step="32"
+          value="384" /></label
+      ><label
+        >雨脚の揺らぎ <output id="gapLabel"></output
+        ><input
+          id="gap"
+          type="range"
+          min="0"
+          max="100"
+          step="5"
+          value="15" /></label
+      ><label
+        >冒頭の消え方<select id="introMode">
+          <option value="random">ランダムに一文字ずつ</option>
+          <option value="words">語句のまとまりごと</option>
+        </select></label
+      ><label
+        >サイズの割り当て<select id="sizing">
+          <option value="adaptive">領域に応じたランダム</option>
+          <option value="fixed">固定サイズ</option>
+        </select></label
+      ><label
+        >文字の向き<select id="rotation">
+          <option value="random">ランダム −180°〜180°</option>
+          <option value="upright">正立</option>
+        </select></label
+      ><label
+        >文字数の上限 <output id="countLabel"></output
+        ><input
+          id="count"
+          type="range"
+          min="300"
+          max="12000"
+          step="100"
+          value="4800" /></label
+      ><label
+        >文字サイズ倍率 <output id="scaleLabel"></output
+        ><input
+          id="scale"
+          type="range"
+          min="70"
+          max="150"
+          step="5"
+          value="120" /></label
+      ><label
+        >白抜きの閾値 <output id="toneLabel"></output
+        ><input id="tone" type="range" min="45" max="90" value="60" /></label
+      ><label
+        >輪郭の重視度 <output id="edgeLabel"></output
+        ><input id="edge" type="range" min="0" max="100" value="60"
+      /></label>
+      <div class="row">
+        <button id="reseed" disabled>配置を再生成</button
+        ><button id="save" disabled>PNG保存</button>
+      </div>
+      <button id="reset">初期設定に戻す</button
+      ><label
+        >進行度 <output id="progressLabel">100%</output
+        ><input id="progress" type="range" min="0" max="1000" value="0"
+      /></label>
+      <p class="note">
+        同じ乱数では同じ配置を再現。初期状態は文章。紙面版は少量で始まり、時間とともに雨脚が強まり、最後に大量の文字が降り注ぎます。着地待ちで区切らず連続して降ります。「演出パターン」で紙面への落下と従来版を比較できます。設定変更時は完成形を表示します。本文は必要な数までループします。白い領域には着地させません。閾値を下げると白い余白が増えます。大きさは領域内でもばらつきます。
+      </p>
+    </aside>
+    <section aria-label="文字の肖像">
+      <canvas
+        aria-busy="true"
+        id="art"
+        width="780"
+        height="1020"
+        aria-label="文字が落ちて芥川龍之介の肖像になるアニメーション"
+      ></canvas>
+    </section>
+  </main>
+  <div class="stage-tools">
+    <button id="toggle" aria-expanded="false" aria-controls="panel">調整</button
+    ><button id="play" disabled>再生</button
+    ><button id="restart" disabled>最初から</button
+    ><button id="finish" disabled>完成形を見る</button
+    ><span id="phase" aria-live="polite">文章</span>
+    <p id="status">画像とフォントを読み込み中…</p>
+  </div>
+  <footer>
+    <details>
+      <summary>素材とクレジット</summary>
+      肖像：<a
+        href="https://commons.wikimedia.org/wiki/File:Akutagawa_Ryunosuke_photo.jpg"
+        >Wikimedia Commons / 作者不詳・PD表記</a
+      >。本文：<a
+        href="https://www.aozora.gr.jp/cards/000879/files/127_15260.html"
+        >青空文庫『羅生門』</a
+      >（入力：平山誠・野口英司／校正：もりみつじゅんじ）。本文はルビを除去。フォントにない外字は原典の外字画像で補完。フォント：Zen
+      Antique Soft / Google Fonts（同梱、SIL OFL 1.1）。<br />Canvas
+      2Dによる文字の肖像。背景に写真を重ねず、文字だけで描画しています。初期状態は文章です。紙面へ降り積もる演出と、落下後に再構成する演出を切り替えられます。
+    </details>
+    <a class="source" href="https://github.com/rulers/shader-playground"
+      >GITHUB ↗</a
+    >
+  </footer>
+  <script type="module" src="app.js"></script>
+</html>
