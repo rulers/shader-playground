@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#090f19">
+  <meta name="description" content="雨粒が流れ、夜の光がにじむ。Heartfeltをブラウザーで体験する、インタラクティブな雨と曇りガラス。">
+  <title>雨粒と曇りガラス — Shader Playground</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <img class="fallback" src="../tutorials/images/heartfelt.png" alt="夜の光を屈折させる、ガラス上の雨粒の静止画">
+  <canvas id="rain" aria-label="雨粒が流れ、背景の光を屈折させるアニメーション"></canvas>
+  <header><a href="../">↖ SHADER PLAYGROUND</a><span>EXPERIMENT 02</span></header>
+  <main>
+    <div class="intro"><p class="eyebrow">A STUDY OF RAIN & LIGHT</p><h1>雨粒と<br>曇りガラス<span>HEARTFELT — RAIN ON GLASS</span></h1><p class="description">流れる雨粒。にじむ街の光。<br>ガラス越しの、小さな夜。</p></div>
+    <section class="controls" aria-label="作品の操作">
+      <div class="range"><label for="amount">雨の強さ</label><input id="amount" type="range" min="0" max="1" step="0.01" value="0.7" disabled><output id="amount-value" for="amount">70%</output></div>
+      <div class="buttons"><button id="pause" type="button" aria-pressed="false" disabled>一時停止</button><button id="reset" type="button" disabled>最初から</button></div>
+      <p id="status" role="status">雨の景色を読み込み中…</p>
+    </section>
+  </main>
+  <footer><p>Original: <a href="https://www.shadertoy.com/view/ltffzl">Heartfelt</a> by <a href="https://www.shadertoy.com/user/BigWings">Martijn Steinrucken / BigWIngs</a><br>Web adaptation · <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/">CC BY-NC-SA 3.0</a> · <a href="../third_party/heartfelt/NOTICE.md">Credits & changes</a></p><a class="source" href="https://github.com/rulers/shader-playground/blob/main/tutorials/10_heartfelt.md">仕組みとソース ↗</a></footer>
+</body>
+</html>

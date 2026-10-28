@@ -20,3 +20,7 @@ The build script generates the adaptation from the preserved source:
 ```sh
 python3 third_party/heartfelt/tools/build.py
 ```
+
+## Browser adaptation (2026-10-29)
+
+The complete `rain/` directory (HTML, CSS and JavaScript) is distributed under **CC BY-NC-SA 3.0** as a browser adaptation of Heartfelt by Martijn Steinrucken / BigWIngs. It loads the preserved KodeLife shader and adapts the entry point to WebGL 2 / GLSL ES 3.00. Changes: adjustable rain uniform; pause/resume and restart controls; initial time set to 40 seconds; lightning flashes disabled; bounded render resolution and 30fps drawing; reduced-motion and visibility support; resize and context-recovery handling; attributed static fallback. The procedural background is retained. No original image, music or rain audio is included. The original shader's credits, including Dave Hoskins, remain in its source. These browser files are not covered by the repository's MIT license.

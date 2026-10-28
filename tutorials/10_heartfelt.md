@@ -1,5 +1,7 @@
 # 10. Heartfelt：雨粒と曇りガラス
 
+[ブラウザーで体験する](https://rulers.github.io/shader-playground/rain/) — WebGL 2対応ブラウザーで、雨量の調整と一時停止ができます。インストールは不要です。
+
 [BigWIngs / Martijn Steinruckenさんの「Heartfelt」](https://www.shadertoy.com/view/ltffzl)をKodeLifeで学ぶ教材です。原作者の雨粒・軌跡を移植し、ハートになる演出は取り除いています。流体の速度や圧力を解くシミュレーションではなく、画面上の雨粒から背景の歪みとぼかしを計算する表現です。
 
 ![KodeLife向け移植版の描画](images/heartfelt.png)

@@ -20,7 +20,7 @@ GitHub Pagesは `main` ブランチのルート `/` から公開します。
 | 作品 | 動かし方 | 解説 | ライセンス |
 | --- | --- | --- | --- |
 | 墨の庭 / Ink Playground | [preview.html](inkplay/preview.html) をダウンロードしてブラウザーで開く | [操作と仕組み](tutorials/11_interactive_ink.md) | MIT |
-| Heartfelt：雨粒と曇りガラス | [GLSL 150](third_party/heartfelt/heartfelt_kodelife.frag) をKodeLifeに貼り付ける | [設定と仕組み](tutorials/10_heartfelt.md) | CC BY-NC-SA 3.0 |
+| Heartfelt：雨粒と曇りガラス | [ブラウザーで体験](https://rulers.github.io/shader-playground/rain/) | [設定と仕組み](tutorials/10_heartfelt.md) | CC BY-NC-SA 3.0 |
 
 ## 墨の庭を動かす
 
@@ -35,9 +35,13 @@ http://127.0.0.1:8766/ を開きます。マウスやタッチで描画し、PNG
 
 ## 雨粒と曇りガラスを動かす
 
-KodeLifeでOpenGL 3.2以上／GLSL 150のフルスクリーン1 Passを用意し、`heartfelt_kodelife.frag` をFragmentへ貼り付けます。
+[ブラウザー版](https://rulers.github.io/shader-playground/rain/)では、雨量の調整・一時停止・再生・時間のリセットができます。WebGL 2が必要です。モーション低減設定では停止状態で開き、非対応環境では静止画を表示します。外部画像や音声は読み込みません。
+
+ブラウザー版は `rain/` にあり、既存の `third_party/heartfelt/heartfelt_kodelife.frag` を読み込んでWebGL 2向けに変換します。`rain/` のHTML・CSS・JavaScriptもCC BY-NC-SA 3.0です。
+
+KodeLifeで利用する場合はOpenGL 3.2以上／GLSL 150のフルスクリーン1 Passを用意し、`heartfelt_kodelife.frag` をFragmentへ貼り付けます。
 `resolution`（vec2）をFrame → Resolution、`time`（float）をClockに接続してください。
-ブラウザー版やネイティブ `.kode` プロジェクトは含みません。原作の画像・音楽・雨音も含みません。
+ネイティブ `.kode` プロジェクトは含みません。原作の画像・音楽・雨音も含みません。
 
 ## 開発
 
