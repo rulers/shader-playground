@@ -24,3 +24,7 @@ Third-party exception: third_party/heartfelt/original.glsl,
 third_party/heartfelt/heartfelt_kodelife.frag and tutorials/images/heartfelt.png
 are licensed under CC BY-NC-SA 3.0, not this MIT license.
 See third_party/heartfelt/NOTICE.md for attribution and terms.
+
+Third-party MIT attribution: assets/warp.js adapts Warp Animation by
+php-hacker (https://codepen.io/php-hacker/pen/dyVdgRX).
+Its copyright and MIT permission notice are in third_party/warp/NOTICE.md.

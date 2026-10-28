@@ -1,5 +1,19 @@
 # Shader Playground
 
+[トップページ](https://rulers.github.io/shader-playground/)
+
+## トップページの開発
+
+`index.html` と `assets/home.css` がページを構成し、`assets/warp.js` が背景を描画します。
+ビルドや外部ライブラリは不要です。リポジトリ全体を静的HTTPサーバーで配信してください。
+GitHub Pagesは `main` ブランチのルート `/` から公開します。
+
+背景は [php-hacker / Warp Animation](https://codepen.io/php-hacker/pen/dyVdgRX) のコードを利用しています。
+[作者表記・MITライセンス・変更点](third_party/warp/NOTICE.md) を同梱しています。
+背景を一時停止でき、OSのモーション低減設定では静止します。WebGL非対応時も作品リンクを利用できます。
+
+## 作品
+
 「墨の庭」と「雨粒と曇りガラス」を独立して育てるシェーダー実験集です。
 [rulers/kodelife-leaning](https://github.com/rulers/kodelife-leaning) の教材10・11を、ソース・生成ツール・解説・画像とともに切り出しています。
 

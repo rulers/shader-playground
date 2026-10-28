@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#19152c">
+  <meta name="description" content="コードから、まだ見たことのない景色へ。墨の庭と雨粒・曇りガラスを集めた、小さなシェーダー実験室。">
+  <title>Shader Playground — Code into feeling.</title>
+  <link rel="stylesheet" href="assets/home.css">
+  <script src="assets/warp.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#experiments">作品へスキップ</a>
+  <canvas id="warp" aria-hidden="true"></canvas>
+  <div class="veil" aria-hidden="true"></div>
+  <div class="page">
+    <header class="header">
+      <a class="brand" href="./" aria-label="Shader Playground トップ"><span class="brand-mark" aria-hidden="true">✳</span><span>SHADER<br>PLAYGROUND</span></a>
+      <p class="header-note">AN OPEN SPACE FOR<br>CREATIVE EXPERIMENTS</p>
+      <nav aria-label="サイト"><a href="#experiments">EXPERIMENTS <span aria-hidden="true">↘</span></a><a href="https://github.com/rulers/shader-playground">GITHUB <span aria-hidden="true">↗</span></a></nav>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="eyebrow"><span class="dot" aria-hidden="true"></span> CODE INTO FEELING <span class="edition">VOL. 01 — ONGOING</span></div>
+        <h1 id="hero-title">SHADER<br><span class="title-bottom">PLAYGROUND<span class="title-star" aria-hidden="true">✳</span></span></h1>
+        <div class="hero-bottom"><p>コードから、<br>まだ見たことのない景色へ。</p><p class="hero-description">光がゆらぐ。インクがにじむ。雨が流れる。<br>数行のコードから生まれる、小さな実験室。</p><a class="explore" href="#experiments" aria-label="作品を探す"><span aria-hidden="true">↓</span></a></div>
+      </section>
+
+      <section class="experiments" id="experiments" aria-labelledby="experiments-title">
+        <div class="section-heading"><h2 id="experiments-title">SELECTED EXPERIMENTS</h2><span>01 — 02</span></div>
+        <div class="works">
+          <a class="work work-ink" href="inkplay/" aria-label="01 墨の庭をブラウザーで体験する">
+            <div class="work-image"><img src="tutorials/images/inkplay.png" alt="紙の上に墨や色がにじむ、墨の庭の描画例" width="1280" height="720"><span class="work-format">INTERACTIVE / WEBGL 2</span><span class="work-arrow" aria-hidden="true">↗</span></div>
+            <div class="work-heading"><span class="work-number">01</span><div><h3>墨の庭</h3><p>INK PLAYGROUND</p></div><span class="work-action">触れて、描く <span aria-hidden="true">↗</span></span></div>
+          </a>
+          <a class="work work-rain" href="https://github.com/rulers/shader-playground/blob/main/tutorials/10_heartfelt.md" aria-label="02 雨粒と曇りガラスの解説とKodeLife用シェーダーを見る">
+            <div class="work-image"><img src="tutorials/images/heartfelt.png" alt="夜の光を屈折させる、ガラス上の雨粒の描画例" width="1280" height="720"><span class="work-format">SHADER STUDY / KODELIFE</span><span class="work-arrow" aria-hidden="true">↗</span></div>
+            <div class="work-heading"><span class="work-number">02</span><div><h3>雨粒と曇りガラス</h3><p>HEARTFELT — RAIN ON GLASS</p></div><span class="work-action">仕組みを読む <span aria-hidden="true">↗</span></span></div>
+          </a>
+        </div>
+      </section>
+    </main>
+    <footer><p>A PERSONAL EXPLORATION BY <a href="https://github.com/rulers">RULERS</a></p><p class="credit">BACKGROUND: <a href="https://codepen.io/php-hacker/pen/dyVdgRX">WARP ANIMATION / PHP-HACKER</a> · <a href="third_party/warp/NOTICE.md">MIT</a></p><button id="motion-toggle" type="button" hidden aria-pressed="false"><span class="motion-icon" aria-hidden="true">Ⅱ</span><span class="motion-label">背景を一時停止</span></button><span id="motion-status" class="motion-status" role="status"></span></footer>
+  </div>
+</body>
+</html>
