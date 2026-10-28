@@ -10,6 +10,14 @@
   const pause = document.querySelector("#pause");
   const reset = document.querySelector("#reset");
   const status = document.querySelector("#status");
+  const controls = document.querySelector("#controls");
+  const controlsNotice = document.querySelector("#controls-notice");
+  controls.addEventListener("keydown", event => {
+    if (event.key === "Escape" && controls.open) {
+      controls.open = false;
+      controls.querySelector("summary").focus();
+    }
+  });
   const reduced = matchMedia("(prefers-reduced-motion: reduce)");
   const gl = canvas.getContext("webgl2", {alpha:false, antialias:false, depth:false, powerPreference:"low-power"});
   let shaderSource = "";
@@ -22,6 +30,8 @@
     stop(); ready = false; canvas.classList.remove("ready");
     amount.disabled = pause.disabled = reset.disabled = true;
     status.textContent = message;
+    controlsNotice.textContent = message;
+    controlsNotice.hidden = false;
   }
   function compile(type, source) {
     const shader = gl.createShader(type);
@@ -82,7 +92,8 @@
       const position = gl.getAttribLocation(program, "position");
       gl.enableVertexAttribArray(position); gl.vertexAttribPointer(position,2,gl.FLOAT,false,0,0);
       uniforms = {time:gl.getUniformLocation(program,"time"),resolution:gl.getUniformLocation(program,"resolution"),amount:gl.getUniformLocation(program,"RAIN_AMOUNT")};
-      ready = true; amount.disabled = pause.disabled = reset.disabled = false;
+      ready = true; controlsNotice.hidden = true;
+      amount.disabled = pause.disabled = reset.disabled = false;
       resize(); canvas.classList.add("ready"); sync();
     } catch (error) {
       console.warn("Rain renderer unavailable:", error);

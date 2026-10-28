@@ -2,6 +2,8 @@
 
 [ブラウザーで体験する](https://rulers.github.io/shader-playground/rain/) — WebGL 2対応ブラウザーで、雨量の調整と一時停止ができます。インストールは不要です。
 
+操作パネルは最初は小さな「操作 ＋」ボタンです。クリック・タップすると雨量、再生／停止、最初からの操作を開けます。見出しを再度押すかEscキーで閉じても、雨量と再生状態は維持されます。
+
 [BigWIngs / Martijn Steinruckenさんの「Heartfelt」](https://www.shadertoy.com/view/ltffzl)をKodeLifeで学ぶ教材です。原作者の雨粒・軌跡を移植し、ハートになる演出は取り除いています。流体の速度や圧力を解くシミュレーションではなく、画面上の雨粒から背景の歪みとぼかしを計算する表現です。
 
 ![KodeLife向け移植版の描画](images/heartfelt.png)
