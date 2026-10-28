@@ -15,11 +15,17 @@
   <header><a href="../">↖ SHADER PLAYGROUND</a><span>EXPERIMENT 02</span></header>
   <main>
     <div class="intro"><p class="eyebrow">A STUDY OF RAIN & LIGHT</p><h1>雨粒と<br>曇りガラス<span>HEARTFELT — RAIN ON GLASS</span></h1><p class="description">流れる雨粒。にじむ街の光。<br>ガラス越しの、小さな夜。</p></div>
-    <section class="controls" aria-label="作品の操作">
+    <div class="control-dock">
+    <details class="controls" id="controls">
+      <summary><span class="controls-closed-label">操作</span><span class="controls-open-label">操作を閉じる</span><span class="controls-icon" aria-hidden="true">＋</span></summary>
+      <div class="controls-body">
       <div class="range"><label for="amount">雨の強さ</label><input id="amount" type="range" min="0" max="1" step="0.01" value="0.7" disabled><output id="amount-value" for="amount">70%</output></div>
       <div class="buttons"><button id="pause" type="button" aria-pressed="false" disabled>一時停止</button><button id="reset" type="button" disabled>最初から</button></div>
       <p id="status" role="status">雨の景色を読み込み中…</p>
-    </section>
+      </div>
+    </details>
+    <p id="controls-notice" role="status" hidden></p>
+    </div>
   </main>
   <footer><p>Original: <a href="https://www.shadertoy.com/view/ltffzl">Heartfelt</a> by <a href="https://www.shadertoy.com/user/BigWings">Martijn Steinrucken / BigWIngs</a><br>Web adaptation · <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/">CC BY-NC-SA 3.0</a> · <a href="../third_party/heartfelt/NOTICE.md">Credits & changes</a></p><a class="source" href="https://github.com/rulers/shader-playground/blob/main/tutorials/10_heartfelt.md">仕組みとソース ↗</a></footer>
 </body>
