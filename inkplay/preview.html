@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="ja">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>墨の庭 · Ink Playground</title>
+<style>
+    * {
+        box-sizing: border-box
+    }
+
+    body {
+        margin: 0;
+        background: #eae7df;
+        color: #292e2e;
+        font: 14px/1.6 -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif
+    }
+
+    button,
+    select,
+    input {
+        font: inherit
+    }
+
+    button,
+    select {
+        border: 1px solid #cfcdc5;
+        border-radius: 7px;
+        background: #faf9f5;
+        padding: 8px 13px;
+        color: inherit;
+        cursor: pointer
+    }
+
+    button:hover {
+        background: #e6e2d7
+    }
+
+    button:focus-visible,
+    input:focus-visible,
+    select:focus-visible {
+        outline: 2px solid #246964;
+        outline-offset: 3px
+    }
+
+    header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 23px 4vw;
+        border-bottom: 1px solid #d7d3c9
+    }
+
+    h1 {
+        font-family: serif;
+        font-weight: 400;
+        font-size: 28px;
+        letter-spacing: .1em;
+        margin: 0
+    }
+
+    small {
+        font-size: 11px;
+        letter-spacing: .16em;
+        color: #7d8178
+    }
+
+    .brand {
+        display: flex;
+        align-items: center;
+        gap: 18px
+    }
+
+    .actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap
+    }
+
+    main {
+        padding: 24px 4vw 16px
+    }
+
+    .workspace {
+        position: relative;
+        border: 1px solid #d3d0c5;
+        background: #faf9f4;
+        box-shadow: 0 12px 35px #423c3110
+    }
+
+    canvas {
+        display: block;
+        width: 100%;
+        height: min(66vh, 720px);
+        min-height: 320px;
+        touch-action: none;
+        cursor: crosshair
+    }
+
+    .hint {
+        position: absolute;
+        top: 28px;
+        left: 30px;
+        pointer-events: none;
+        color: #8b8c81;
+        transition: opacity .5s
+    }
+
+    .hint strong {
+        display: block;
+        color: #555d54;
+        font: 23px serif;
+        margin-bottom: 7px
+    }
+
+    .hint.hidden {
+        opacity: 0
+    }
+
+    .toolbar {
+        display: flex;
+        align-items: center;
+        gap: 26px;
+        flex-wrap: wrap;
+        padding: 18px 0
+    }
+
+    .group {
+        display: flex;
+        align-items: center;
+        gap: 10px
+    }
+
+    .label {
+        font-size: 11px;
+        letter-spacing: .12em;
+        color: #6c7169
+    }
+
+    .colors {
+        display: flex;
+        gap: 7px
+    }
+
+    .swatch {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        padding: 0;
+        border: 3px solid #eae7df;
+        box-shadow: 0 0 0 1px transparent
+    }
+
+    .swatch[aria-pressed=true] {
+        box-shadow: 0 0 0 1px #60675f
+    }
+
+    input[type=range] {
+        width: 100px;
+        accent-color: #475b50
+    }
+
+    output {
+        min-width: 22px;
+        font-size: 12px
+    }
+
+    footer {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        color: #787d73;
+        font-size: 12px;
+        border-top: 1px solid #d6d2c8;
+        padding: 13px 0
+    }
+
+    #error {
+        color: #a32c29;
+        white-space: pre-wrap
+    }
+
+    a {
+        color: inherit
+    }
+
+    @media(max-width:650px) {
+        header {
+            padding: 16px 5vw;
+            align-items: flex-start
+        }
+
+        .brand {
+            display: block
+        }
+
+        h1 {
+            font-size: 22px
+        }
+
+        .actions {
+            justify-content: flex-end;
+            max-width: 185px
+        }
+
+        main {
+            padding: 16px 5vw
+        }
+
+        .toolbar {
+            gap: 16px
+        }
+
+        canvas {
+            height: 58vh
+        }
+
+        .hint {
+            top: 18px;
+            left: 18px
+        }
+
+        .hint strong {
+            font-size: 19px
+        }
+
+        footer {
+            display: block
+        }
+    }
+</style>
+<header>
+    <div class="brand">
+        <h1>墨の庭</h1><small>INK PLAYGROUND</small>
+    </div>
+    <div class="actions"><button id="example">一滴を試す</button><button id="pause">一時停止</button><button
+            id="clear">白紙に戻す</button><button id="save">PNG保存</button></div>
+</header>
+<main>
+    <div class="workspace"><canvas id="view" aria-label="インクを描くキャンバス" tabindex="0"></canvas>
+        <div class="hint" id="hint"><strong>動かす。にじむ。重なる。</strong>マウス移動で描く／押して描く、を下で選べます。<br>タッチでは指でなぞってください。</div>
+    </div>
+    <div class="toolbar">
+        <div class="group"><span class="label">INK</span>
+            <div class="colors" id="colors"><button class="swatch" style="background:#191f24" data-color="#191f24"
+                    aria-label="墨色" aria-pressed="true"></button><button class="swatch" style="background:#183f68"
+                    data-color="#183f68" aria-label="藍色" aria-pressed="false"></button><button class="swatch"
+                    style="background:#a23f40" data-color="#a23f40" aria-label="朱色"
+                    aria-pressed="false"></button><button class="swatch" style="background:#48624a" data-color="#48624a"
+                    aria-label="苔色" aria-pressed="false"></button><button class="swatch" style="background:#956b30"
+                    data-color="#956b30" aria-label="琥珀色" aria-pressed="false"></button></div>
+        </div><label class="group"><span class="label">筆の太さ</span><input id="size" type="range" min="3" max="35"
+                value="15"><output id="sizeValue">15</output></label><label class="group"><span
+                class="label">にじみ</span><input id="wet" type="range" min="0" max="2" step=".1" value="1.2"><output
+                id="wetValue">1.2</output></label><label class="group"><span class="label">操作</span><select
+                id="interaction">
+                <option value="hover">マウス移動で描く</option>
+                <option value="drag">押している間だけ描く</option>
+            </select></label>
+    </div>
+    <div id="error" role="alert"></div>
+    <footer><span>ゆっくり動かすと太く、速く動かすと細く。Space：停止 / C：色替え / R：白紙</span><span id="status" role="status">準備中…</span></footer>
+</main>
+<script>window.INK_SHADERS = { "01_velocity": "#version 150\nuniform vec2 resolution;\nuniform sampler2D velocityTex, pigmentTex, pressureTex, divergenceTex;\nuniform float dt, time, wetness, injecting, radius, amount;\nuniform vec2 point, previous, impulse;\nuniform vec3 inkColor;\nout vec4 fragColor;\nvec2 uv(){return gl_FragCoord.xy/resolution;}\nvec2 cell(){return 1.0/resolution;}\nfloat hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}\nfloat noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),mix(hash(i+vec2(0,1)),hash(i+1.),f.x),f.y);}\nfloat fbm(vec2 p){return .57*noise(p)+.28*noise(p*2.03+7.)+.15*noise(p*4.11+19.);}\n// Distances are in simulation pixels, keeping round drops at every aspect ratio.\nvec2 relativePoint(vec2 p){vec2 a=previous*resolution,b=point*resolution,d=b-a;float t=clamp(dot(p-a,d)/max(dot(d,d),.001),0.,1.);return p-mix(a,b,t);}\nfloat source(vec2 p){vec2 d=relativePoint(p);float r=max(radius,1.);float angle=dot(d,d)>1e-8?atan(d.y,d.x):0.; float rough=1.+.22*sin(angle*5.+noise(p*.06)*3.)+.12*sin(angle*9.);return injecting*amount*exp(-dot(d,d)*rough/(r*r));}\nvec2 velocity(vec2 p){return texture(velocityTex,clamp(p,cell()*.5,1.-cell()*.5)).xy;}\nvoid main(){\n vec2 p=uv(),h=cell();\n vec2 v0=velocity(p),v=velocity(p-dt*v0*h);\n vec2 l=velocity(p-vec2(h.x,0)),r=velocity(p+vec2(h.x,0));\n vec2 b=velocity(p-vec2(0,h.y)),t=velocity(p+vec2(0,h.y));\n v=mix(v,(l+r+b+t)*.25,.025)*exp(-dt*.7);\n // A fixed, spatially varying curl field breaks the bloom into folds.\n vec2 q=gl_FragCoord.xy*.055;\n vec2 curl=vec2(fbm(q+vec2(0,.08))-fbm(q-vec2(0,.08)),\n                fbm(q-vec2(.08,0))-fbm(q+vec2(.08,0)))*90.;\n float water=texture(pigmentTex,p).a;\n v+=curl*min(water,1.)*wetness*dt*18.;\n vec2 d=relativePoint(gl_FragCoord.xy);\n float s=source(gl_FragCoord.xy);\n // A drop pushes outwards; hand motion carries ink along the stroke.\n v+=(d/max(length(d),1.)*95.*wetness+impulse*.38)*s;\n float speed=length(v);v*=min(1.,180./max(speed,.001));\n if(p.x<h.x||p.x>1.-h.x)v.x=0.;\n if(p.y<h.y||p.y>1.-h.y)v.y=0.;\n fragColor=vec4(v,0,1);\n}\n", "02_divergence": "#version 150\nuniform vec2 resolution;\nuniform sampler2D velocityTex, pigmentTex, pressureTex, divergenceTex;\nuniform float dt, time, wetness, injecting, radius, amount;\nuniform vec2 point, previous, impulse;\nuniform vec3 inkColor;\nout vec4 fragColor;\nvec2 uv(){return gl_FragCoord.xy/resolution;}\nvec2 cell(){return 1.0/resolution;}\nfloat hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}\nfloat noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),mix(hash(i+vec2(0,1)),hash(i+1.),f.x),f.y);}\nfloat fbm(vec2 p){return .57*noise(p)+.28*noise(p*2.03+7.)+.15*noise(p*4.11+19.);}\n// Distances are in simulation pixels, keeping round drops at every aspect ratio.\nvec2 relativePoint(vec2 p){vec2 a=previous*resolution,b=point*resolution,d=b-a;float t=clamp(dot(p-a,d)/max(dot(d,d),.001),0.,1.);return p-mix(a,b,t);}\nfloat source(vec2 p){vec2 d=relativePoint(p);float r=max(radius,1.);float angle=dot(d,d)>1e-8?atan(d.y,d.x):0.; float rough=1.+.22*sin(angle*5.+noise(p*.06)*3.)+.12*sin(angle*9.);return injecting*amount*exp(-dot(d,d)*rough/(r*r));}\nvec2 velocity(vec2 p){return texture(velocityTex,clamp(p,cell()*.5,1.-cell()*.5)).xy;}\nvoid main(){vec2 p=uv(),h=cell();float d=.5*(velocity(p+vec2(h.x,0)).x-velocity(p-vec2(h.x,0)).x+velocity(p+vec2(0,h.y)).y-velocity(p-vec2(0,h.y)).y);fragColor=vec4(d,0,0,1);}\n", "03_pressure": "#version 150\nuniform vec2 resolution;\nuniform sampler2D velocityTex, pigmentTex, pressureTex, divergenceTex;\nuniform float dt, time, wetness, injecting, radius, amount;\nuniform vec2 point, previous, impulse;\nuniform vec3 inkColor;\nout vec4 fragColor;\nvec2 uv(){return gl_FragCoord.xy/resolution;}\nvec2 cell(){return 1.0/resolution;}\nfloat hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}\nfloat noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),mix(hash(i+vec2(0,1)),hash(i+1.),f.x),f.y);}\nfloat fbm(vec2 p){return .57*noise(p)+.28*noise(p*2.03+7.)+.15*noise(p*4.11+19.);}\n// Distances are in simulation pixels, keeping round drops at every aspect ratio.\nvec2 relativePoint(vec2 p){vec2 a=previous*resolution,b=point*resolution,d=b-a;float t=clamp(dot(p-a,d)/max(dot(d,d),.001),0.,1.);return p-mix(a,b,t);}\nfloat source(vec2 p){vec2 d=relativePoint(p);float r=max(radius,1.);float angle=dot(d,d)>1e-8?atan(d.y,d.x):0.; float rough=1.+.22*sin(angle*5.+noise(p*.06)*3.)+.12*sin(angle*9.);return injecting*amount*exp(-dot(d,d)*rough/(r*r));}\nvec2 velocity(vec2 p){return texture(velocityTex,clamp(p,cell()*.5,1.-cell()*.5)).xy;}\nvoid main(){vec2 p=uv(),h=cell();float a=texture(pressureTex,p-vec2(h.x,0)).r+texture(pressureTex,p+vec2(h.x,0)).r+texture(pressureTex,p-vec2(0,h.y)).r+texture(pressureTex,p+vec2(0,h.y)).r;fragColor=vec4((a-texture(divergenceTex,p).r)*.25,0,0,1);}\n", "04_project": "#version 150\nuniform vec2 resolution;\nuniform sampler2D velocityTex, pigmentTex, pressureTex, divergenceTex;\nuniform float dt, time, wetness, injecting, radius, amount;\nuniform vec2 point, previous, impulse;\nuniform vec3 inkColor;\nout vec4 fragColor;\nvec2 uv(){return gl_FragCoord.xy/resolution;}\nvec2 cell(){return 1.0/resolution;}\nfloat hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}\nfloat noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),mix(hash(i+vec2(0,1)),hash(i+1.),f.x),f.y);}\nfloat fbm(vec2 p){return .57*noise(p)+.28*noise(p*2.03+7.)+.15*noise(p*4.11+19.);}\n// Distances are in simulation pixels, keeping round drops at every aspect ratio.\nvec2 relativePoint(vec2 p){vec2 a=previous*resolution,b=point*resolution,d=b-a;float t=clamp(dot(p-a,d)/max(dot(d,d),.001),0.,1.);return p-mix(a,b,t);}\nfloat source(vec2 p){vec2 d=relativePoint(p);float r=max(radius,1.);float angle=dot(d,d)>1e-8?atan(d.y,d.x):0.; float rough=1.+.22*sin(angle*5.+noise(p*.06)*3.)+.12*sin(angle*9.);return injecting*amount*exp(-dot(d,d)*rough/(r*r));}\nvec2 velocity(vec2 p){return texture(velocityTex,clamp(p,cell()*.5,1.-cell()*.5)).xy;}\nvoid main(){vec2 p=uv(),h=cell();vec2 g=.5*vec2(texture(pressureTex,p+vec2(h.x,0)).r-texture(pressureTex,p-vec2(h.x,0)).r,texture(pressureTex,p+vec2(0,h.y)).r-texture(pressureTex,p-vec2(0,h.y)).r);vec2 v=velocity(p)-g;if(p.x<h.x||p.x>1.-h.x)v.x=0.;if(p.y<h.y||p.y>1.-h.y)v.y=0.;fragColor=vec4(v,0,1);}\n", "05_pigment": "#version 150\nuniform vec2 resolution;\nuniform sampler2D velocityTex, pigmentTex, pressureTex, divergenceTex;\nuniform float dt, time, wetness, injecting, radius, amount;\nuniform vec2 point, previous, impulse;\nuniform vec3 inkColor;\nout vec4 fragColor;\nvec2 uv(){return gl_FragCoord.xy/resolution;}\nvec2 cell(){return 1.0/resolution;}\nfloat hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}\nfloat noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),mix(hash(i+vec2(0,1)),hash(i+1.),f.x),f.y);}\nfloat fbm(vec2 p){return .57*noise(p)+.28*noise(p*2.03+7.)+.15*noise(p*4.11+19.);}\n// Distances are in simulation pixels, keeping round drops at every aspect ratio.\nvec2 relativePoint(vec2 p){vec2 a=previous*resolution,b=point*resolution,d=b-a;float t=clamp(dot(p-a,d)/max(dot(d,d),.001),0.,1.);return p-mix(a,b,t);}\nfloat source(vec2 p){vec2 d=relativePoint(p);float r=max(radius,1.);float angle=dot(d,d)>1e-8?atan(d.y,d.x):0.; float rough=1.+.22*sin(angle*5.+noise(p*.06)*3.)+.12*sin(angle*9.);return injecting*amount*exp(-dot(d,d)*rough/(r*r));}\nvec2 velocity(vec2 p){return texture(velocityTex,clamp(p,cell()*.5,1.-cell()*.5)).xy;}\nvoid main(){\n vec2 p=uv(),h=cell();vec4 old=texture(pigmentTex,p);\n // Artistic wetting-front expansion, added to the incompressible flow.\n vec2 grad=.5*vec2(texture(pigmentTex,p+vec2(h.x,0)).a-texture(pigmentTex,p-vec2(h.x,0)).a,\n                   texture(pigmentTex,p+vec2(0,h.y)).a-texture(pigmentTex,p-vec2(0,h.y)).a);\n vec2 spread=-grad*wetness*15.*clamp(old.a*2.,0.,1.);\n spread*=min(1.,22./max(length(spread),.001));\n vec2 back=p-dt*(velocity(p)*clamp(old.a*3.,0.,1.)+spread)*h;\n vec4 c=texture(pigmentTex,back);\n vec4 average=(texture(pigmentTex,back-vec2(h.x,0))+texture(pigmentTex,back+vec2(h.x,0))+texture(pigmentTex,back-vec2(0,h.y))+texture(pigmentTex,back+vec2(0,h.y)))*.25;\n c=mix(c,average,min(.24,wetness*.13)*clamp(old.a*3.,0.,1.));\n c.a*=exp(-dt*.18); // drying freezes marks instead of erasing them\n float s=source(gl_FragCoord.xy);\n // Store optical density, not display RGB: overlapping pigments darken.\n c.rgb+=-log(clamp(inkColor,vec3(.015),vec3(.98)))*s*.38;\n c.a+=s*.55;\n fragColor=clamp(c,0.,12.);\n}\n", "06_render": "#version 150\nuniform vec2 resolution;\nuniform sampler2D velocityTex, pigmentTex, pressureTex, divergenceTex;\nuniform float dt, time, wetness, injecting, radius, amount;\nuniform vec2 point, previous, impulse;\nuniform vec3 inkColor;\nout vec4 fragColor;\nvec2 uv(){return gl_FragCoord.xy/resolution;}\nvec2 cell(){return 1.0/resolution;}\nfloat hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}\nfloat noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),mix(hash(i+vec2(0,1)),hash(i+1.),f.x),f.y);}\nfloat fbm(vec2 p){return .57*noise(p)+.28*noise(p*2.03+7.)+.15*noise(p*4.11+19.);}\n// Distances are in simulation pixels, keeping round drops at every aspect ratio.\nvec2 relativePoint(vec2 p){vec2 a=previous*resolution,b=point*resolution,d=b-a;float t=clamp(dot(p-a,d)/max(dot(d,d),.001),0.,1.);return p-mix(a,b,t);}\nfloat source(vec2 p){vec2 d=relativePoint(p);float r=max(radius,1.);float angle=dot(d,d)>1e-8?atan(d.y,d.x):0.; float rough=1.+.22*sin(angle*5.+noise(p*.06)*3.)+.12*sin(angle*9.);return injecting*amount*exp(-dot(d,d)*rough/(r*r));}\nvec2 velocity(vec2 p){return texture(velocityTex,clamp(p,cell()*.5,1.-cell()*.5)).xy;}\nvoid main(){vec2 p=uv();vec3 density=texture(pigmentTex,p).rgb;float grain=hash(gl_FragCoord.xy)*.014;vec3 paper=vec3(.985,.978,.957)-grain;fragColor=vec4(paper*exp(-density*1.4),1);}\n" };
+</script>
+<script>'use strict';
+    (() => {
+        const $ = id => document.getElementById(id), canvas = $('view');
+        const swatches = [...document.querySelectorAll('.swatch')];
+        let colorIndex = 0, paused = false, failed = false, gl, fb, w = 768, h = 480, simTime = 0, last = 0, acc = 0;
+        let down = false, pointerId = null, position = null, lastDraw = null, lastMove = 0, pending = [], dots = 0;
+        let velocity, pigment, pressure, divergence, programs = {};
+        const dt = 1 / 60, iterations = 24;
+        const uniforms = ['resolution', 'velocityTex', 'pigmentTex', 'pressureTex', 'divergenceTex', 'dt', 'time', 'wetness', 'injecting', 'radius', 'amount', 'point', 'previous', 'impulse', 'inkColor'];
+        function fail(e) { failed = true; $('error').textContent = '描画できませんでした。' + (e.message || e); $('status').textContent = '停止中'; for (const id of ['example', 'pause', 'save']) $(id).disabled = true; console.error(e); }
+        function compile(type, source) { const s = gl.createShader(type); gl.shaderSource(s, source); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw Error(gl.getShaderInfoLog(s)); return s; }
+        function program(source) { const p = gl.createProgram(); const vs = compile(gl.VERTEX_SHADER, '#version 300 es\nvoid main(){vec2 p=vec2((gl_VertexID<<1)&2,gl_VertexID&2);gl_Position=vec4(p*2.-1.,0,1);}'); const fs = compile(gl.FRAGMENT_SHADER, source.replace('#version 150', '#version 300 es\nprecision highp float;\nprecision highp int;\nprecision highp sampler2D;')); gl.attachShader(p, vs); gl.attachShader(p, fs); gl.linkProgram(p); if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw Error(gl.getProgramInfoLog(p)); gl.deleteShader(vs); gl.deleteShader(fs); return { p, u: Object.fromEntries(uniforms.map(k => [k, gl.getUniformLocation(p, k)])) }; }
+        function texture() { const t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA16F, w, h, 0, gl.RGBA, gl.HALF_FLOAT, null); for (const k of [gl.TEXTURE_MIN_FILTER, gl.TEXTURE_MAG_FILTER]) gl.texParameteri(gl.TEXTURE_2D, k, gl.LINEAR); for (const k of [gl.TEXTURE_WRAP_S, gl.TEXTURE_WRAP_T]) gl.texParameteri(gl.TEXTURE_2D, k, gl.CLAMP_TO_EDGE); gl.bindFramebuffer(gl.FRAMEBUFFER, fb); gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, t, 0); if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE) throw Error('浮動小数点テクスチャに対応したWebGL2が必要です。'); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); return t; }
+        function color() { const c = swatches[colorIndex].dataset.color; return [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16) / 255); }
+        function selectColor(i) { colorIndex = (i + swatches.length) % swatches.length; swatches.forEach((b, j) => b.setAttribute('aria-pressed', String(j === colorIndex))); }
+        function draw(name, out, inputs, splat = null) { const { p, u } = programs[name]; gl.useProgram(p); gl.bindFramebuffer(gl.FRAMEBUFFER, out ? fb : null); if (out) gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, out, 0); gl.viewport(0, 0, out ? w : canvas.width, out ? h : canvas.height); gl.uniform2f(u.resolution, out ? w : canvas.width, out ? h : canvas.height); for (const [k, v] of Object.entries({ dt, time: simTime, wetness: Number($('wet').value), injecting: splat ? 1 : 0, radius: splat?.radius || 1, amount: splat?.amount || 0 })) gl.uniform1f(u[k], v); gl.uniform2fv(u.point, splat?.point || [0, 0]); gl.uniform2fv(u.previous, splat?.previous || [0, 0]); gl.uniform2fv(u.impulse, splat?.impulse || [0, 0]); gl.uniform3fv(u.inkColor, splat?.color || color()); let unit = 0; for (const [key, t] of Object.entries(inputs)) { if (u[key] === null) continue; if (t === out) throw Error('描画先と入力が重複しています。'); gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, t); gl.uniform1i(u[key], unit++); } gl.drawArrays(gl.TRIANGLES, 0, 3); }
+        function clearTexture(t) { gl.bindFramebuffer(gl.FRAMEBUFFER, fb); gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, t, 0); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); }
+        function clear() { for (const t of [...velocity, ...pigment, ...pressure, divergence]) clearTexture(t); pending = []; dots = 0; simTime = 0; acc = 0; position = lastDraw = null; down = false; pointerId = null; $('hint').classList.remove('hidden'); render(); }
+        function render() { draw('06_render', null, { pigmentTex: pigment[0] }); }
+        function enqueue(p, prev, speed, burst = false) { if (paused || failed) return; const radius = Number($('size').value) / (1 + speed * .003); pending.push({ point: p, previous: prev, impulse: [Math.max(-150, Math.min(150, (p[0] - prev[0]) * w / dt)), Math.max(-150, Math.min(150, (p[1] - prev[1]) * h / dt))], radius: burst ? Number($('size').value) * 1.8 : Math.max(2, radius), amount: burst ? 3 : 0.6, color: color() }); if (pending.length > 96) pending.splice(0, pending.length - 96); dots++; $('hint').classList.add('hidden'); }
+        function step() { const s = pending.shift() || null; draw('01_velocity', velocity[1], { velocityTex: velocity[0], pigmentTex: pigment[0] }, s); velocity.reverse(); draw('02_divergence', divergence, { velocityTex: velocity[0] }); clearTexture(pressure[0]); for (let i = 0; i < iterations; i++) { draw('03_pressure', pressure[1], { pressureTex: pressure[0], divergenceTex: divergence }); pressure.reverse(); } draw('04_project', velocity[1], { velocityTex: velocity[0], pressureTex: pressure[0] }); velocity.reverse(); draw('05_pigment', pigment[1], { velocityTex: velocity[0], pigmentTex: pigment[0] }, s); pigment.reverse(); simTime += dt; }
+        function toggle() { paused = !paused; pending = []; lastDraw = null; $('pause').textContent = paused ? '再開' : '一時停止'; }
+        function resize() { const rect = canvas.getBoundingClientRect(), dpr = Math.min(devicePixelRatio || 1, 2); canvas.width = Math.round(rect.width * dpr); canvas.height = Math.round(rect.height * dpr); render(); }
+        function locate(e) { const r = canvas.getBoundingClientRect(); return [Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)), Math.max(0, Math.min(1, 1 - (e.clientY - r.top) / r.height))]; }
+        function move(e) { if (pointerId !== null && e.pointerId !== pointerId) return; const p = locate(e), now = performance.now(); const shouldDraw = (e.pointerType === 'mouse' && $('interaction').value === 'hover') || down; position = p; if (shouldDraw) { const prev = lastDraw || p; const speed = Math.hypot((p[0] - prev[0]) * w, (p[1] - prev[1]) * h) / Math.max(.016, (now - lastMove) / 1000); enqueue(p, prev, speed); lastDraw = p; } else lastDraw = null; lastMove = now; }
+        function release(e) { if (pointerId !== null && e.pointerId !== pointerId) return; down = false; pointerId = null; lastDraw = null; if (e.pointerType !== 'mouse') position = null; }
+        function animate(now) { if (failed) return; try { acc += Math.min((now - last) / 1000, .05); last = now; if (!paused) { if (position && pending.length === 0 && (down || $('interaction').value === 'hover') && now - lastMove > 65) { enqueue(position, position, 0); lastMove = now; } let count = 0; while (acc >= dt && count < 2) { step(); acc -= dt; count++; } if (count === 2) acc = 0; render(); } else acc = 0; $('status').textContent = `${paused ? '停止中' : '描画中'} · ${dots} 筆 · ${simTime.toFixed(1)} 秒`; if (gl.getError() !== gl.NO_ERROR) throw Error('GPU描画エラー'); requestAnimationFrame(animate); } catch (e) { fail(e); } }
+        try {
+            gl = canvas.getContext('webgl2', { alpha: false, antialias: false, depth: false, preserveDrawingBuffer: true }); if (!gl || !gl.getExtension('EXT_color_buffer_float')) throw Error('WebGL2対応のブラウザーで開いてください。'); gl.bindVertexArray(gl.createVertexArray()); fb = gl.createFramebuffer(); const rect = canvas.getBoundingClientRect(); const aspect = rect.width / rect.height; w = Math.max(256, Math.round(640 * Math.min(1, aspect))); h = Math.max(256, Math.round(640 / Math.max(1, aspect))); for (const [name, source] of Object.entries(window.INK_SHADERS)) programs[name] = program(source); velocity = [texture(), texture()]; pigment = [texture(), texture()]; pressure = [texture(), texture()]; divergence = texture();
+            swatches.forEach((b, i) => b.onclick = () => selectColor(i)); for (const id of ['size', 'wet']) $(id).oninput = () => $(id + 'Value').value = $(id).value;
+            $('pause').onclick = toggle; $('clear').onclick = clear; $('interaction').onchange = () => { position = lastDraw = null; pending = []; };
+            $('example').onclick = () => { if (paused) toggle(); enqueue([.5, .54], [.5, .54], 0, true); };
+            $('save').onclick = () => { render(); canvas.toBlob(blob => { if (!blob) return; const a = document.createElement('a'), url = URL.createObjectURL(blob); a.href = url; a.download = 'ink-garden.png'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); }, 'image/png'); };
+            canvas.onpointerdown = e => { if (down) return; down = true; pointerId = e.pointerId; canvas.setPointerCapture(e.pointerId); const p = locate(e); position = lastDraw = p; enqueue(p, p, 0, true); lastMove = performance.now(); }; canvas.onpointermove = move; canvas.onpointerup = e => { release(e); if (e.pointerType === 'mouse' && $('interaction').value === 'hover') selectColor(colorIndex + 1); }; canvas.onpointercancel = release; canvas.onlostpointercapture = release; canvas.onpointerleave = () => { if (!down) { position = lastDraw = null; } };
+            window.addEventListener('blur', () => { down = false; pointerId = null; position = lastDraw = null; pending = []; });
+            document.addEventListener('visibilitychange', () => { last = performance.now(); acc = 0; position = lastDraw = null; pending = []; });
+            document.addEventListener('keydown', e => { if (['INPUT', 'SELECT', 'BUTTON'].includes(document.activeElement.tagName) || e.repeat) return; if (e.code === 'Space') { e.preventDefault(); toggle(); } if (e.key.toLowerCase() === 'c') selectColor(colorIndex + 1); if (e.key.toLowerCase() === 'r') clear(); });
+            canvas.addEventListener('webglcontextlost', e => { e.preventDefault(); fail(Error('GPU接続が失われました。ページを再読み込みしてください。')); });
+            new ResizeObserver(resize).observe(canvas); resize(); last = performance.now(); requestAnimationFrame(animate);
+        } catch (e) { fail(e); }
+    })();
+</script>
+
+</html>
