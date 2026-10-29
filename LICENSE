@@ -29,6 +29,9 @@ Third-party MIT attribution: assets/warp.js adapts Warp Animation by
 php-hacker (https://codepen.io/php-hacker/pen/dyVdgRX).
 Its copyright and MIT permission notice are in third_party/warp/NOTICE.md.
 
+Third-party MIT attribution: third_party/three/ contains three.js 0.186.1.
+Its copyright and MIT permission notice are in third_party/three/LICENSE.
+
 Third-party CC BY-NC-SA 3.0 exception: the complete rain/ directory is a
 browser adaptation of Heartfelt by Martijn Steinrucken / BigWIngs, and is
 not covered by this MIT license. See third_party/heartfelt/NOTICE.md.
