@@ -46,7 +46,8 @@ void main(){
  float turn=clamp((before.z*after.w-before.w*after.z)*3.,-1.,1.)*(portrait?-1.:1.);
  vec2 position=portrait?course.yx:course.xy;
  vec2 forward=portrait?course.wz:course.zw;
- vec2 p=uv-centre-position;
+ // As pigment disperses, let its centre drift inward to give the wash room.
+ vec2 p=uv-centre-position*mix(.55,1.,form);
  vec2 q=vec2(dot(p,forward),dot(p,vec2(-forward.y,forward.x)))/.55;
  vec2 drift=vec2(cos(a),sin(a));
  // The same domain warp gradually relaxes into an articulated fish silhouette.
@@ -65,19 +66,20 @@ void main(){
  tail=max(tail,-(r.x+.89+abs(r.y)*.8));
  float fins=min(ellipse(r-vec2(.04,.22),vec2(.21,.12)),ellipse(r-vec2(.04,-.22),vec2(.21,.12)));
  float fish=smin(body,min(tail,fins),.055);
- // A connected, folded ribbon of pigment is the other end of the distance field.
- float flow=r.y+.19*sin(r.x*5.+2.*a)+.08*sin(r.x*10.-a);
- float cloud=ellipse(vec2(r.x+.12,flow),vec2(1.05,.30));
- cloud+=(fbm(r*4.+drift)-.5)*.23;
+ // A broad, diluted wash gathers back into the fish's distance field.
+ // Low-frequency folds keep soft pockets of pigment without a hard black core.
+ float flow=r.y+.25*sin(r.x*2.5+2.*a)+.10*sin(r.x*5.-a);
+ float cloud=ellipse(vec2(r.x+.12,flow),vec2(1.95,.88));
+ cloud+=(fbm(r*2.+drift)-.5)*.30;
  float d=mix(cloud,fish,form);
- d+=(1.-form)*.045*sin(r.x*23.+r.y*13.+a);
+ d+=(1.-form)*.025*sin(r.x*12.+r.y*7.+a);
  float aa=3.3/min(resolution.x,resolution.y);
- float softness=mix(.075,.009,form)+aa;
+ float softness=mix(.42,.009,form)+aa;
  float edge=1.-smoothstep(-softness,softness,d);
- float bleed=(1.-smoothstep(-.035,.17,d))*.12;
+ float bleed=(1.-smoothstep(-.035,mix(.55,.17,form),d))*mix(.035,.12,form);
  float pigment=fbm(r*8.+warp*2.+drift*.3);
  float veins=.5+.5*sin(r.y*38.+fbm(r*4.+drift)*12.);
- float density=.54+.32*pigment+.10*veins*(1.-form);
+ float density=(.54+.32*pigment+.025*veins*(1.-form))*mix(.30,1.,form);
  // Diluted fins and a quiet spine; monochrome throughout.
  density*=mix(1.,mix(.48,1.,1.-smoothstep(-.025,.02,body)),form);
  float eye=min(length(r-vec2(.49,.085)),length(r-vec2(.49,-.085)));
