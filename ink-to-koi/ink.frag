@@ -46,10 +46,16 @@ void main(){
  float turn=clamp((before.z*after.w-before.w*after.z)*3.,-1.,1.)*(portrait?-1.:1.);
  vec2 position=portrait?course.yx:course.xy;
  vec2 forward=portrait?course.wz:course.zw;
- // Keep the wash close to the same moving centre as it gathers into a fish.
- vec2 p=uv-centre-position*mix(.90,1.,form);
+ // Ink drifts near the centre independently of the fish's boundary turns.
+ // Interpolate translation, never the ink's orientation, while it gathers.
+ vec2 inkPosition=vec2(.18*sin(a),.10*cos(a));
+ vec2 p=uv-centre-mix(inkPosition,position,form);
  vec2 q=vec2(dot(p,forward),dot(p,vec2(-forward.y,forward.x)))/.55;
+ vec2 inkQ=(portrait?p.yx:p)/.55;
  vec2 drift=vec2(cos(a),sin(a));
+ vec2 inkWarp=vec2(fbm(inkQ*2.7+drift),fbm(inkQ*2.7+drift+19.))-.5;
+ vec2 inkR=inkQ+inkWarp*.95;
+ inkR.y-=.045*sin(2.*a+inkR.x*3.);
  // The same domain warp gradually relaxes into an articulated fish silhouette.
  vec2 warp=vec2(fbm(q*2.7+drift),fbm(q*2.7+drift+19.))-.5;
  vec2 r=q+(1.-form)*warp*.95;
@@ -70,17 +76,17 @@ void main(){
  float fins=min(ellipse(f-vec2(.04,.22),vec2(.21,.12)),ellipse(f-vec2(.04,-.22),vec2(.21,.12)));
  float fish=smin(body,min(tail,fins),.055);
  // A connected ribbon retains folded liquid edges, rather than a smoky cloud.
- float flow=r.y+.20*sin(r.x*4.+2.*a)+.08*sin(r.x*8.-a);
- float cloud=ellipse(vec2(r.x+.12,flow),vec2(1.55,.50));
- cloud+=(fbm(r*3.+drift)-.5)*.20;
+ float flow=inkR.y+.20*sin(inkR.x*4.+2.*a)+.08*sin(inkR.x*8.-a);
+ float cloud=ellipse(vec2(inkR.x+.12,flow),vec2(1.55,.50));
+ cloud+=(fbm(inkR*3.+drift)-.5)*.20;
  float d=mix(cloud,fish,form);
- d+=(1.-form)*.025*sin(r.x*12.+r.y*7.+a);
+ d+=(1.-form)*.025*sin(inkR.x*12.+inkR.y*7.+a);
  float aa=3.3/min(resolution.x,resolution.y);
  float softness=mix(.13,.009,form)+aa;
  float edge=1.-smoothstep(-softness,softness,d);
  float bleed=(1.-smoothstep(-.035,mix(.24,.17,form),d))*mix(.065,.12,form);
- float pigment=fbm(r*8.+warp*2.+drift*.3);
- float veins=.5+.5*sin(r.y*38.+fbm(r*4.+drift)*12.);
+ float pigment=mix(fbm(inkR*8.+inkWarp*2.+drift*.3),fbm(r*8.+warp*2.+drift*.3),form);
+ float veins=.5+.5*sin(inkR.y*38.+fbm(inkR*4.+drift)*12.);
  float density=(.45+.40*pigment+.07*veins*(1.-form))*mix(.70,1.,form);
  // Diluted fins and a quiet spine; monochrome throughout.
  density*=mix(1.,mix(.48,1.,1.-smoothstep(-.025,.02,body)),form);
