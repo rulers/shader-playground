@@ -46,44 +46,46 @@ void main(){
  float turn=clamp((before.z*after.w-before.w*after.z)*3.,-1.,1.)*(portrait?-1.:1.);
  vec2 position=portrait?course.yx:course.xy;
  vec2 forward=portrait?course.wz:course.zw;
- // As pigment disperses, let its centre drift inward to give the wash room.
- vec2 p=uv-centre-position*mix(.55,1.,form);
+ // Keep the wash close to the same moving centre as it gathers into a fish.
+ vec2 p=uv-centre-position*mix(.90,1.,form);
  vec2 q=vec2(dot(p,forward),dot(p,vec2(-forward.y,forward.x)))/.55;
  vec2 drift=vec2(cos(a),sin(a));
  // The same domain warp gradually relaxes into an articulated fish silhouette.
  vec2 warp=vec2(fbm(q*2.7+drift),fbm(q*2.7+drift+19.))-.5;
  vec2 r=q+(1.-form)*warp*.95;
  float tailWeight=clamp((.5-r.x)/1.4,0.,1.);
+ // Ink has its own slow current; the fast swimming wave only shapes the fish.
+ r.y-=(1.-form)*.045*sin(2.*a+r.x*3.);
+ vec2 f=r;
  // 30 tail beats per loop (~1.25 Hz); a wave travels from head toward tail.
  // The quiet head leads while the caudal peduncle and tail do most of the work.
- r.y-=.22*tailWeight*tailWeight*sin(30.*a+4.*r.x);
+ f.y-=form*.22*tailWeight*tailWeight*sin(30.*a+4.*f.x);
  // The rear body follows the curve during a turn, instead of pivoting rigidly.
- r.y-=.18*turn*tailWeight*tailWeight;
- float body=ellipse(r-vec2(.06,0),vec2(.62,.205));
- body=smin(body,ellipse(r-vec2(-.53,0),vec2(.24,.065)),.09);
+ f.y-=form*.18*turn*tailWeight*tailWeight;
+ float body=ellipse(f-vec2(.06,0),vec2(.62,.205));
+ body=smin(body,ellipse(f-vec2(-.53,0),vec2(.24,.065)),.09);
  // A soft fork and paired pectoral fins keep the silhouette organic.
- float tail=ellipse(r-vec2(-.83,0),vec2(.26,.25));
- tail=max(tail,-(r.x+.89+abs(r.y)*.8));
- float fins=min(ellipse(r-vec2(.04,.22),vec2(.21,.12)),ellipse(r-vec2(.04,-.22),vec2(.21,.12)));
+ float tail=ellipse(f-vec2(-.83,0),vec2(.26,.25));
+ tail=max(tail,-(f.x+.89+abs(f.y)*.8));
+ float fins=min(ellipse(f-vec2(.04,.22),vec2(.21,.12)),ellipse(f-vec2(.04,-.22),vec2(.21,.12)));
  float fish=smin(body,min(tail,fins),.055);
- // A broad, diluted wash gathers back into the fish's distance field.
- // Low-frequency folds keep soft pockets of pigment without a hard black core.
- float flow=r.y+.25*sin(r.x*2.5+2.*a)+.10*sin(r.x*5.-a);
- float cloud=ellipse(vec2(r.x+.12,flow),vec2(1.95,.88));
- cloud+=(fbm(r*2.+drift)-.5)*.30;
+ // A connected ribbon retains folded liquid edges, rather than a smoky cloud.
+ float flow=r.y+.20*sin(r.x*4.+2.*a)+.08*sin(r.x*8.-a);
+ float cloud=ellipse(vec2(r.x+.12,flow),vec2(1.55,.50));
+ cloud+=(fbm(r*3.+drift)-.5)*.20;
  float d=mix(cloud,fish,form);
  d+=(1.-form)*.025*sin(r.x*12.+r.y*7.+a);
  float aa=3.3/min(resolution.x,resolution.y);
- float softness=mix(.42,.009,form)+aa;
+ float softness=mix(.13,.009,form)+aa;
  float edge=1.-smoothstep(-softness,softness,d);
- float bleed=(1.-smoothstep(-.035,mix(.55,.17,form),d))*mix(.035,.12,form);
+ float bleed=(1.-smoothstep(-.035,mix(.24,.17,form),d))*mix(.065,.12,form);
  float pigment=fbm(r*8.+warp*2.+drift*.3);
  float veins=.5+.5*sin(r.y*38.+fbm(r*4.+drift)*12.);
- float density=(.54+.32*pigment+.025*veins*(1.-form))*mix(.30,1.,form);
+ float density=(.45+.40*pigment+.07*veins*(1.-form))*mix(.70,1.,form);
  // Diluted fins and a quiet spine; monochrome throughout.
  density*=mix(1.,mix(.48,1.,1.-smoothstep(-.025,.02,body)),form);
- float eye=min(length(r-vec2(.49,.085)),length(r-vec2(.49,-.085)));
- density=mix(density,.98,(1.-smoothstep(.009,.016,eye))*form);
+ float eye=min(length(f-vec2(.49,.085)),length(f-vec2(.49,-.085)));
+ density=mix(density,.98,(1.-smoothstep(.009,.016,eye))*smoothstep(.75,.98,form));
  float paper=(noise(gl_FragCoord.xy*.7)-.5)*.012;
  vec3 background=vec3(.914,.898,.859)+paper;
  float ink=clamp(edge*density+bleed,0.,.96);
