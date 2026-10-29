@@ -12,24 +12,31 @@ float noise(vec2 p){
 float fbm(vec2 p){return .57*noise(p)+.28*noise(p*2.03+7.)+.15*noise(p*4.07+19.);}
 float ellipse(vec2 p,vec2 r){return (length(p/r)-1.)*min(r.x,r.y);}
 float smin(float a,float b,float k){float h=max(k-abs(a-b),0.)/k;return min(a,b)-h*h*k*.25;}
-vec2 route(float a){return vec2(.40*cos(a),.23*sin(a));}
+// Closed, centre-crossing course: turn smoothly inward at its outer reaches.
+// Reserve room for the tail and diluted ink before the canvas boundary.
+vec2 route(float a,vec2 reach){return reach*vec2(cos(a),sin(2.*a)*.78);}
 void main(){
  // All clocks share a 24s period, including the travelling body wave and warp.
  // No reseeding, opacity crossfade, or time reset at the loop boundary.
  float a=time*TAU/24.;
  float form=smoothstep(.12,.82,.5-.5*cos(a));
  vec2 uv=(gl_FragCoord.xy-.5*resolution)/min(resolution.x,resolution.y)*3.3;
- // Reserve the lower left for the title; keep the complete fish in portrait view.
- vec2 p=uv-vec2(resolution.x>resolution.y?.65:0.,.35);
- p-=route(a);
- vec2 forward=normalize(vec2(-.40*sin(a),.23*cos(a)));
+ // A periodic speed integral accelerates gently while the fish has its shape.
+ // Its derivative is 1 - .30*cos(a): up to 30% faster in the fish phase.
+ float swim=a-.30*sin(a);
+ vec2 halfView=resolution/min(resolution.x,resolution.y)*1.65;
+ vec2 centre=vec2(resolution.x>resolution.y?.55:0.,.20);
+ vec2 reach=min(vec2(.78,.52),max(vec2(.05),halfView-abs(centre)-1.05));
+ vec2 p=uv-centre-route(swim,reach);
+ vec2 tangent=reach*vec2(-sin(swim),1.56*cos(2.*swim));
+ vec2 forward=normalize(tangent);
  vec2 q=vec2(dot(p,forward),dot(p,vec2(-forward.y,forward.x)))/.80;
  vec2 drift=vec2(cos(a),sin(a));
  // The same domain warp gradually relaxes into an articulated fish silhouette.
  vec2 warp=vec2(fbm(q*2.7+drift),fbm(q*2.7+drift+19.))-.5;
  vec2 r=q+(1.-form)*warp*.95;
  float tailWeight=clamp((.5-r.x)/1.4,0.,1.);
- r.y-=.12*tailWeight*tailWeight*sin(4.*a+r.x*4.);
+ r.y-=.12*tailWeight*tailWeight*sin(4.*swim+r.x*4.);
  float body=ellipse(r-vec2(.06,0),vec2(.62,.205));
  body=smin(body,ellipse(r-vec2(-.53,0),vec2(.24,.065)),.09);
  // A soft fork and paired pectoral fins keep the silhouette organic.
