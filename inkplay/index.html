@@ -228,19 +228,27 @@
             display: block
         }
     }
+    [hidden] { display: none !important }
+    .control-dock { position: relative; flex: 0 0 32px; width: 32px; height: 32px }
+    #controls-toggle { display: grid; place-items: center; width: 32px; height: 32px; padding: 0; border-radius: 0; font-size: 20px; line-height: 1 }
+    #controls { position: absolute; top: 46px; right: 0; z-index: 3; width: 340px; max-width: 92vw; max-height: calc(100svh - 110px); overflow-y: auto; padding: 18px; border: 1px solid #cfcdc5; background: #faf9f5f5; box-shadow: 0 12px 35px #423c3120; backdrop-filter: blur(12px) }
+    .controls-heading { display: flex; justify-content: space-between; align-items: center; font-size: 11px; letter-spacing: .08em }
+    #controls-close { display: grid; place-items: center; width: 28px; height: 28px; padding: 0; border: 0; background: transparent; font-size: 18px }
+    #controls .toolbar { flex-direction: column; align-items: stretch; gap: 18px; padding: 16px 0 22px }
+    #controls .group { justify-content: space-between; gap: 8px }
+    #controls .actions { display: grid; grid-template-columns: 1fr 1fr; max-width: none }
+    #controls select { max-width: 210px; padding: 7px }
+    @media(max-width:650px) { #controls { max-width: 90vw; padding: 16px } }
 </style>
 <header>
     <div class="brand">
         <h1>墨の庭</h1><small>INK PLAYGROUND</small>
     </div>
-    <div class="actions"><button id="example">一滴を試す</button><button id="pause">一時停止</button><button
-            id="clear">白紙に戻す</button><button id="save">PNG保存</button></div>
-</header>
-<main>
-    <div class="workspace"><canvas id="view" aria-label="インクを描くキャンバス" tabindex="0"></canvas>
-        <div class="hint" id="hint"><strong>動かす。にじむ。重なる。</strong>マウス移動で描く／押して描く、を下で選べます。<br>タッチでは指でなぞってください。</div>
-    </div>
-    <div class="toolbar">
+    <div class="control-dock">
+        <button id="controls-toggle" type="button" aria-label="調整UIを開く" aria-expanded="false" aria-controls="controls"><span aria-hidden="true">＋</span></button>
+        <section id="controls" aria-label="作品の調整" hidden>
+            <div class="controls-heading"><span>調整</span><button id="controls-close" type="button" aria-label="調整UIを閉じる">×</button></div>
+                <div class="toolbar">
         <div class="group"><span class="label">INK</span>
             <div class="colors" id="colors"><button class="swatch" style="background:#191f24" data-color="#191f24"
                     aria-label="墨色" aria-pressed="true"></button><button class="swatch" style="background:#183f68"
@@ -258,10 +266,19 @@
                 <option value="drag">押している間だけ描く</option>
             </select></label>
     </div>
+    <div class="actions"><button id="example">一滴を試す</button><button id="pause">一時停止</button><button
+            id="clear">白紙に戻す</button><button id="save">PNG保存</button></div>
+        </section>
+    </div>
+</header>
+<main>
+    <div class="workspace"><canvas id="view" aria-label="インクを描くキャンバス" tabindex="0"></canvas>
+        <div class="hint" id="hint"><strong>動かす。にじむ。重なる。</strong>マウス移動で描く／押して描く、を「＋」から選べます。<br>タッチでは指でなぞってください。</div>
+    </div>
     <div id="error" role="alert"></div>
     <footer><span>ゆっくり動かすと太く、速く動かすと細く。Space：停止 / C：色替え / R：白紙</span><span id="status" role="status">準備中…</span></footer>
 </main>
 <script src="shaders.js"></script>
-<script src="app.js"></script>
+<script src="app.js?v=square-controls-1"></script>
 
 </html>

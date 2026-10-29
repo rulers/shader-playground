@@ -1,6 +1,25 @@
 'use strict';
 (() => {
     const $ = id => document.getElementById(id);
+    const controls = $('controls');
+    const controlsToggle = $('controls-toggle');
+    function setControlsOpen(open) {
+        controls.hidden = !open;
+        controlsToggle.setAttribute('aria-expanded', String(open));
+        controlsToggle.setAttribute('aria-label', open ? '調整UIを閉じる' : '調整UIを開く');
+        controlsToggle.querySelector('span').textContent = open ? '−' : '＋';
+    }
+    controlsToggle.onclick = () => setControlsOpen(controls.hidden);
+    $('controls-close').onclick = () => {
+        setControlsOpen(false);
+        controlsToggle.focus();
+    };
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && !controls.hidden) {
+            setControlsOpen(false);
+            controlsToggle.focus();
+        }
+    });
     const canvas = $('view');
     const swatches = [...document.querySelectorAll('.swatch')];
     let colorIndex = 0;
