@@ -63,7 +63,7 @@ async function init() {
     try {
         gl = canvas.getContext('webgl2', { alpha: false, antialias: false, depth: false });
         if (!gl) throw Error('WebGL 2 unavailable');
-        const response = await fetch('film.frag?v=1');
+        const response = await fetch('film.frag?v=bright-2');
         if (!response.ok) throw Error('Shader download failed');
         const source = await response.text();
         const vs = compile(gl.VERTEX_SHADER, '#version 300 es\nvoid main(){vec2 p=vec2((gl_VertexID<<1)&2,gl_VertexID&2);gl_Position=vec4(p*2.-1.,0,1);}');

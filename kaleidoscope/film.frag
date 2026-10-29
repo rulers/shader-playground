@@ -26,21 +26,22 @@ void main(){
  float thickness=film*11.+r*1.6;
  // Interference colours, normalised to bound luminance as colours drift.
  vec3 rainbow=.5+.5*cos(thickness+vec3(0.,2.1,4.2));
- rainbow=mix(vec3(.56,.63,.7),rainbow,.58);
+ rainbow=mix(vec3(.64,.7,.77),rainbow,.76);
  float luma=dot(rainbow,vec3(.2126,.7152,.0722));
- rainbow*=.5/max(luma,.12);
+ rainbow*=.65/max(luma,.12);
  float contour=.5+.5*cos(thickness*2.5);
  float aa=max(fwidth(thickness)*2.5,.02);
  float lace=1.-smoothstep(.045,.045+aa,abs(sin(thickness*3.)));
  float glow=pow(contour,5.);
- float light=.72+.12*contour+.06*glow;
+ float light=.95+.10*contour+.05*glow;
  vec3 base=rainbow*light;
  base+=vec3(.6,.78,.84)*lace*.18;
  // Smooth falloff and fixed exposure; no flashing, cuts or time-based palette switches.
- float vignette=1.-.24*smoothstep(.2,2.6,r);
- vec3 background=vec3(.028,.046,.09);
- vec3 rgb=background+base*vignette;
+ float vignette=1.-.12*smoothstep(.2,2.6,r);
+ vec3 background=vec3(.045,.065,.11);
+ vec3 rgb=(background+base*vignette)*1.2;
  rgb=rgb/(1.+rgb);
- rgb=pow(rgb,vec3(.83));
+ // Convert linear light for display, rather than darkening the midtones.
+ rgb=pow(rgb,vec3(1./2.2));
  color=vec4(rgb,1.);
 }
