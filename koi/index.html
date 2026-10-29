@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>墨と鯉 — Shader Playground</title>
+<link rel="stylesheet" href="style.css"><script src="app.js" type="module"></script>
+</head>
+<body>
+<canvas id="view" aria-label="和紙の上で錦鯉が体と尾をくねらせて泳ぐアニメーション"></canvas>
+<header><a href="../">↖ SHADER PLAYGROUND</a><span>EXPERIMENT 05</span></header>
+<main><div class="intro"><p class="eyebrow">A STUDY OF INK & MOVEMENT</p><h1>墨と鯉<span>KOI ON PAPER</span></h1><p class="description">尾を揺らし、余白を泳ぐ。<br>墨と朱が、生きものになる。</p></div>
+<div class="dock"><button id="toggle" aria-label="調整UIを開く" aria-expanded="false" aria-controls="controls">＋</button>
+<section id="controls" aria-label="作品の調整" hidden><div class="heading">調整<button id="close" aria-label="調整UIを閉じる">×</button></div>
+<label for="speed">泳ぐ速さ<output id="speed-value">0.7</output><input id="speed" type="range" min="0" max="1.5" step=".05" value=".7"></label>
+<label for="bend">体のくねり<output id="bend-value">1.2</output><input id="bend" type="range" min=".3" max="2" step=".05" value="1.2"></label>
+<label for="paper">和紙の質感<output id="paper-value">1.0</output><input id="paper" type="range" min="0" max="1.8" step=".05" value="1"></label>
+<label for="count">鯉の数<output id="count-value">5</output><input id="count" type="range" min="1" max="7" step="1" value="5"></label>
+<div class="buttons"><button id="pause" aria-pressed="false">一時停止</button><button id="reset">最初から</button></div>
+<p>手続き的な描画による試作 · 絵や動画素材は使用していません。</p></section></div></main>
+<footer><span>PROCEDURAL PAINTING / WEBGL 2</span><span id="status" role="status">シェーダーを準備中…</span></footer>
+</body></html>
