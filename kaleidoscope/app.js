@@ -63,7 +63,7 @@ async function init() {
     try {
         gl = canvas.getContext('webgl2', { alpha: false, antialias: false, depth: false });
         if (!gl) throw Error('WebGL 2 unavailable');
-        const response = await fetch('film.frag?v=two-tone-5');
+        const response = await fetch('film.frag?v=acid-fluid-6');
         if (!response.ok) throw Error('Shader download failed');
         const source = await response.text();
         function link(source) {
@@ -75,7 +75,7 @@ async function init() {
         }
         program = link(source);
         uniforms = Object.fromEntries(['resolution','rotationAngle','flowTime'].map(k => [k, gl.getUniformLocation(program,k)]));
-        $('status').textContent = '青とピンクのブレンドを描画中';
+        $('status').textContent = '蛍光イエローと紫のブレンドを描画中';
         redraw();
     } catch (error) { fail(error); }
 }
