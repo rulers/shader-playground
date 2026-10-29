@@ -11,6 +11,15 @@ float noise(vec2 p){
 }
 float fbm(vec2 p){return .57*noise(p)+.28*noise(p*2.03+7.)+.15*noise(p*4.07+19.);}
 float ellipse(vec2 p,vec2 r){return (length(p/r)-1.)*min(r.x,r.y);}
+float segment(vec2 p,vec2 a,vec2 b){vec2 v=b-a;return length(p-a-v*clamp(dot(p-a,v)/dot(v,v),0.,1.));}
+float tri(vec2 p,vec2 a,vec2 b,vec2 c){
+ float d=min(segment(p,a,b),min(segment(p,b,c),segment(p,c,a)));
+ vec2 v=b-a,w=c-b,z=a-c;
+ float s1=v.x*(p-a).y-v.y*(p-a).x;
+ float s2=w.x*(p-b).y-w.y*(p-b).x;
+ float s3=z.x*(p-c).y-z.y*(p-c).x;
+ return ((s1>=0.&&s2>=0.&&s3>=0.)||(s1<=0.&&s2<=0.&&s3<=0.))?-d:d;
+}
 float smin(float a,float b,float k){float h=max(k-abs(a-b),0.)/k;return min(a,b)-h*h*k*.25;}
 // Arc-length parameterized capsule: long glides separated by forward U-turns.
 // xy = position, zw = its exact unit tangent; the head never rotates in place.
@@ -68,13 +77,16 @@ void main(){
  f.y-=form*.22*tailWeight*tailWeight*sin(30.*a+4.*f.x);
  // The rear body follows the curve during a turn, instead of pivoting rigidly.
  f.y-=form*.18*turn*tailWeight*tailWeight;
- float body=ellipse(f-vec2(.06,0),vec2(.62,.205));
- body=smin(body,ellipse(f-vec2(-.53,0),vec2(.24,.065)),.09);
- // A soft fork and paired pectoral fins keep the silhouette organic.
- float tail=ellipse(f-vec2(-.83,0),vec2(.26,.25));
- tail=max(tail,-(f.x+.89+abs(f.y)*.8));
- float fins=min(ellipse(f-vec2(.04,.22),vec2(.21,.12)),ellipse(f-vec2(.04,-.22),vec2(.21,.12)));
- float fish=smin(body,min(tail,fins),.055);
+ // Match koi/koi.frag's broad head/body, narrow peduncle and fin proportions.
+ float body=ellipse(f-vec2(.02,0),vec2(.72,.255));
+ body=smin(body,ellipse(f-vec2(-.65,0),vec2(.27,.08)),.035);
+ // Two lobes leave a visible V-shaped fork; all parts share the body wave.
+ float flap=form*.04*sin(30.*a+1.);
+ float tail=min(tri(f,vec2(-.79,0),vec2(-1.24,.31+flap),vec2(-1.13,.01)),tri(f,vec2(-.79,0),vec2(-1.13,-.01),vec2(-1.24,-.31+flap)));
+ // Whole-number cycles retain the exact 24s loop while the fins gently fan.
+ float finAngle=form*.045*sin(24.*a);
+ float fins=min(tri(f,vec2(.25,.16),vec2(-.02,.48+finAngle),vec2(-.28,.2)),tri(f,vec2(.25,-.16),vec2(-.28,-.2),vec2(-.02,-.48-finAngle)));
+ float fish=smin(body,min(tail,fins),.025);
  // A connected ribbon retains folded liquid edges, rather than a smoky cloud.
  float flow=inkR.y+.20*sin(inkR.x*4.+2.*a)+.08*sin(inkR.x*8.-a);
  float cloud=ellipse(vec2(inkR.x+.12,flow),vec2(1.55,.50));
@@ -90,7 +102,9 @@ void main(){
  float density=(.45+.40*pigment+.07*veins*(1.-form))*mix(.70,1.,form);
  // Diluted fins and a quiet spine; monochrome throughout.
  density*=mix(1.,mix(.48,1.,1.-smoothstep(-.025,.02,body)),form);
- float eye=min(length(f-vec2(.49,.085)),length(f-vec2(.49,-.085)));
+ float gill=abs(ellipse(f-vec2(.4,0),vec2(.12,.205)))-.005;
+ density=mix(density,.86,(1.-smoothstep(-.005,.008,gill))*step(.32,f.x)*smoothstep(.75,.98,form)*.45);
+ float eye=min(length(f-vec2(.53,.135)),length(f-vec2(.53,-.135)));
  density=mix(density,.98,(1.-smoothstep(.009,.016,eye))*smoothstep(.75,.98,form));
  float paper=(noise(gl_FragCoord.xy*.7)-.5)*.012;
  vec3 background=vec3(.914,.898,.859)+paper;
