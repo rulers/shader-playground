@@ -18,14 +18,37 @@ function effort(time, id) {
     const frequency = .72 + id * .037, phase = id * 1.83;
     return 1 + .38 * Math.cos(time * frequency + phase) + .12 * Math.cos(time * 2 * frequency + phase + .7);
 }
+function dartSegment(id, segment) {
+    const offset = id === 1 ? -1 : 3;
+    return (id === 1 || id === 4) && ((segment - offset) % 8 + 8) % 8 === 1;
+}
+export function dartStrength(time, id) {
+    const clock = swimClock(time, id) / (5.8 + id * .23), segment = Math.floor(clock);
+    return dartSegment(id, segment) ? Math.pow(Math.sin(Math.PI * (clock - segment)), 2) : 0;
+}
 // Seeded waypoints with a C2-continuous B-spline, rather than a closed orbit.
 // Its convex hull keeps the complete path within the swimming volume.
 export function sampleSwimPath(id, time, width, depth, target = new THREE.Vector3()) {
-    const clock = swimClock(time, id) / (5.8 + id * .23), segment = Math.floor(clock), u = clock - segment;
+    const clock = swimClock(time, id) / (5.8 + id * .23), segment = Math.floor(clock);
+    let u = clock - segment;
+    if (dartSegment(id, segment)) {
+        // A straight stroke accelerates in the middle, with C2 joins at both ends.
+        u += .75 / TAU * (-Math.sin(TAU * u) + .5 * Math.sin(2 * TAU * u));
+    }
     const weights = [Math.pow(1 - u, 3) / 6, (3*u*u*u - 6*u*u + 4) / 6, (-3*u*u*u + 3*u*u + 3*u + 1) / 6, u*u*u / 6];
     target.set(0, 0, 0);
     for (let n = 0; n < 4; n++) {
         const index = segment + n - 1, weight = weights[n];
+        const offset = id === 1 ? -1 : 3, lineIndex = ((index - offset) % 8 + 8) % 8;
+        if ((id === 1 || id === 4) && lineIndex <= 3) {
+            // Four equally spaced collinear controls give one truly straight leg.
+            const cycle = Math.floor((index - offset) / 8), progress = lineIndex / 3;
+            const direction = randomPoint(id, cycle, 5) > .5 ? 1 : -1;
+            target.x += (progress * 2 - 1) * width * .72 * direction * weight;
+            target.y += THREE.MathUtils.lerp(-.10 + randomPoint(id, cycle, 6) * .5, .25 + randomPoint(id, cycle, 7) * .55, progress) * weight;
+            target.z += (progress * 2 - 1) * depth * .45 * -direction * weight;
+            continue;
+        }
         const surfaceVisit = ((index + id * 2) % 9 + 9) % 9 < 3;
         target.x += (randomPoint(id, index, 0) * 2 - 1) * width * .82 * weight;
         target.y += (surfaceVisit ? 1.04 : -.45 + randomPoint(id, index, 1) * 1.15) * weight;
@@ -115,7 +138,7 @@ export function createFish(id) {
         previousTime = t;
         group.position.copy(position);
         const phase = swimClock(t, id) * (5.7 + id * .19) + id * 1.8;
-        const tailEffort = .16 + .09 * effort(t, id);
+        const tailEffort = (.16 + .09 * effort(t, id)) * (1 - .40 * dartStrength(t, id));
         const turning = .5 * curvature * group.scale.x;
         function offset(x) {
             const weight = THREE.MathUtils.clamp((.55 - x) / 1.85, 0, 1);
