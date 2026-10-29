@@ -30,7 +30,7 @@ export function createSwimmer(id) {
     const position = new THREE.Vector3(), velocity = new THREE.Vector3(), acceleration = new THREE.Vector3();
     const direction = new THREE.Vector3(), wander = new THREE.Vector3(), desired = new THREE.Vector3(), previousVelocity = new THREE.Vector3();
     const turn = new THREE.Quaternion(), partialTurn = new THREE.Quaternion();
-    const result = { position: new THREE.Vector3(), velocity, acceleration, dart: 0 };
+    const result = { position: new THREE.Vector3(), velocity, acceleration, dart: 0, curvature: 0 };
     let tick = 0, lastTime = -1, nextChange = 0, choice = 0, speed = .35, oldWidth = 0, oldDepth = 0;
     function reset(width, depth) {
         // Start spread out; their subsequent headings and turns stay independent.
@@ -39,7 +39,7 @@ export function createSwimmer(id) {
         const angle = randomPoint(id, 0, 11) * TAU;
         direction.set(Math.cos(angle), .25 * (randomPoint(id, 0, 12) * 2 - 1), Math.sin(angle)).normalize();
         wander.copy(direction); velocity.copy(direction).multiplyScalar(.35); acceleration.set(0, 0, 0);
-        tick = 0; nextChange = 2 + id * .7; choice = 0; speed = .35; result.dart = 0; oldWidth = width; oldDepth = depth;
+        tick = 0; nextChange = 2 + id * .7; choice = 0; speed = .35; result.dart = 0; result.curvature = 0; oldWidth = width; oldDepth = depth;
     }
     function update(time, width, depth) {
         if (lastTime < 0 || time < lastTime) reset(width, depth);
@@ -89,6 +89,14 @@ export function createSwimmer(id) {
             direction.copy(velocity).normalize();
             position.addScaledVector(velocity, dt);
             acceleration.copy(velocity).sub(previousVelocity).divideScalar(dt);
+            // Boundary steering can reverse raw curvature in a single substep.
+            // A damped, rate-limited bend keeps that reversal out of the tail.
+            const horizontal = Math.max(Math.hypot(velocity.x, velocity.z), .001);
+            const lateralAcceleration = (-velocity.z * acceleration.x + velocity.x * acceleration.z) / horizontal;
+            const targetCurvature = THREE.MathUtils.clamp(lateralAcceleration / Math.max(velocity.lengthSq(), .0025), -.65, .65)
+                * THREE.MathUtils.smoothstep(velocity.length(), .04, .20);
+            const bendChange = (targetCurvature - result.curvature) * (1 - Math.exp(-dt / .45));
+            result.curvature += THREE.MathUtils.clamp(bendChange, -.6 * dt, .6 * dt);
         }
         // Interpolate the substep remainder so rendering is independent of FPS.
         result.position.copy(position).addScaledVector(velocity, time - tick * dt);
@@ -169,7 +177,7 @@ export function createFish(id) {
         velocity.normalize();
         right.crossVectors(velocity, worldUp).normalize(); up.crossVectors(right, velocity).normalize();
         matrix.makeBasis(velocity, up, right); orientation.setFromRotationMatrix(matrix);
-        const curvature = THREE.MathUtils.clamp(motion.acceleration.dot(right) / Math.max(pace * pace, .0025), -.8, .8);
+        const curvature = motion.curvature;
         roll.setFromAxisAngle(localX, THREE.MathUtils.clamp(curvature * .25, -.24, .24)); orientation.multiply(roll);
         // At a slow change of course, turn the body gradually instead of snapping.
         if (previousTime === null || t < previousTime) group.quaternion.copy(orientation);
