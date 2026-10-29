@@ -3,6 +3,36 @@ import * as THREE from '../third_party/three/three.module.js';
 const TAU = Math.PI * 2;
 const ivory = new THREE.Color('#eee6d2'), red = new THREE.Color('#a53a23');
 const black = new THREE.Color('#202c2b'), gold = new THREE.Color('#c99c43');
+function randomPoint(id, index, channel) {
+    const value = Math.sin(id * 91.7 + index * 127.1 + channel * 311.7) * 43758.5453;
+    return value - Math.floor(value);
+}
+// Integral of a strictly positive, individual burst-and-glide rhythm.
+// Modulating the clock, rather than multiplying positions, avoids jumps.
+export function swimClock(time, id) {
+    const frequency = .72 + id * .037, phase = id * 1.83;
+    return time + .38 / frequency * (Math.sin(time * frequency + phase) - Math.sin(phase))
+        + .12 / (2 * frequency) * (Math.sin(time * 2 * frequency + phase + .7) - Math.sin(phase + .7));
+}
+function effort(time, id) {
+    const frequency = .72 + id * .037, phase = id * 1.83;
+    return 1 + .38 * Math.cos(time * frequency + phase) + .12 * Math.cos(time * 2 * frequency + phase + .7);
+}
+// Seeded waypoints with a C2-continuous B-spline, rather than a closed orbit.
+// Its convex hull keeps the complete path within the swimming volume.
+export function sampleSwimPath(id, time, width, depth, target = new THREE.Vector3()) {
+    const clock = swimClock(time, id) / (5.8 + id * .23), segment = Math.floor(clock), u = clock - segment;
+    const weights = [Math.pow(1 - u, 3) / 6, (3*u*u*u - 6*u*u + 4) / 6, (-3*u*u*u + 3*u*u + 3*u + 1) / 6, u*u*u / 6];
+    target.set(0, 0, 0);
+    for (let n = 0; n < 4; n++) {
+        const index = segment + n - 1, weight = weights[n];
+        const surfaceVisit = ((index + id * 2) % 9 + 9) % 9 < 3;
+        target.x += (randomPoint(id, index, 0) * 2 - 1) * width * .82 * weight;
+        target.y += (surfaceVisit ? 1.04 : -.45 + randomPoint(id, index, 1) * 1.15) * weight;
+        target.z += (randomPoint(id, index, 2) * 2 - 1) * depth * .82 * weight;
+    }
+    return target;
+}
 function pattern(x, z, id) {
     const stain = Math.sin(x * 12 + id * 3) + .65 * Math.cos(z * 19 - x * 5 + id);
     if (id === 4) return gold;
@@ -65,29 +95,31 @@ export function createFish(id) {
     group.scale.setScalar(.84 + .06 * Math.sin(id * 2.3));
     const position = new THREE.Vector3(), before = new THREE.Vector3(), after = new THREE.Vector3();
     const velocity = new THREE.Vector3(), right = new THREE.Vector3(), up = new THREE.Vector3();
-    const matrix = new THREE.Matrix4(), roll = new THREE.Quaternion();
+    const matrix = new THREE.Matrix4(), roll = new THREE.Quaternion(), orientation = new THREE.Quaternion();
+    let previousTime = null;
     const worldUp = new THREE.Vector3(0, 1, 0), localX = new THREE.Vector3(1, 0, 0);
-    function route(t, width, depth, target) {
-        const speed = .115 + .009 * id;
-        const a = speed * (t + .15 * Math.sin(t * .32 + id) / .32) + id * TAU / 5;
-        return target.set(width * (.72 + .025 * id) * Math.cos(a), .30 + .46 * Math.sin(a * 1.7 + id * .8), depth * (.66 + .025 * id) * Math.sin(a) + .12 * Math.sin(a * 2 + id));
-    }
     function update(t, bend, width, depth) {
-        route(t, width, depth, position);
-        route(t - .04, width, depth, before); route(t + .04, width, depth, after);
+        sampleSwimPath(id, t, width, depth, position);
+        sampleSwimPath(id, t - .04, width, depth, before); sampleSwimPath(id, t + .04, width, depth, after);
         velocity.subVectors(after, before);
         const pace = velocity.length() / .08;
         velocity.normalize();
         right.crossVectors(velocity, worldUp).normalize(); up.crossVectors(right, velocity).normalize();
-        matrix.makeBasis(velocity, up, right); group.quaternion.setFromRotationMatrix(matrix);
-        roll.setFromAxisAngle(localX, .20 * Math.sin(t * .48 + id)); group.quaternion.multiply(roll);
-        group.position.copy(position);
-        const phase = t * (5.7 + id * .19) + id * 1.8;
+        matrix.makeBasis(velocity, up, right); orientation.setFromRotationMatrix(matrix);
         const acceleration = after.clone().add(before).addScaledVector(position, -2).multiplyScalar(1 / (.04 * .04));
-        const turning = .5 * THREE.MathUtils.clamp(acceleration.dot(right) / (pace * pace), -.8, .8) * group.scale.x;
+        const curvature = THREE.MathUtils.clamp(acceleration.dot(right) / Math.max(pace * pace, .0025), -.8, .8);
+        roll.setFromAxisAngle(localX, THREE.MathUtils.clamp(curvature * .25, -.24, .24)); orientation.multiply(roll);
+        // At a slow change of course, turn the body gradually instead of snapping.
+        if (previousTime === null || t < previousTime) group.quaternion.copy(orientation);
+        else group.quaternion.rotateTowards(orientation, .75 * (t - previousTime));
+        previousTime = t;
+        group.position.copy(position);
+        const phase = swimClock(t, id) * (5.7 + id * .19) + id * 1.8;
+        const tailEffort = .16 + .09 * effort(t, id);
+        const turning = .5 * curvature * group.scale.x;
         function offset(x) {
             const weight = THREE.MathUtils.clamp((.55 - x) / 1.85, 0, 1);
-            return bend * .25 * weight * weight * Math.sin(phase + x * 4.5) + turning * Math.pow(Math.max(.4 - x, 0), 2);
+            return bend * tailEffort * weight * weight * Math.sin(phase + x * 4.5) + turning * Math.pow(Math.max(.4 - x, 0), 2);
         }
         const positions = geometry.attributes.position;
         for (let i = 0; i < positions.count; i++) {

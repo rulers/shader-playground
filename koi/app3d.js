@@ -1,5 +1,6 @@
 import * as THREE from '../third_party/three/three.module.js';
 import { createFish } from './fish.js';
+import { createRipples, WATER_LEVEL } from './ripples.js';
 
 const $ = id => document.getElementById(id);
 const canvas = $('view'), controls = $('controls');
@@ -13,7 +14,7 @@ $('close').onclick = () => { openPanel(false); $('toggle').focus(); };
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && !controls.hidden) { openPanel(false); $('toggle').focus(); } });
 const motion = matchMedia('(prefers-reduced-motion: reduce)');
 let paused = motion.matches, elapsed = 0, last = null, frame = 0;
-let renderer, scene, camera, paper, fishes, lost = false;
+let renderer, scene, camera, paper, fishes, ripples, lost = false;
 function stop() { cancelAnimationFrame(frame); last = null; }
 function sync() {
     stop(); $('pause').textContent = paused ? '再生' : '一時停止';
@@ -41,6 +42,7 @@ function render(now) {
         fish.group.visible = i < Number($('count').value);
         if (fish.group.visible) fish.update(elapsed, Number($('bend').value), width, depth);
     });
+    ripples.update(elapsed, fishes);
     paper.material.bumpScale = .035 * Number($('paper').value);
     renderer.render(scene, camera);
     if (!paused) frame = requestAnimationFrame(render);
@@ -60,7 +62,7 @@ function fail(error) {
 }
 try {
     renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
-    renderer.setClearColor('#c9b99a'); renderer.shadowMap.enabled = true;
+    renderer.setClearColor('#dce8de'); renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.25;
@@ -70,17 +72,20 @@ try {
     light.position.set(-3, 8, 5); light.castShadow = true; light.shadow.mapSize.set(1024, 1024);
     Object.assign(light.shadow.camera, { left: -7, right: 7, top: 7, bottom: -7, near: .1, far: 25 });
     light.shadow.bias = -.0005; light.shadow.intensity = .30; light.shadow.radius = 3; scene.add(light);
-    paper = new THREE.Mesh(new THREE.PlaneGeometry(100, 100), new THREE.MeshStandardMaterial({ color: '#baa989', roughness: 1, bumpMap: paperTexture(), bumpScale: .035 }));
+    paper = new THREE.Mesh(new THREE.PlaneGeometry(100, 100), new THREE.MeshStandardMaterial({ color: '#9ebbb0', roughness: 1, bumpMap: paperTexture(), bumpScale: .035 }));
     paper.rotation.x = -Math.PI / 2; paper.position.y = -1.25; paper.receiveShadow = true; scene.add(paper);
     fishes = Array.from({ length: 7 }, (_, i) => createFish(i)); fishes.forEach(fish => scene.add(fish.group));
-    $('status').textContent = '立体の鯉と和紙を描画中'; resize();
+    const water = new THREE.Mesh(new THREE.PlaneGeometry(100, 100), new THREE.MeshBasicMaterial({ color: '#a8d7ce', transparent: true, opacity: .045, depthWrite: false, side: THREE.DoubleSide }));
+    water.rotation.x = -Math.PI / 2; water.position.y = WATER_LEVEL; scene.add(water);
+    ripples = createRipples(scene);
+    $('status').textContent = '水中の鯉と水面の波紋を描画中'; resize();
 } catch (error) { fail(error); }
 for (const id of ['speed', 'bend', 'paper', 'count']) {
     $(id).oninput = () => { $(id + '-value').value = Number($(id).value).toFixed(id === 'count' ? 0 : 2); sync(); };
 }
 $('pause').onclick = () => { paused = !paused; sync(); };
-$('reset').onclick = () => { elapsed = 0; sync(); };
+$('reset').onclick = () => { elapsed = 0; ripples.clear(); sync(); };
 motion.addEventListener('change', () => { paused = motion.matches; sync(); });
 addEventListener('resize', resize); document.addEventListener('visibilitychange', sync);
 canvas.addEventListener('webglcontextlost', () => { lost = true; stop(); $('status').textContent = '描画の復帰を待っています…'; });
-canvas.addEventListener('webglcontextrestored', () => { lost = false; $('status').textContent = '立体の鯉と和紙を描画中'; resize(); });
+canvas.addEventListener('webglcontextrestored', () => { lost = false; $('status').textContent = '水中の鯉と水面の波紋を描画中'; resize(); });
