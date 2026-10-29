@@ -18,11 +18,19 @@ void main(){
  float t=flowTime;
  vec2 drift=vec2(t*.025,-t*.018);
  vec2 warp=vec2(field(p+drift),field(p-drift+9.3))-.5;
- vec2 q=p+.45*warp;
- float wave=.5+.5*sin(q.x*7.+field(q*1.4+drift)*3.5-t*.08);
- float blend=smoothstep(.14,.86,wave);
- const vec3 blue=vec3(.025,.16,.88);
- const vec3 pink=vec3(.96,.035,.46);
- // Only two colours and their continuous blend; no highlights or extra palette.
- color=vec4(mix(blue,pink,blend),1.);
+ // Spatial warp bends the contours themselves, rather than just recolouring rings.
+ vec2 q=p+.7*warp;
+ q+=.13*vec2(sin(p.y*3.+t*.07),sin(p.x*2.7-t*.06));
+ float pattern=q.x*.72+field(q*1.8+drift)*.95;
+ float fluidTime=t*.22;
+ float fluidDistort=sin(pattern*3.14+fluidTime*.5)*.5;
+ float psychWave=sin((pattern+fluidDistort)*8.+fluidTime*1.2);
+ // Keep the requested crisp transition, with a pixel-sized antialiasing floor.
+ float edgeWidth=max(.1,fwidth(psychWave)*.7);
+ float colorMixRatio=smoothstep(-edgeWidth,edgeWidth,psychWave);
+ const vec3 fluorescentYellow=vec3(.85,1.,0.);
+ const vec3 deepPurple=vec3(.45,0.,.85);
+ vec3 finalColor=mix(deepPurple,fluorescentYellow,colorMixRatio);
+ finalColor=smoothstep(vec3(0.),vec3(1.),finalColor);
+ color=vec4(finalColor,1.);
 }
