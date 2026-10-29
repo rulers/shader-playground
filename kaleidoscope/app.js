@@ -105,7 +105,7 @@ async function init() {
         gl = canvas.getContext('webgl2', { alpha: false, antialias: false, depth: false });
         if (!gl) throw Error('WebGL 2 unavailable');
         const sources = await Promise.all(['film.frag', 'post.frag'].map(async path => {
-            const response = await fetch(path + '?v=contrast-3');
+            const response = await fetch(path + '?v=neon-4');
             if (!response.ok) throw Error('Shader download failed');
             return response.text();
         }));

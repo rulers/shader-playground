@@ -23,6 +23,12 @@ void main(){
   vec3 hdr=unpackHDR(texture(scene,uv).rgb)+unpackHDR(texture(bloom,uv).rgb)*.28;
   vec3 mapped=tone(hdr*.92);
   // Linear-light output conversion, after highlight compression.
-  color=vec4(mix(mapped*12.92,1.055*pow(mapped,vec3(1./2.4))-.055,step(vec3(.0031308),mapped)),1.);
+  vec3 display=mix(mapped*12.92,1.055*pow(mapped,vec3(1./2.4))-.055,step(vec3(.0031308),mapped));
+  // Reassert saturation after bloom/tone mapping so overlaps cannot turn pastel.
+  display=smoothstep(vec3(.025),vec3(.97),display);
+  float low=min(display.r,min(display.g,display.b));
+  float high=max(display.r,max(display.g,display.b));
+  display=(display-low*.98)*high/max(high-low*.98,.001);
+  color=vec4(clamp(display,0.,1.),1.);
  }
 }
