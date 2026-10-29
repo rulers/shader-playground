@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="ja">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#101727"><title>薄膜の万華鏡 — Shader Playground</title><link rel="stylesheet" href="style.css?v=1"><script src="app.js?v=1" type="module"></script></head>
+<body>
+<canvas id="view" aria-label="虹色の薄膜がゆっくり回り、内部模様が独立して流れる万華鏡"></canvas>
+<header><a href="../">↖ SHADER PLAYGROUND</a><span>EXPERIMENT 06</span></header>
+<main><div class="intro"><p class="eyebrow">A STUDY OF SYMMETRY & IRIDESCENCE</p><h1>薄膜の<br>万華鏡<span>IRIDESCENT KALEIDOSCOPE</span></h1><p class="description">ゆっくり巡る。静かにほどける。<br>光の膜に、終わりのない模様。</p></div>
+<div class="dock"><button id="toggle" aria-label="調整UIを開く" aria-expanded="false" aria-controls="controls">＋</button>
+<section id="controls" aria-label="作品の調整" hidden><div class="heading">調整<button id="close" aria-label="調整UIを閉じる">×</button></div>
+<label for="rotation">回転の速さ<output id="rotation-value">0.3</output><input id="rotation" type="range" min="0" max="1" step=".05" value=".3"></label>
+<label for="flow">模様の流れ<output id="flow-value">0.6</output><input id="flow" type="range" min="0" max="1.5" step=".05" value=".6"></label>
+<div class="buttons"><button id="pause" aria-pressed="false">一時停止</button><button id="reset">最初から</button></div><p>全体の回転と、内側の流れを別々に調整できます。</p></section></div></main>
+<footer><span>PROCEDURAL LIGHT / WEBGL 2</span><span id="status" role="status">光の模様を準備中…</span></footer>
+</body></html>
