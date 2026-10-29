@@ -19,6 +19,7 @@ GitHub Pagesは `main` ブランチのルート `/` です
 | 作品 | 動かし方 | 解説 | ライセンス |
 | --- | --- | --- | --- |
 | 墨の庭 / Ink Playground | [DEMO](https://rulers.github.io/shader-playground/inkplay/) | [操作と仕組み](tutorials/11_interactive_ink.md) | MIT |
+| 墨が鯉になる / Ink Becomes Koi | 公開後：`/shader-playground/ink-to-koi/` | [操作と仕組み](ink-to-koi/README.md) | MIT |
 | Heartfelt：雨粒と曇りガラス | [DEMO](https://rulers.github.io/shader-playground/rain/) | [設定と仕組み](tutorials/10_heartfelt.md) | CC BY-NC-SA 3.0 |
 | 言葉の肖像：芥川龍之介 × 羅生門 | [DEMO](https://rulers.github.io/shader-playground/portraits/) | [操作と仕組み](portraits/README.md) | 実装MIT／フォントOFL等、[素材別条件](portraits/NOTICE.md) |
 
