@@ -28,7 +28,7 @@ function render(now) {
         flowTime += delta * Number($('flow').value);
     }
     // A bounded internal resolution keeps shader rendering usable on phones.
-    const scale = Math.min(1, 1280 / innerWidth, 900 / innerHeight);
+    const scale = Math.min(1, 1000 / innerWidth, 750 / innerHeight);
     const w = Math.max(1, Math.round(innerWidth * scale));
     const h = Math.max(1, Math.round(innerHeight * scale));
     if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
@@ -63,16 +63,19 @@ async function init() {
     try {
         gl = canvas.getContext('webgl2', { alpha: false, antialias: false, depth: false });
         if (!gl) throw Error('WebGL 2 unavailable');
-        const response = await fetch('film.frag?v=1');
+        const response = await fetch('film.frag?v=two-tone-5');
         if (!response.ok) throw Error('Shader download failed');
         const source = await response.text();
-        const vs = compile(gl.VERTEX_SHADER, '#version 300 es\nvoid main(){vec2 p=vec2((gl_VertexID<<1)&2,gl_VertexID&2);gl_Position=vec4(p*2.-1.,0,1);}');
-        const frag = compile(gl.FRAGMENT_SHADER, source);
-        program = gl.createProgram(); gl.attachShader(program, vs); gl.attachShader(program, frag); gl.linkProgram(program);
-        if (!gl.getProgramParameter(program, gl.LINK_STATUS)) throw Error(gl.getProgramInfoLog(program));
-        gl.deleteShader(vs); gl.deleteShader(frag);
+        function link(source) {
+            const vs = compile(gl.VERTEX_SHADER, '#version 300 es\nvoid main(){vec2 p=vec2((gl_VertexID<<1)&2,gl_VertexID&2);gl_Position=vec4(p*2.-1.,0,1);}');
+            const frag = compile(gl.FRAGMENT_SHADER, source);
+            const result = gl.createProgram(); gl.attachShader(result, vs); gl.attachShader(result, frag); gl.linkProgram(result);
+            if (!gl.getProgramParameter(result, gl.LINK_STATUS)) throw Error(gl.getProgramInfoLog(result));
+            gl.deleteShader(vs); gl.deleteShader(frag); return result;
+        }
+        program = link(source);
         uniforms = Object.fromEntries(['resolution','rotationAngle','flowTime'].map(k => [k, gl.getUniformLocation(program,k)]));
-        $('status').textContent = '虹色の薄膜をシェーダーで描画中';
+        $('status').textContent = '青とピンクのブレンドを描画中';
         redraw();
     } catch (error) { fail(error); }
 }

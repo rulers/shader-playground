@@ -4,3 +4,5 @@
 
 @media(max-width:650px){.intro{padding:24px 22px}.eyebrow{letter-spacing:2px}}
 body{background:#101727;color:#f2ede4}#view{background:#101727}.intro{padding:28px 32px;background:linear-gradient(90deg,#0d142b99,#0d142b00);text-shadow:0 2px 20px #091020}#controls{background:#101b30ed;border-color:#e1def02e}button{background:#152138dd;border-color:#e1def045}button:hover{background:#2c3952}input{accent-color:#b8d5db}h1{font-family:serif}a:focus-visible,button:focus-visible,input:focus-visible{outline-color:#badde5}@media(max-width:650px){.intro{padding:24px 22px}.eyebrow{letter-spacing:1.4px;font-size:7px}h1{font-size:44px}}
+/* Keep small navigation and credits legible over the dark glass. */
+header,footer{color:#e8edf5;text-shadow:0 1px 10px #081123}
