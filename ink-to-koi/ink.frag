@@ -25,22 +25,21 @@ vec4 route(float phase,float run,float radius){
  float t=(s-straight)/radius;
  return vec4(-run-radius*sin(t),-radius*cos(t),-cos(t),sin(t));
 }
-void main(){
+vec3 paintKoi(vec3 under,vec2 uv,float id){
  // All clocks share a 24s period, including the travelling body wave and warp.
  // No reseeding, opacity crossfade, or time reset at the loop boundary.
  float a=time*TAU/24.;
  float form=smoothstep(.12,.82,.5-.5*cos(a));
- vec2 uv=(gl_FragCoord.xy-.5*resolution)/min(resolution.x,resolution.y)*3.3;
  // A periodic speed integral accelerates gently while the fish has its shape.
  // Its derivative is 1 - .30*cos(a): up to 30% faster in the fish phase.
- float swim=a-.30*sin(a);
+ float swim=a-.30*sin(a)+id*3.141592654;
  vec2 halfView=resolution/min(resolution.x,resolution.y)*1.65;
  bool portrait=resolution.y>resolution.x;
- vec2 centre=vec2(portrait?0.:.30,portrait?.65:.25);
+ vec2 centre=vec2(portrait?0.:.30,portrait?min(1.30,halfView.y*.36):.25);
  vec2 reach=max(vec2(.12),halfView-abs(centre)-.78);
  vec2 axes=portrait?reach.yx:reach;
- float radius=min(.48,axes.y);
- float run=max(.15,min(1.35,axes.x-radius));
+ float radius=min(portrait?.40:.48,axes.y);
+ float run=max(.15,min(portrait?.50:1.35,axes.x-radius));
  vec4 course=route(swim,run,radius);
  vec4 before=route(swim-.04,run,radius),after=route(swim+.04,run,radius);
  float turn=clamp((before.z*after.w-before.w*after.z)*3.,-1.,1.)*(portrait?-1.:1.);
@@ -48,11 +47,11 @@ void main(){
  vec2 forward=portrait?course.wz:course.zw;
  // Ink drifts near the centre independently of the fish's boundary turns.
  // Interpolate translation, never the ink's orientation, while it gathers.
- vec2 inkPosition=vec2(.18*sin(a),.10*cos(a));
+ vec2 inkPosition=vec2(.18*sin(a)+id*.22,.10*cos(a)-id*.36);
  vec2 p=uv-centre-mix(inkPosition,position,form);
  vec2 q=vec2(dot(p,forward),dot(p,vec2(-forward.y,forward.x)))/.55;
  vec2 inkQ=(portrait?p.yx:p)/.55;
- vec2 drift=vec2(cos(a),sin(a));
+ vec2 drift=vec2(cos(a),sin(a))+id*7.;
  vec2 inkWarp=vec2(fbm(inkQ*2.7+drift),fbm(inkQ*2.7+drift+19.))-.5;
  vec2 inkR=inkQ+inkWarp*.95;
  inkR.y-=.045*sin(2.*a+inkR.x*3.);
@@ -65,7 +64,7 @@ void main(){
  vec2 f=r;
  // 30 tail beats per loop (~1.25 Hz); a wave travels from head toward tail.
  // The quiet head leads while the caudal peduncle and tail do most of the work.
- f.y-=form*.22*tailWeight*tailWeight*sin(30.*a+4.*f.x);
+ f.y-=form*.22*tailWeight*tailWeight*sin(30.*a+4.*f.x+id*1.7);
  // The rear body follows the curve during a turn, instead of pivoting rigidly.
  f.y-=form*.18*turn*tailWeight*tailWeight;
  float body=ellipse(f-vec2(.06,0),vec2(.62,.205));
@@ -92,8 +91,29 @@ void main(){
  density*=mix(1.,mix(.48,1.,1.-smoothstep(-.025,.02,body)),form);
  float eye=min(length(f-vec2(.49,.085)),length(f-vec2(.49,-.085)));
  density=mix(density,.98,(1.-smoothstep(.009,.016,eye))*smoothstep(.75,.98,form));
+ vec3 inkColor=vec3(.075,.085,.083);
+ if(id>.5){
+  // Kohaku-inspired broad vermilion islands on an ivory body. No textures.
+  float stain=fbm(f*vec2(5.5,7.)+vec2(8.,17.))+.10*cos(f.x*10.);
+  float red=smoothstep(.48,.55,stain);
+  float bulge=sqrt(max(0.,1.-pow(f.y/.24,2.)));
+  vec3 ivory=vec3(.88,.86,.79)*(.84+.16*bulge);
+  vec3 vermilion=vec3(.68,.105,.065)*(.83+.17*bulge);
+  vec3 kohaku=mix(ivory,vermilion,red);
+  kohaku=mix(kohaku,vec3(.07,.075,.07),1.-smoothstep(.009,.016,eye));
+  float emerge=smoothstep(.35,.90,form);
+  inkColor=mix(inkColor,kohaku,emerge);
+  float finOpacity=mix(.55,.97,1.-smoothstep(-.025,.02,body));
+  density=mix(density,finOpacity,emerge);
+ }
+ float ink=clamp(edge*density+bleed,0.,.96);
+ return mix(under,inkColor,ink);
+}
+void main(){
+ vec2 uv=(gl_FragCoord.xy-.5*resolution)/min(resolution.x,resolution.y)*3.3;
  float paper=(noise(gl_FragCoord.xy*.7)-.5)*.012;
  vec3 background=vec3(.914,.898,.859)+paper;
- float ink=clamp(edge*density+bleed,0.,.96);
- color=vec4(mix(background,vec3(.075,.085,.083),ink),1.);
+ vec3 painting=paintKoi(background,uv,0.);
+ painting=paintKoi(painting,uv,1.);
+ color=vec4(painting,1.);
 }
