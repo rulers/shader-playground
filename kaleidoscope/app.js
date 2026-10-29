@@ -63,7 +63,7 @@ async function init() {
     try {
         gl = canvas.getContext('webgl2', { alpha: false, antialias: false, depth: false });
         if (!gl) throw Error('WebGL 2 unavailable');
-        const response = await fetch('film.frag?v=acid-fluid-6');
+        const response = await fetch('film.frag?v=marble-7');
         if (!response.ok) throw Error('Shader download failed');
         const source = await response.text();
         function link(source) {
