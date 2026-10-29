@@ -36,6 +36,7 @@ function render(now) {
     gl.useProgram(program);
     gl.uniform2f(uniforms.resolution, w, h);
     gl.uniform1f(uniforms.rotationAngle, angle);
+    $('angle-value').textContent = Math.round(angle * 180 / Math.PI) + '°';
     gl.uniform1f(uniforms.flowTime, flowTime);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     if (!paused && !document.hidden) request = requestAnimationFrame(render);
@@ -45,6 +46,7 @@ for (const id of ['rotation', 'flow']) {
     $(id).oninput = () => { $(id + '-value').value = Number($(id).value).toFixed(2); redraw(); };
 }
 $('pause').onclick = () => { paused = !paused; pauseLabel(); redraw(); };
+$('step').onclick = () => { angle += Math.PI / 6; redraw(); };
 $('reset').onclick = () => { angle = 0; flowTime = 0; redraw(); };
 addEventListener('resize', redraw);
 document.addEventListener('visibilitychange', redraw);
@@ -63,7 +65,7 @@ async function init() {
     try {
         gl = canvas.getContext('webgl2', { alpha: false, antialias: false, depth: false });
         if (!gl) throw Error('WebGL 2 unavailable');
-        const response = await fetch('neon.frag?v=revenge-1');
+        const response = await fetch('neon.frag?v=turn-2');
         if (!response.ok) throw Error('Shader download failed');
         const source = await response.text();
         function link(source) {
