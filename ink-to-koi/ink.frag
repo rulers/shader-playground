@@ -12,9 +12,19 @@ float noise(vec2 p){
 float fbm(vec2 p){return .57*noise(p)+.28*noise(p*2.03+7.)+.15*noise(p*4.07+19.);}
 float ellipse(vec2 p,vec2 r){return (length(p/r)-1.)*min(r.x,r.y);}
 float smin(float a,float b,float k){float h=max(k-abs(a-b),0.)/k;return min(a,b)-h*h*k*.25;}
-// Closed, centre-crossing course: turn smoothly inward at its outer reaches.
-// Reserve room for the tail and diluted ink before the canvas boundary.
-vec2 route(float a,vec2 reach){return reach*vec2(cos(a),sin(2.*a)*.78);}
+// Arc-length parameterized capsule: long glides separated by forward U-turns.
+// xy = position, zw = its exact unit tangent; the head never rotates in place.
+vec4 route(float phase,float run,float radius){
+ float straight=2.*run,arc=3.141592654*radius;
+ float s=mod(phase/TAU*(2.*straight+2.*arc),2.*straight+2.*arc);
+ if(s<straight)return vec4(-run+s,radius,1.,0.);
+ s-=straight;
+ if(s<arc){float t=s/radius;return vec4(run+radius*sin(t),radius*cos(t),cos(t),-sin(t));}
+ s-=arc;
+ if(s<straight)return vec4(run-s,-radius,-1.,0.);
+ float t=(s-straight)/radius;
+ return vec4(-run-radius*sin(t),-radius*cos(t),-cos(t),sin(t));
+}
 void main(){
  // All clocks share a 24s period, including the travelling body wave and warp.
  // No reseeding, opacity crossfade, or time reset at the loop boundary.
@@ -25,18 +35,29 @@ void main(){
  // Its derivative is 1 - .30*cos(a): up to 30% faster in the fish phase.
  float swim=a-.30*sin(a);
  vec2 halfView=resolution/min(resolution.x,resolution.y)*1.65;
- vec2 centre=vec2(resolution.x>resolution.y?.55:0.,.20);
- vec2 reach=min(vec2(.78,.52),max(vec2(.05),halfView-abs(centre)-1.05));
- vec2 p=uv-centre-route(swim,reach);
- vec2 tangent=reach*vec2(-sin(swim),1.56*cos(2.*swim));
- vec2 forward=normalize(tangent);
- vec2 q=vec2(dot(p,forward),dot(p,vec2(-forward.y,forward.x)))/.80;
+ bool portrait=resolution.y>resolution.x;
+ vec2 centre=vec2(portrait?0.:.30,portrait?.65:.25);
+ vec2 reach=max(vec2(.12),halfView-abs(centre)-.78);
+ vec2 axes=portrait?reach.yx:reach;
+ float radius=min(.48,axes.y);
+ float run=max(.15,min(1.35,axes.x-radius));
+ vec4 course=route(swim,run,radius);
+ vec4 before=route(swim-.04,run,radius),after=route(swim+.04,run,radius);
+ float turn=clamp((before.z*after.w-before.w*after.z)*3.,-1.,1.)*(portrait?-1.:1.);
+ vec2 position=portrait?course.yx:course.xy;
+ vec2 forward=portrait?course.wz:course.zw;
+ vec2 p=uv-centre-position;
+ vec2 q=vec2(dot(p,forward),dot(p,vec2(-forward.y,forward.x)))/.55;
  vec2 drift=vec2(cos(a),sin(a));
  // The same domain warp gradually relaxes into an articulated fish silhouette.
  vec2 warp=vec2(fbm(q*2.7+drift),fbm(q*2.7+drift+19.))-.5;
  vec2 r=q+(1.-form)*warp*.95;
  float tailWeight=clamp((.5-r.x)/1.4,0.,1.);
- r.y-=.12*tailWeight*tailWeight*sin(4.*swim+r.x*4.);
+ // 30 tail beats per loop (~1.25 Hz); a wave travels from head toward tail.
+ // The quiet head leads while the caudal peduncle and tail do most of the work.
+ r.y-=.22*tailWeight*tailWeight*sin(30.*a+4.*r.x);
+ // The rear body follows the curve during a turn, instead of pivoting rigidly.
+ r.y-=.18*turn*tailWeight*tailWeight;
  float body=ellipse(r-vec2(.06,0),vec2(.62,.205));
  body=smin(body,ellipse(r-vec2(-.53,0),vec2(.24,.065)),.09);
  // A soft fork and paired pectoral fins keep the silhouette organic.
