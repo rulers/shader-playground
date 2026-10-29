@@ -26,35 +26,76 @@ export function dartStrength(time, id) {
     const clock = swimClock(time, id) / (5.8 + id * .23), segment = Math.floor(clock);
     return dartSegment(id, segment) ? Math.pow(Math.sin(Math.PI * (clock - segment)), 2) : 0;
 }
-// Seeded waypoints with a C2-continuous B-spline, rather than a closed orbit.
-// Its convex hull keeps the complete path within the swimming volume.
-export function sampleSwimPath(id, time, width, depth, target = new THREE.Vector3()) {
-    const clock = swimClock(time, id) / (5.8 + id * .23), segment = Math.floor(clock);
-    let u = clock - segment;
-    if (dartSegment(id, segment)) {
-        // A straight stroke accelerates in the middle, with C2 joins at both ends.
-        u += .75 / TAU * (-Math.sin(TAU * u) + .5 * Math.sin(2 * TAU * u));
+export function createSwimmer(id) {
+    const position = new THREE.Vector3(), velocity = new THREE.Vector3(), acceleration = new THREE.Vector3();
+    const direction = new THREE.Vector3(), wander = new THREE.Vector3(), desired = new THREE.Vector3(), previousVelocity = new THREE.Vector3();
+    const turn = new THREE.Quaternion(), partialTurn = new THREE.Quaternion();
+    const result = { position: new THREE.Vector3(), velocity, acceleration, dart: 0 };
+    let tick = 0, lastTime = -1, nextChange = 0, choice = 0, speed = .35, oldWidth = 0, oldDepth = 0;
+    function reset(width, depth) {
+        // Start spread out; their subsequent headings and turns stay independent.
+        const placement = id * 2.399963 + .55;
+        position.set(Math.cos(placement) * width * .72, id === 0 ? .94 : -.3 + randomPoint(id, 0, 9) * 1.1, Math.sin(placement) * depth * .72);
+        const angle = randomPoint(id, 0, 11) * TAU;
+        direction.set(Math.cos(angle), .25 * (randomPoint(id, 0, 12) * 2 - 1), Math.sin(angle)).normalize();
+        wander.copy(direction); velocity.copy(direction).multiplyScalar(.35); acceleration.set(0, 0, 0);
+        tick = 0; nextChange = 2 + id * .7; choice = 0; speed = .35; result.dart = 0; oldWidth = width; oldDepth = depth;
     }
-    const weights = [Math.pow(1 - u, 3) / 6, (3*u*u*u - 6*u*u + 4) / 6, (-3*u*u*u + 3*u*u + 3*u + 1) / 6, u*u*u / 6];
-    target.set(0, 0, 0);
-    for (let n = 0; n < 4; n++) {
-        const index = segment + n - 1, weight = weights[n];
-        const offset = id === 1 ? -1 : 3, lineIndex = ((index - offset) % 8 + 8) % 8;
-        if ((id === 1 || id === 4) && lineIndex <= 3) {
-            // Four equally spaced collinear controls give one truly straight leg.
-            const cycle = Math.floor((index - offset) / 8), progress = lineIndex / 3;
-            const direction = randomPoint(id, cycle, 5) > .5 ? 1 : -1;
-            target.x += (progress * 2 - 1) * width * .72 * direction * weight;
-            target.y += THREE.MathUtils.lerp(-.10 + randomPoint(id, cycle, 6) * .5, .25 + randomPoint(id, cycle, 7) * .55, progress) * weight;
-            target.z += (progress * 2 - 1) * depth * .45 * -direction * weight;
-            continue;
+    function update(time, width, depth) {
+        if (lastTime < 0 || time < lastTime) reset(width, depth);
+        if (width !== oldWidth || depth !== oldDepth) {
+            position.x *= width / oldWidth; position.z *= depth / oldDepth;
+            oldWidth = width; oldDepth = depth;
         }
-        const surfaceVisit = ((index + id * 2) % 9 + 9) % 9 < 3;
-        target.x += (randomPoint(id, index, 0) * 2 - 1) * width * .82 * weight;
-        target.y += (surfaceVisit ? 1.04 : -.45 + randomPoint(id, index, 1) * 1.15) * weight;
-        target.z += (randomPoint(id, index, 2) * 2 - 1) * depth * .82 * weight;
+        const dt = 1 / 60;
+        while ((tick + 1) * dt <= time + 1e-9) {
+            const t = ++tick * dt;
+            if (t >= nextChange) {
+                choice++;
+                const yaw = (randomPoint(id, choice, 0) * 2 - 1) * 1.15;
+                wander.copy(direction).applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
+                wander.y = (randomPoint(id, choice, 1) * 2 - 1) * .55;
+                wander.normalize(); nextChange = t + 3 + randomPoint(id, choice, 2) * 4;
+            }
+            const clearance = Math.min(width - Math.abs(position.x), depth - Math.abs(position.z));
+            result.dart = dartStrength(t, id) * THREE.MathUtils.smoothstep(clearance, .65, 1.35);
+            desired.copy(direction).lerp(wander, 1 - result.dart);
+            // Only the nearby boundary steers inward; there is no centre target.
+            for (const [axis, bound, margin] of [['x', width, 1.05], ['z', depth, 1.05]]) {
+                const predicted = position[axis] + direction[axis] * .35;
+                const influence = THREE.MathUtils.smoothstep(Math.abs(predicted), bound - margin, bound);
+                desired[axis] -= Math.sign(predicted) * influence * 4;
+            }
+            const predictedY = position.y + direction.y * .7;
+            desired.y += 4 * THREE.MathUtils.smoothstep(-predictedY, .05, .40);
+            desired.y -= 4 * THREE.MathUtils.smoothstep(predictedY, .68, 1.0);
+            desired.y = THREE.MathUtils.clamp(desired.y, -.8, .8); desired.normalize();
+            turn.setFromUnitVectors(direction, desired);
+            partialTurn.identity().rotateTowards(turn, .85 * dt);
+            direction.applyQuaternion(partialTurn).normalize();
+            // Ease vertical motion to zero before the surface/bottom, even when
+            // a simultaneous side-wall turn occupies most of the steering.
+            const maxUp = Math.max(0, (1.02 - position.y) * 1.2 / Math.max(speed, .1));
+            const maxDown = Math.max(0, (position.y + .50) * 1.2 / Math.max(speed, .1));
+            const vertical = THREE.MathUtils.clamp(direction.y, -maxDown, maxUp);
+            const horizontalScale = Math.sqrt(Math.max(0, 1 - vertical * vertical)) / Math.max(Math.hypot(direction.x, direction.z), .0001);
+            direction.x *= horizontalScale; direction.z *= horizontalScale; direction.y = vertical;
+            const targetSpeed = ((.36 + .022 * id) * effort(t, id) + .65 * result.dart) * (.38 + .62 * THREE.MathUtils.smoothstep(clearance, .12, .85));
+            speed = THREE.MathUtils.lerp(speed, targetSpeed, 1 - Math.exp(-2 * dt));
+            previousVelocity.copy(velocity); velocity.copy(direction).multiplyScalar(speed);
+            for (const [axis, bound] of [['x', width - .04], ['z', depth - .04]]) {
+                velocity[axis] = THREE.MathUtils.clamp(velocity[axis], -Math.max(0, (position[axis] + bound) * 1.5), Math.max(0, (bound - position[axis]) * 1.5));
+            }
+            direction.copy(velocity).normalize();
+            position.addScaledVector(velocity, dt);
+            acceleration.copy(velocity).sub(previousVelocity).divideScalar(dt);
+        }
+        // Interpolate the substep remainder so rendering is independent of FPS.
+        result.position.copy(position).addScaledVector(velocity, time - tick * dt);
+        lastTime = time;
+        return result;
     }
-    return target;
+    return { update };
 }
 function pattern(x, z, id) {
     const stain = Math.sin(x * 12 + id * 3) + .65 * Math.cos(z * 19 - x * 5 + id);
@@ -116,29 +157,27 @@ export function createFish(id) {
         eye.position.set(.55, .067, sign * .13); group.add(eye); eyes.push(eye);
     }
     group.scale.setScalar(.84 + .06 * Math.sin(id * 2.3));
-    const position = new THREE.Vector3(), before = new THREE.Vector3(), after = new THREE.Vector3();
+    const swimmer = createSwimmer(id);
     const velocity = new THREE.Vector3(), right = new THREE.Vector3(), up = new THREE.Vector3();
     const matrix = new THREE.Matrix4(), roll = new THREE.Quaternion(), orientation = new THREE.Quaternion();
     let previousTime = null;
     const worldUp = new THREE.Vector3(0, 1, 0), localX = new THREE.Vector3(1, 0, 0);
     function update(t, bend, width, depth) {
-        sampleSwimPath(id, t, width, depth, position);
-        sampleSwimPath(id, t - .04, width, depth, before); sampleSwimPath(id, t + .04, width, depth, after);
-        velocity.subVectors(after, before);
-        const pace = velocity.length() / .08;
+        const motion = swimmer.update(t, width, depth);
+        velocity.copy(motion.velocity);
+        const pace = velocity.length();
         velocity.normalize();
         right.crossVectors(velocity, worldUp).normalize(); up.crossVectors(right, velocity).normalize();
         matrix.makeBasis(velocity, up, right); orientation.setFromRotationMatrix(matrix);
-        const acceleration = after.clone().add(before).addScaledVector(position, -2).multiplyScalar(1 / (.04 * .04));
-        const curvature = THREE.MathUtils.clamp(acceleration.dot(right) / Math.max(pace * pace, .0025), -.8, .8);
+        const curvature = THREE.MathUtils.clamp(motion.acceleration.dot(right) / Math.max(pace * pace, .0025), -.8, .8);
         roll.setFromAxisAngle(localX, THREE.MathUtils.clamp(curvature * .25, -.24, .24)); orientation.multiply(roll);
         // At a slow change of course, turn the body gradually instead of snapping.
         if (previousTime === null || t < previousTime) group.quaternion.copy(orientation);
         else group.quaternion.rotateTowards(orientation, .75 * (t - previousTime));
         previousTime = t;
-        group.position.copy(position);
+        group.position.copy(motion.position);
         const phase = swimClock(t, id) * (5.7 + id * .19) + id * 1.8;
-        const tailEffort = (.16 + .09 * effort(t, id)) * (1 - .40 * dartStrength(t, id));
+        const tailEffort = (.16 + .09 * effort(t, id)) * (1 - .40 * motion.dart);
         const turning = .5 * curvature * group.scale.x;
         function offset(x) {
             const weight = THREE.MathUtils.clamp((.55 - x) / 1.85, 0, 1);
