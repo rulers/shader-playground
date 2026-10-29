@@ -1,0 +1,7 @@
+@import url("../koi/style.css");
+body,#view{background:#e9e5db;color:#302f2c}
+.intro{padding:0;background:none;text-shadow:0 1px 15px #e9e5db}
+h1{font-size:clamp(34px,4.5vw,66px)}
+#pause{background:#e9e5dbcc;white-space:nowrap}
+button:disabled{cursor:default;opacity:.5}
+@media(max-width:650px){main{justify-content:flex-end;gap:24px}.intro{padding:0}h1{font-size:clamp(32px,9vw,48px)}#pause{align-self:flex-end}.eyebrow{margin-bottom:16px}.description{margin-top:20px}}
