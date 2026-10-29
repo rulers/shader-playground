@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>水中のインク — Shader Playground</title>
+<link rel="stylesheet" href="style.css"><script src="app.js" type="module"></script>
+</head>
+<body>
+<canvas id="view" aria-label="白い水の中で青灰色のインクが渦を巻く立体アニメーション"></canvas>
+<header><a href="../">↖ SHADER PLAYGROUND</a><span>EXPERIMENT 04</span></header>
+<main><div class="intro"><p class="eyebrow">A STUDY OF INK & VOLUME</p><h1>水中の<br>インク<span>INK IN WATER</span></h1><p class="description">ほどける塊。重なり合う青。<br>水の中に、もうひとつの地形。</p></div>
+<div class="dock"><button id="toggle" aria-label="調整UIを開く" aria-expanded="false" aria-controls="controls">＋</button>
+<section id="controls" aria-label="作品の調整" hidden><div class="heading">調整<button id="close" aria-label="調整UIを閉じる">×</button></div>
+<label for="speed">流れる速さ<output id="speed-value">0.7</output><input id="speed" type="range" min="0" max="1.5" step=".05" value=".7"></label>
+<label for="density">インクの濃さ<output id="density-value">1.2</output><input id="density" type="range" min=".3" max="2" step=".05" value="1.2"></label>
+<label for="detail">渦の細かさ<output id="detail-value">1.0</output><input id="detail" type="range" min=".5" max="1.8" step=".05" value="1"></label>
+<label for="white">白いインク<output id="white-value">0.6</output><input id="white" type="range" min="0" max="1" step=".05" value=".6"></label>
+<div class="buttons"><button id="pause" aria-pressed="false">一時停止</button><button id="reset">最初から</button></div>
+<p>立体ノイズによる試作 · 動画素材は使用していません。</p></section></div></main>
+<footer><span>PROCEDURAL VOLUME / WEBGL 2</span><span id="status" role="status">シェーダーを準備中…</span></footer>
+</body></html>
