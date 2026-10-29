@@ -1,0 +1,7 @@
+body,#view{background:#dce8de;color:#243c36}
+.intro{background:linear-gradient(90deg,#dce8debb,#dce8de00);text-shadow:0 1px 15px #dce8de}
+button{background:#e6efe5dd;border-color:#24463840}
+#controls{background:#e6efe5ed;border-color:#24463830}
+input{accent-color:#416d60}
+h1{font-size:clamp(42px,5.7vw,82px)}
+@media(max-width:650px){h1{font-size:clamp(36px,10vw,54px)}}
