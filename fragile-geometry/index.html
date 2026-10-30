@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#111921" />
+    <meta
+      name="description"
+      content="触れるとほどける。離れると、秩序へ戻る。"
+    />
+    <title>壊れる秩序 — Shader Playground</title>
+    <link rel="stylesheet" href="style.css" />
+    <script type="module" src="app.js"></script>
+  </head>
+  <body>
+    <canvas
+      id="view"
+      tabindex="0"
+      aria-label="触れるとほどける。離れると、秩序へ戻る。。キーボードの矢印とスペースキーでも操作できます。"
+    ></canvas>
+    <header>
+      <a href="../">↖ SHADER PLAYGROUND</a
+      ><span>EXPERIMENT 11 / TUE · NOV 03</span>
+    </header>
+    <main>
+      <div class="intro">
+        <p class="eyebrow">A STUDY OF FRACTURE & REPAIR</p>
+        <h1>壊れる秩序<span>FRAGILE GEOMETRY</span></h1>
+        <p class="description">触れるとほどける。離れると、秩序へ戻る。</p>
+      </div>
+      <div class="dock">
+        <button
+          id="toggle"
+          type="button"
+          aria-label="調整UIを開く"
+          aria-expanded="false"
+          aria-controls="controls"
+        >
+          ＋
+        </button>
+        <section id="controls" aria-label="作品の調整" hidden>
+          <div class="heading">
+            調整<button id="close" type="button" aria-label="調整UIを閉じる">
+              ×
+            </button>
+          </div>
+          <label for="amount"
+            >崩れる範囲<output id="amount-value">200</output
+            ><input
+              id="amount"
+              type="range"
+              min="80"
+              max="320"
+              step="10"
+              value="200"
+          /></label>
+          <div class="buttons">
+            <button id="pause" type="button" aria-pressed="false">
+              一時停止</button
+            ><button id="reset" type="button">最初から</button>
+          </div>
+          <p>
+            矢印キーで位置を移動、スペースで作用。Escapeで調整を閉じます。モーション低減設定時は停止して開きます。
+          </p>
+        </section>
+      </div>
+    </main>
+    <footer>
+      <span>PROCEDURAL / CANVAS 2D</span
+      ><span id="status" role="status">作品を準備中…</span>
+    </footer>
+  </body>
+</html>
