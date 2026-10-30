@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="800" viewBox="0 0 1280 800">
+<defs><pattern id="dots" width="30" height="30" patternUnits="userSpaceOnUse"><circle cx="15" cy="15" r="1" fill="#342b40" opacity=".08"/></pattern></defs>
+<path fill="#fff4db" d="M0 0h1280v800H0z"/><path fill="url(#dots)" d="M0 0h1280v800H0z"/>
+<g fill="none" stroke-width="50" stroke-linecap="round">
+<path stroke="#f47770" d="M-80 70C150 10 170 260 400 230S690 70 890 210s280 190 480 70"/>
+<path stroke="#ffc83e" d="M-90 340C130 420 210 180 430 260s310 100 490-10 270-70 450-10"/>
+<path stroke="#32b6aa" d="M-80 410C160 260 220 490 450 450S700 290 940 410s240 100 410 70"/>
+<path stroke="#a68add" d="M-60 470C200 640 190 400 430 510s360 90 530-10 240-100 410-10"/>
+<path stroke="#ef9460" d="M-80 570C160 470 240 680 450 650s320-100 510-30 260 120 400 90"/>
+<path stroke="#5da9d4" d="M-70 740C120 830 230 620 470 730s320 20 510-30 260 80 390 40"/>
+</g><g fill="#342b40" font-family="Arial,sans-serif" font-weight="900"><text x="60" y="610" font-size="82" letter-spacing="-5">NOODLE</text><text x="60" y="682" font-size="82" letter-spacing="-5">DISCO</text><text x="65" y="718" font-size="12" letter-spacing="5">PULL. WIGGLE. LET GO.</text></g></svg>
