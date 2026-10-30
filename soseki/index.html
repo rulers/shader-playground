@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="ja" data-renderer="three">
+  <meta charset="utf-8" /><meta
+    name="viewport"
+    content="width=device-width,initial-scale=1"
+  /><title>言葉の肖像 — 夏目漱石 × 吾輩は猫である</title>
+  <link
+    rel="preload"
+    href="assets/ZenAntiqueSoft-Regular.ttf"
+    as="font"
+    type="font/ttf"
+    crossorigin
+  />
+  <link rel="stylesheet" href="style.css" />
+  <header class="site-header">
+    <a href="../">↖ SHADER PLAYGROUND</a><span>PORTRAITS IN WORDS — 02 / THREE.JS</span>
+  </header>
+  <div class="work-intro">
+    <p class="eyebrow">A STUDY OF WORDS & PORTRAITS</p>
+    <h1>言葉の<br />肖像<span>NATSUME SŌSEKI — I AM A CAT</span></h1>
+    <p class="description">
+      言葉が浮かぶ。文字が降り注ぐ。<br />『吾輩は猫である』から、夏目漱石へ。
+    </p>
+    <p id="canvas-hint" class="canvas-hint">原稿をクリックして再生・一時停止</p>
+    <div class="stage-tools" role="group" aria-label="作品の操作">
+      <button id="play" disabled>再生</button
+      ><button id="restart" disabled>最初から</button
+      ><button id="finish" disabled>完成形</button
+      ><button id="toggle" aria-expanded="false" aria-controls="panel">
+        調整
+      </button>
+    </div>
+  </div>
+  <div id="loading" role="status" aria-live="polite">
+    <span class="loading-mark" aria-hidden="true">文</span>
+    <p id="loading-message">作品を準備しています…</p>
+    <button id="retry" hidden>再試行</button>
+  </div>
+  <noscript
+    ><p class="no-script">
+      この作品にはJavaScriptが必要です。夏目漱石『吾輩は猫である』の文字を使った肖像作品です。
+    </p></noscript
+  >
+  <main>
+    <section aria-label="文字の肖像">
+      <canvas
+        aria-busy="true"
+        id="art"
+        width="780"
+        height="1020"
+        role="button"
+        tabindex="0"
+        aria-disabled="true"
+        aria-label="原稿をクリックして再生"
+        aria-describedby="canvas-hint"
+      ></canvas>
+    </section>
+  </main>
+  <aside id="panel" hidden aria-label="作品の調整">
+    <div class="panel-heading">
+      <strong>作品の調整</strong
+      ><button id="close-panel" type="button">閉じる</button>
+    </div>
+    <p id="status">画像とフォントを読み込み中…</p>
+    <span id="phase" aria-live="polite">文章</span>
+    <label
+      >演出パターン<select id="effect">
+        <option value="paper">紙面へ降り積もる</option>
+        <option value="story">文章から落下して再構成</option>
+      </select></label
+    ><label
+      >序盤の雨量 <output id="batchLabel"></output
+      ><input
+        id="batch"
+        type="range"
+        min="4"
+        max="64"
+        step="4"
+        value="16" /></label
+    ><label
+      >雨脚の強まり <output id="accelLabel"></output
+      ><input
+        id="accel"
+        type="range"
+        min="100"
+        max="180"
+        step="5"
+        value="135" /></label
+    ><label
+      >落下中の文字上限 <output id="maxBatchLabel"></output
+      ><input
+        id="maxBatch"
+        type="range"
+        min="64"
+        max="768"
+        step="32"
+        value="384" /></label
+    ><label
+      >雨脚の揺らぎ <output id="gapLabel"></output
+      ><input
+        id="gap"
+        type="range"
+        min="0"
+        max="100"
+        step="5"
+        value="15" /></label
+    ><label
+      >冒頭の消え方<select id="introMode">
+        <option value="random">ランダムに一文字ずつ</option>
+        <option value="words">語句のまとまりごと</option>
+      </select></label
+    ><label
+      >サイズの割り当て<select id="sizing">
+        <option value="adaptive">領域に応じたランダム</option>
+        <option value="fixed">固定サイズ</option>
+      </select></label
+    ><label
+      >文字の向き<select id="rotation">
+        <option value="random">ランダム −180°〜180°</option>
+        <option value="upright">正立</option>
+      </select></label
+    ><label
+      >文字数の上限 <output id="countLabel"></output
+      ><input
+        id="count"
+        type="range"
+        min="300"
+        max="12000"
+        step="100"
+        value="4800" /></label
+    ><label
+      >文字サイズ倍率 <output id="scaleLabel"></output
+      ><input
+        id="scale"
+        type="range"
+        min="70"
+        max="150"
+        step="5"
+        value="120" /></label
+    ><label
+      >白抜きの閾値 <output id="toneLabel"></output
+      ><input id="tone" type="range" min="45" max="90" value="60" /></label
+    ><label
+      >輪郭の重視度 <output id="edgeLabel"></output
+      ><input id="edge" type="range" min="0" max="100" value="60"
+    /></label>
+    <div class="row">
+      <button id="reseed" disabled>配置を再生成</button
+      ><button id="save" disabled>PNG保存</button>
+    </div>
+    <button id="reset">初期設定に戻す</button
+    ><label
+      >進行度 <output id="progressLabel">100%</output
+      ><input id="progress" type="range" min="0" max="1000" value="0"
+    /></label>
+    <p class="note">
+      同じ乱数では同じ配置を再現。初期状態は文章。紙面版は少量で始まり、時間とともに雨脚が強まり、最後に大量の文字が降り注ぎます。着地待ちで区切らず連続して降ります。「演出パターン」で紙面への落下と従来版を比較できます。設定変更時は完成形を表示します。本文は『吾輩は猫である』の先頭から使い、必要な数までループします。白い領域には着地させません。閾値を下げると白い余白が増えます。大きさは領域内でもばらつきます。
+    </p>
+  </aside>
+  <footer>
+    <details>
+      <summary>素材とクレジット</summary>
+      肖像：添付の夏目漱石写真（小川一眞、1912年9月）。
+      <a href="https://commons.wikimedia.org/wiki/File:Natsume_Soseki_photo.jpg">Wikimedia Commons / パブリックドメイン表記</a>。
+      本文：<a href="https://www.aozora.gr.jp/cards/000148/files/789_14547.html">青空文庫『吾輩は猫である』</a>（入力：柴田卓治／校正：渡部峰子ほか）。ルビ・見出し・奥付を除去、外字をUnicodeに変換。
+      フォント：Zen Antique Soft（同梱、SIL OFL 1.1）。<br />
+      Three.js / WebGLによる文字の肖像。背景に写真を重ねず、文字だけで描画しています。WebGL 2対応ブラウザーが必要です。
+    </details>
+    <a class="source" href="https://github.com/rulers/shader-playground"
+      >GITHUB ↗</a
+    >
+  </footer>
+  <script type="module" src="app.js"></script>
+</html>

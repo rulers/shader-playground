@@ -741,6 +741,7 @@ $("reseed").onclick = () => {
 };
 $("finish").onclick = () => {
   stop();
+  exactProgress = 1;
   $("progress").value = 1000;
   draw(1);
 };
