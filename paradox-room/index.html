@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#e7deca" />
+    <meta
+      name="description"
+      content="矛盾する部屋 — ドラッグで重力を回す / 矢印キーでも操作"
+    />
+    <title>矛盾する部屋 — Shader Playground</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="app.js" type="module"></script>
+  </head>
+  <body>
+    <canvas
+      tabindex="0"
+      aria-label="矛盾する部屋。ドラッグで重力を回す / 矢印キーでも操作"
+      data-hint="ドラッグで重力を回す / 矢印キーでも操作"
+    ></canvas>
+    <header>
+      <a href="../">↖ SHADER PLAYGROUND</a><span>EXPERIMENT 15</span>
+    </header>
+    <main>
+      <p class="eyebrow">WHICH WAY IS DOWN?</p>
+      <h1>矛盾する部屋<span>PARADOX ROOM</span></h1>
+      <p class="description">
+        床だった場所が、壁になる。<br />奥へ進むほど、重力がほどけていく。
+      </p>
+      <p class="hint">ドラッグで重力を回す / 矢印キーでも操作</p>
+    </main>
+    <div class="dock">
+      <button
+        id="toggle"
+        aria-label="調整UIを開く"
+        aria-expanded="false"
+        aria-controls="controls"
+      >
+        ＋
+      </button>
+      <section id="controls" aria-label="作品の調整" hidden>
+        <div class="heading">
+          調整<button id="close" aria-label="調整UIを閉じる">×</button>
+        </div>
+        <label for="depth"
+          >遠近の深さ<output id="depth-value">1</output
+          ><input
+            id="depth"
+            type="range"
+            min=".5"
+            max="1.5"
+            step=".1"
+            value="1" /></label
+        ><label for="inertia"
+          >余韻<output id="inertia-value">.6</output
+          ><input
+            id="inertia"
+            type="range"
+            min=".1"
+            max="1"
+            step=".1"
+            value=".6"
+        /></label>
+        <div class="buttons">
+          <button id="pause" aria-pressed="false">一時停止</button
+          ><button id="reset">最初から</button
+          ><button id="invert">重力を90°回す</button>
+        </div>
+        <p>
+          マウス・タッチ対応。モーション低減設定では停止して開きます。作品領域にフォーカスして、矢印キーで視点、Enterで重力を回せます。
+        </p>
+      </section>
+    </div>
+    <footer>
+      <span>PROCEDURAL / CANVAS 2D</span><span id="status" role="status"></span>
+    </footer>
+  </body>
+</html>
