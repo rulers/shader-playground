@@ -25,6 +25,10 @@ GitHub Pagesは `main` ブランチのルート `/` です
 | 言葉の肖像：芥川龍之介 × 羅生門 | [DEMO](https://rulers.github.io/shader-playground/portraits/) | [操作と仕組み](portraits/README.md) | 実装MIT／フォントOFL等、[素材別条件](portraits/NOTICE.md) |
 | 言葉の肖像：夏目漱石 × 吾輩は猫である | [DEMO](https://rulers.github.io/shader-playground/soseki/) | [操作と仕組み](soseki/README.md) | 実装MIT／three.js MIT／フォントOFL等、[素材別条件](soseki/NOTICE.md) |
 
+## NOODLE DISCO
+
+[DAYを体験する](https://rulers.github.io/shader-playground/noodle-disco/) — 麺をつかんで引っ張り、離すとぷるっと戻るCanvas 2D作品。外部依存・ビルド不要。[操作と実装](noodle-disco/README.md)。
+
 ## 言葉の肖像を動かす
 
 添付肖像・Zen Antique Soft・本文を同梱し、外部素材配信に依存しません。Canvas 2DとModule Workerを使用します。
