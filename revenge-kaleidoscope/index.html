@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ja">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#101727"><title>リベンジの万華鏡 — Shader Playground</title><link rel="stylesheet" href="style.css?v=turn-2"><script src="app.js?v=turn-2" type="module"></script></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#101727"><title>リベンジの万華鏡 — Shader Playground</title><link rel="stylesheet" href="style.css?v=turn-2"><script src="app.js?v=turn-3" type="module"></script></head>
 <body>
 <canvas id="view" aria-label="黒い空間でシアンと紫のネオンが星形に反復する万華鏡"></canvas>
 <header><a href="../">↖ SHADER PLAYGROUND</a><span>EXPERIMENT 07</span></header>
@@ -9,6 +9,6 @@
 <section id="controls" aria-label="作品の調整" hidden><div class="heading">調整<button id="close" aria-label="調整UIを閉じる">×</button></div>
 <label for="rotation">回転の速さ<output id="rotation-value">0.3</output><input id="rotation" type="range" min="0" max="1" step=".05" value=".3"></label>
 <label for="flow">模様の流れ<output id="flow-value">0.6</output><input id="flow" type="range" min="0" max="1.5" step=".05" value=".6"></label>
-<p>回転角 <output id="angle-value">0°</output> · 約30°ごとに配置が変化</p><button id="step" type="button">30°進める</button><div class="buttons"><button id="pause" aria-pressed="false">一時停止</button><button id="reset">最初から</button></div><p>回転に応じて光のパーツが移動・回転し、別の模様へつながります。</p></section></div></main>
+<p>回転角 <output id="angle-value">0°</output> · 約30°ごとに配置が変化</p><button id="step-half" type="button">15°進める</button><button id="step" type="button">30°進める</button><div class="buttons"><button id="pause" aria-pressed="false">一時停止</button><button id="reset">最初から</button></div><p>背景をクリック／タップすると15°ずつ進みます。回転に応じて光のパーツが移動・回転し、別の模様へつながります。</p></section></div></main>
 <footer><span>PROCEDURAL LIGHT / WEBGL 2</span><span id="status" role="status">光の模様を準備中…</span></footer>
 </body></html>

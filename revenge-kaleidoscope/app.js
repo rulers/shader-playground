@@ -46,7 +46,13 @@ for (const id of ['rotation', 'flow']) {
     $(id).oninput = () => { $(id + '-value').value = Number($(id).value).toFixed(2); redraw(); };
 }
 $('pause').onclick = () => { paused = !paused; pauseLabel(); redraw(); };
-$('step').onclick = () => { angle += Math.PI / 6; redraw(); };
+function advance(degrees) { angle += degrees * Math.PI / 180; redraw(); }
+$('step').onclick = () => advance(30);
+$('step-half').onclick = () => advance(15);
+// The layout overlays the canvas; accept background clicks but leave UI alone.
+document.addEventListener('click', e => {
+    if (!e.target.closest('header, footer, .dock')) advance(15);
+});
 $('reset').onclick = () => { angle = 0; flowTime = 0; redraw(); };
 addEventListener('resize', redraw);
 document.addEventListener('visibilitychange', redraw);
