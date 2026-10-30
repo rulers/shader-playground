@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#101529" />
+    <meta
+      name="description"
+      content="ピクセルの錬金術 — ドラッグで組み替え / 離すと風景へ"
+    />
+    <title>ピクセルの錬金術 — Shader Playground</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="app.js" type="module"></script>
+  </head>
+  <body>
+    <canvas
+      tabindex="0"
+      aria-label="ピクセルの錬金術。ドラッグで組み替え / 離すと風景へ"
+      data-hint="ドラッグで組み替え / 離すと風景へ"
+    ></canvas>
+    <header>
+      <a href="../">↖ SHADER PLAYGROUND</a><span>EXPERIMENT 13</span>
+    </header>
+    <main>
+      <p class="eyebrow">A LANDSCAPE, REARRANGED</p>
+      <h1>
+        ピクセルの<br class="title-break" />錬金術<span>PIXEL ALCHEMY</span>
+      </h1>
+      <p class="description">
+        触れると、風景はほどける。<br />色のかけらが、別の秩序を見つける。
+      </p>
+      <p class="hint">ドラッグで組み替え / 離すと風景へ</p>
+    </main>
+    <div class="dock">
+      <button
+        id="toggle"
+        aria-label="調整UIを開く"
+        aria-expanded="false"
+        aria-controls="controls"
+      >
+        ＋
+      </button>
+      <section id="controls" aria-label="作品の調整" hidden>
+        <div class="heading">
+          調整<button id="close" aria-label="調整UIを閉じる">×</button>
+        </div>
+        <label for="power"
+          >変換の強さ<output id="power-value">1</output
+          ><input
+            id="power"
+            type="range"
+            min="0.4"
+            max="2"
+            step=".1"
+            value="1" /></label
+        ><label for="return"
+          >戻る速さ<output id="return-value">.3</output
+          ><input
+            id="return"
+            type="range"
+            min="0.1"
+            max="1"
+            step=".1"
+            value=".3"
+        /></label>
+        <div class="buttons">
+          <button id="pause" aria-pressed="false">一時停止</button
+          ><button id="reset">最初から</button
+          ><button id="transform">全体を組み替える</button>
+        </div>
+        <p>
+          マウス・タッチ対応。モーション低減設定では停止して開きます。作品領域にフォーカスして、Enterで全体を組み替えられます。
+        </p>
+      </section>
+    </div>
+    <footer>
+      <span>PROCEDURAL / CANVAS 2D</span><span id="status" role="status"></span>
+    </footer>
+  </body>
+</html>
