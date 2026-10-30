@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#080e18" />
+    <meta
+      name="description"
+      content="光にも、重さがある。 光をドラッグして引き、離すと余韻が残ります。"
+    />
+    <title>光を彫る — Shader Playground</title>
+    <link rel="stylesheet" href="style.css" />
+    <script type="module" src="app.js"></script>
+  </head>
+  <body>
+    <canvas
+      tabindex="0"
+      aria-label="光をドラッグして引き、離すと余韻が残ります。 Enterキーで体験、スペースで一時停止"
+      aria-describedby="hint"
+      >Canvas 2Dに対応したブラウザーでご覧ください。</canvas
+    >
+    <header>
+      <a href="../">↖ SHADER PLAYGROUND</a><span>EXPERIMENT 10</span>
+    </header>
+    <main>
+      <div class="intro">
+        <p class="eyebrow">A STUDY OF LIGHT & WEIGHT</p>
+        <h1>光を彫る<span>LIGHT SCULPTURE</span></h1>
+        <p>光にも、重さがある。</p>
+        <p class="description" id="hint">
+          光をドラッグして引き、離すと余韻が残ります。
+        </p>
+      </div>
+      <div class="dock">
+        <button
+          id="toggle"
+          aria-label="調整UIを開く"
+          aria-expanded="false"
+          aria-controls="controls"
+        >
+          ＋
+        </button>
+        <section id="controls" aria-label="作品の調整" hidden>
+          <div class="heading">
+            調整<button id="close" aria-label="調整UIを閉じる">×</button>
+          </div>
+          <label for="amount"
+            >余韻<output>0.96</output
+            ><input
+              id="amount"
+              type="range"
+              min="0.88"
+              max="0.99"
+              step="0.01"
+              value="0.96"
+          /></label>
+          <div class="buttons">
+            <button id="pause" aria-pressed="false">一時停止</button
+            ><button id="reset">最初から</button>
+          </div>
+          <button id="action">光を引く</button>
+          <p>
+            画面にフォーカスしてEnterで体験、スペースで再生／停止。動きを減らす設定では停止して開きます。
+          </p>
+        </section>
+      </div>
+    </main>
+    <footer>
+      <span>PROCEDURAL ART / CANVAS 2D</span
+      ><span id="status" role="status"
+        >光をドラッグして引き、離すと余韻が残ります。</span
+      >
+    </footer>
+  </body>
+</html>
