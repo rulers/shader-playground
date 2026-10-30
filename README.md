@@ -29,6 +29,8 @@ GitHub Pagesは `main` ブランチのルート `/` です
 
 [DAYを体験する](https://rulers.github.io/shader-playground/noodle-disco/) — 麺をつかんで引っ張り、離すとぷるっと戻るCanvas 2D作品。外部依存・ビルド不要。[操作と実装](noodle-disco/README.md)。
 
+[NIGHT MIXを体験する](https://rulers.github.io/shader-playground/noodle-night/) — 10月31日分。長押しでためて、離すとネオンの麺が弾ける。[操作と実装](noodle-night/README.md)。
+
 ## 言葉の肖像を動かす
 
 添付肖像・Zen Antique Soft・本文を同梱し、外部素材配信に依存しません。Canvas 2DとModule Workerを使用します。

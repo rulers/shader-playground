@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="800" viewBox="0 0 1280 800">
+  <rect width="1280" height="800" fill="#1638ba"/>
+  <g fill="none" stroke="#edf0ff" stroke-opacity=".08">
+    <circle cx="640" cy="400" r="180"/><circle cx="640" cy="400" r="300"/><circle cx="640" cy="400" r="420"/>
+  </g>
+  <g fill="none" stroke-width="48" stroke-linecap="round">
+    <path stroke="#ff59c7" d="M-50 110C180 450 310-150 520 140S860 570 1000 160S1300 240 1340 360"/>
+    <path stroke="#edff57" d="M50 600C-30 220 420 220 380 430S200 730 530 680S790 230 1050 410S1230 710 1340 620"/>
+    <path stroke="#58f7f1" d="M-80 320C270 300 190 650 470 510S630 70 870 210S1090 670 1330 520"/>
+    <path stroke="#ff914d" d="M140-70C520 0 210 280 630 310S1000 640 1210 810"/>
+    <path stroke="#a892ff" d="M680-50C1050 10 480 610 770 690S1100 600 1330 850"/>
+  </g>
+  <g fill="#fff4e4" font-family="Arial,sans-serif" font-weight="900">
+    <text x="65" y="600" font-size="94" letter-spacing="-5">NOODLE</text>
+    <text x="65" y="685" font-size="94" letter-spacing="-5">DISCO</text>
+    <text x="70" y="727" font-size="17" letter-spacing="7">NIGHT MIX</text>
+  </g>
+</svg>
