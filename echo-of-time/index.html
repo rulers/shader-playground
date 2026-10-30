@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#e8e2d6" />
+    <meta
+      name="description"
+      content="少し前の自分に、また出会う。 ドラッグで軌跡を描くと、時間差で3つの残響が現れます。"
+    />
+    <title>時間の残響 — Shader Playground</title>
+    <link rel="stylesheet" href="style.css" />
+    <script type="module" src="app.js"></script>
+  </head>
+  <body>
+    <canvas
+      tabindex="0"
+      aria-label="ドラッグで軌跡を描くと、時間差で3つの残響が現れます。 Enterキーで体験、スペースで一時停止"
+      aria-describedby="hint"
+      >Canvas 2Dに対応したブラウザーでご覧ください。</canvas
+    >
+    <header>
+      <a href="../">↖ SHADER PLAYGROUND</a><span>EXPERIMENT 16</span>
+    </header>
+    <main>
+      <div class="intro">
+        <p class="eyebrow">A STUDY OF MEMORY & REPETITION</p>
+        <h1>時間の残響<span>ECHO OF TIME</span></h1>
+        <p>少し前の自分に、また出会う。</p>
+        <p class="description" id="hint">
+          ドラッグで軌跡を描くと、時間差で3つの残響が現れます。
+        </p>
+      </div>
+      <div class="dock">
+        <button
+          id="toggle"
+          aria-label="調整UIを開く"
+          aria-expanded="false"
+          aria-controls="controls"
+        >
+          ＋
+        </button>
+        <section id="controls" aria-label="作品の調整" hidden>
+          <div class="heading">
+            調整<button id="close" aria-label="調整UIを閉じる">×</button>
+          </div>
+          <label for="amount"
+            >再生速度<output>1.00</output
+            ><input
+              id="amount"
+              type="range"
+              min="0.4"
+              max="2"
+              step="0.1"
+              value="1"
+          /></label>
+          <div class="buttons">
+            <button id="pause" aria-pressed="false">一時停止</button
+            ><button id="reset">最初から</button>
+          </div>
+          <button id="action">軌跡を描く</button>
+          <p>
+            画面にフォーカスしてEnterで体験、スペースで再生／停止。動きを減らす設定では停止して開きます。
+          </p>
+        </section>
+      </div>
+    </main>
+    <footer>
+      <span>PROCEDURAL ART / CANVAS 2D</span
+      ><span id="status" role="status"
+        >ドラッグで軌跡を描くと、時間差で3つの残響が現れます。</span
+      >
+    </footer>
+  </body>
+</html>
