@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f3ebda"><meta name="description" content="ポインターを近づけると、図形が寄り添う。色と余白を動かすインタラクティブポスター。">
+<title>MAGNETIC SHAPES | Shader Playground</title>
+<link rel="stylesheet" href="style.css"><script type="module" src="app.js"></script>
+</head>
+<body>
+<canvas tabindex="0" aria-label="磁力のポスター。マウスを近づけるか、タッチして動かす。矢印キーで磁力の位置を移動、Escapeで解放。" aria-describedby="hint"></canvas>
+<header><a href="../">↖ SHADER PLAYGROUND</a><span>EXPERIMENT 12 · 2026.11.01</span></header>
+<main class="intro"><p class="eyebrow">A POSTER THAT LEANS TOWARD YOU</p><h1>MAGNETIC<br>SHAPES<span>色と余白の引力</span></h1><p id="hint">近づけて、ほどく。離れて、整う。<br>マウスを動かす / タッチしてなぞる / 矢印キー</p></main>
+<div class="dock"><button id="toggle" aria-label="調整UIを開く" aria-expanded="false" aria-controls="controls">＋</button>
+<section id="controls" hidden aria-label="作品の調整"><div class="heading">調整<button id="close" aria-label="調整UIを閉じる">×</button></div>
+<label for="strength">引き合う強さ <output>1.00</output><input id="strength" type="range" min="0" max="2" step="0.05" value="1"></label>
+<div class="buttons"><button id="pause" aria-pressed="false">一時停止</button><button id="reset">最初から</button></div><p>Spaceで再生／停止、Escapeで解放。<br>動きを減らす設定では、操作の反応を短くします。</p></section></div>
+<footer><span>LOCAL ATTRACTION / CANVAS 2D</span><span id="status" role="status">図形の近くへ、ポインターを。</span></footer>
+<noscript>JavaScriptを有効にしてご覧ください。</noscript>
+</body></html>

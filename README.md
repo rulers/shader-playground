@@ -31,6 +31,10 @@ GitHub Pagesは `main` ブランチのルート `/` です
 
 [NIGHT MIXを体験する](https://rulers.github.io/shader-playground/noodle-night/) — 10月31日分。長押しでためて、離すとネオンの麺が弾ける。[操作と実装](noodle-night/README.md)。
 
+## MAGNETIC SHAPES
+
+11月1日分。ポインターの近くの図形が寄り、離れると構図へ戻るCanvas 2Dポスター。[操作と検証](magnetic-shapes/README.md)。
+
 ## 言葉の肖像を動かす
 
 添付肖像・Zen Antique Soft・本文を同梱し、外部素材配信に依存しません。Canvas 2DとModule Workerを使用します。
