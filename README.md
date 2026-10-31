@@ -73,3 +73,7 @@ python3 third_party/heartfelt/tools/build.py
 - ⚠️このリポジトリ全体をMITとして扱わないでください。第三者作品には上記の個別条件が適用されます。
 
 切り出し元：[kodelife-leaning](https://github.com/rulers/kodelife-leaning/tree/62069083f16e27c156350e846cfbb7daf0676af1)。元リポジトリは変更せず、このリポジトリには新しい履歴で収録しています。
+
+## LIGHT SCULPTURE
+
+11月2日分。光の曲線をドラッグすると局所的に伸び、離すと余韻が残るCanvas 2D作品。[操作と検証](light-sculpture/README.md)。
