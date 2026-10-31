@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#fff4db"><meta name="description" content="つまんで、のばして、ぷるんと戻す。カラフルな麺が踊るCanvasのおもちゃ。">
+<title>NOODLE DISCO — Shader Playground</title>
+<link rel="stylesheet" href="../assets/noodle.css">
+<script type="module">import { mountNoodles } from '../assets/noodle-engine.js'; mountNoodles({ mode: 'day' });</script>
+</head>
+<body>
+<canvas id="noodles" tabindex="0" aria-label="カラフルな麺。ドラッグで引っ張る。矢印キーで揺らす。スペースで一時停止。" aria-describedby="instructions"></canvas>
+<header><a href="../">↖ SHADER PLAYGROUND</a><span>EXPERIMENT 10 / 2026.10.30</span></header>
+<main class="intro"><p class="eyebrow">PULL. WIGGLE. LET GO.</p><h1>NOODLE<br>DISCO<span class="edition">DAY MIX</span></h1><p class="description" id="instructions">つまんで、のばして、ぷるん。<br>麺をドラッグ。余白をタップして、ひと揺れ。</p></main>
+<div class="settings-dock"><button id="settings-toggle" type="button" aria-label="調整UIを開く" aria-expanded="false" aria-controls="settings-panel">＋</button>
+<section id="settings-panel" aria-label="作品の調整" hidden>
+<div class="panel-heading"><span>THE RECIPE</span><button id="settings-close" type="button" aria-label="調整UIを閉じる">×</button></div>
+<label for="control-speed">Speed <output>1.00</output><input id="control-speed" type="range" min="0.3" max="1.6" step="0.05" value="1"></label>
+<label for="control-elasticity">Elasticity <output>0.80</output><input id="control-elasticity" type="range" min="0.3" max="1.5" step="0.05" value="0.8"></label>
+<label for="control-influence">Influence <output>0.35</output><input id="control-influence" type="range" min="0" max="1" step="0.05" value="0.35"></label>
+<div class="buttons"><button id="pause" type="button" aria-pressed="false">一時停止</button><button id="reset" type="button">Reset</button></div><p>矢印キーで揺らす · Spaceで一時停止<br>モーション低減設定では自動の揺れを止めます。</p>
+</section></div>
+<footer><span>PLAY WITH YOUR FOOD / CANVAS 2D</span><span id="state-label" role="status">つまんで、踊ろう。</span></footer>
+<noscript>この作品にはJavaScriptが必要です。</noscript>
+</body></html>

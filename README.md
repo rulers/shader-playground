@@ -25,6 +25,16 @@ GitHub Pagesは `main` ブランチのルート `/` です
 | 言葉の肖像：芥川龍之介 × 羅生門 | [DEMO](https://rulers.github.io/shader-playground/portraits/) | [操作と仕組み](portraits/README.md) | 実装MIT／フォントOFL等、[素材別条件](portraits/NOTICE.md) |
 | 言葉の肖像：夏目漱石 × 吾輩は猫である | [DEMO](https://rulers.github.io/shader-playground/soseki/) | [操作と仕組み](soseki/README.md) | 実装MIT／three.js MIT／フォントOFL等、[素材別条件](soseki/NOTICE.md) |
 
+## NOODLE DISCO
+
+[DAYを体験する](https://rulers.github.io/shader-playground/noodle-disco/) — 麺をつかんで引っ張り、離すとぷるっと戻るCanvas 2D作品。外部依存・ビルド不要。[操作と実装](noodle-disco/README.md)。
+
+[NIGHT MIXを体験する](https://rulers.github.io/shader-playground/noodle-night/) — 10月31日分。長押しでためて、離すとネオンの麺が弾ける。[操作と実装](noodle-night/README.md)。
+
+## MAGNETIC SHAPES
+
+11月1日分。ポインターの近くの図形が寄り、離れると構図へ戻るCanvas 2Dポスター。[操作と検証](magnetic-shapes/README.md)。
+
 ## 言葉の肖像を動かす
 
 添付肖像・Zen Antique Soft・本文を同梱し、外部素材配信に依存しません。Canvas 2DとModule Workerを使用します。
@@ -63,3 +73,7 @@ python3 third_party/heartfelt/tools/build.py
 - ⚠️このリポジトリ全体をMITとして扱わないでください。第三者作品には上記の個別条件が適用されます。
 
 切り出し元：[kodelife-leaning](https://github.com/rulers/kodelife-leaning/tree/62069083f16e27c156350e846cfbb7daf0676af1)。元リポジトリは変更せず、このリポジトリには新しい履歴で収録しています。
+
+## LIGHT SCULPTURE
+
+11月2日分。光の曲線をドラッグすると局所的に伸び、離すと余韻が残るCanvas 2D作品。[操作と検証](light-sculpture/README.md)。

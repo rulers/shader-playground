@@ -26,6 +26,7 @@ function setPause(value) {
 }
 function resize() {
   if (!ctx) return;
+  release();
   W = innerWidth;
   H = innerHeight;
   DPR = Math.min(devicePixelRatio || 1, 2);
@@ -56,7 +57,7 @@ function point(e) {
   pointer.active = true;
 }
 canvas.addEventListener("pointerdown", (e) => {
-  if (!ctx || activePointer !== null) return;
+  if (!ctx || activePointer !== null || e.button !== 0) return;
   if (paused) {
     setStatus("再生ボタンで動きを再開できます");
     return;
@@ -78,8 +79,11 @@ canvas.addEventListener("pointermove", (e) => {
 function release(e) {
   if (e && activePointer !== e.pointerId) return;
   if (pointer.down) end();
+  const captured = activePointer;
   pointer.down = false;
   activePointer = null;
+  if (captured !== null && canvas.hasPointerCapture(captured))
+    canvas.releasePointerCapture(captured);
 }
 canvas.addEventListener("pointerup", release);
 canvas.addEventListener("pointercancel", release);
@@ -91,7 +95,7 @@ canvas.addEventListener("blur", () => release());
 canvas.addEventListener("keydown", (e) => {
   if (e.code === "Space") {
     e.preventDefault();
-    setPause(!paused);
+    if (!e.repeat) setPause(!paused);
   } else if (e.key === "Enter") {
     e.preventDefault();
     if (!paused) action();
@@ -99,7 +103,10 @@ canvas.addEventListener("keydown", (e) => {
 });
 pauseButton.addEventListener("click", () => setPause(!paused));
 document.querySelector("#reset").addEventListener("click", () => {
+  release();
   time = 0;
+  slider.value = "0.96";
+  document.querySelector("output").value = "0.96";
   reset();
   render(0);
   setStatus("最初の景色に戻しました");
@@ -128,7 +135,10 @@ toggle.addEventListener("click", () => {
 });
 document.querySelector("#close").addEventListener("click", closePanel);
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape" && !panel.hidden) closePanel();
+  if (e.key === "Escape") {
+    release();
+    if (!panel.hidden) closePanel();
+  }
 });
 document.addEventListener("visibilitychange", () => {
   last = 0;
@@ -142,6 +152,7 @@ reduce.addEventListener("change", (e) => {
   if (e.matches) setPause(true);
 });
 addEventListener("resize", resize);
+addEventListener("blur", () => release());
 const nodes = [],
   count = 150;
 function anchor(i) {

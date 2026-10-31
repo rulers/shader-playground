@@ -48,3 +48,7 @@ node tests/study-smoke.cjs light-sculpture
 ```
 
 `preview.jpg` は実際のCanvas描画をキャプチャした画像です。
+
+## 2026-10-31 更新
+
+現在のmainと統合し、入力解除・Reset・キーリピートを修正。右上の＋へ配置を統一。今回は単独担当によるコード確認とCanvasハーネス検証であり、上記三者レビューの再実施ではない。変更と検証結果はREADME.md「2026-10-31 再検証と修正」を参照。
