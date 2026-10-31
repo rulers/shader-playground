@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#1638ba">
+  <meta name="description" content="長押しで静まり、離すと弾ける。ネオン色の麺が踊る、夜のインタラクティブディスコ。">
+  <title>NOODLE DISCO — NIGHT MIX | Shader Playground</title>
+  <link rel="stylesheet" href="../assets/noodle.css">
+  <script type="module">
+    import { mountNoodles } from '../assets/noodle-engine.js';
+    mountNoodles({ mode: 'night' });
+  </script>
+</head>
+<body class="night">
+  <canvas id="noodles" tabindex="0" aria-label="ネオンの麺のダンス。長押しで動きをためて、離すと解放。キーボードはスペース長押し、Escapeでキャンセル。" aria-describedby="instructions"></canvas>
+  <header><a href="../">↖ SHADER PLAYGROUND</a><span>EXPERIMENT 11 · 2026.10.31</span></header>
+  <main class="intro">
+    <p class="eyebrow">AFTER HOURS / THE FLOOR IS YOURS</p>
+    <h1>NOODLE<br>DISCO<span class="edition">NIGHT MIX</span></h1>
+    <p class="description" id="instructions">押して、ためて。離して、踊ろう。<br>長押し → 解放 / SPACEでも遊べます。</p>
+  </main>
+  <div class="settings-dock">
+    <button id="settings-toggle" type="button" aria-label="調整UIを開く" aria-expanded="false" aria-controls="settings-panel">＋</button>
+    <section id="settings-panel" aria-label="NIGHT MIXの調整" hidden>
+      <div class="panel-heading"><span>NIGHT MIX / 調整</span><button id="settings-close" type="button" aria-label="調整UIを閉じる">×</button></div>
+      <label for="control-speed">Tempo <output>1.00</output><input id="control-speed" type="range" min="0.3" max="2" step="0.05" value="1"></label>
+      <label for="control-elasticity">Tension <output>1.00</output><input id="control-elasticity" type="range" min="0.3" max="2" step="0.05" value="1"></label>
+      <label for="control-influence">Burst <output>1.00</output><input id="control-influence" type="range" min="0" max="2" step="0.05" value="1"></label>
+      <div class="buttons"><button id="pause" type="button" aria-pressed="false">一時停止</button><button id="reset" type="button">Reset</button></div>
+      <p>画面を押し続けると動きが静まり、離すと一斉に解放します。Escapeでためをキャンセル。<br>モーション低減設定では自動のダンスを止めます。</p>
+      <p><a href="../noodle-disco/">昼のNOODLE DISCOへ ↗</a></p>
+    </section>
+  </div>
+  <footer><span>HOLD. RELEASE. REPEAT. / CANVAS 2D</span><span id="state-label" role="status">DANCE</span></footer>
+  <noscript>この作品を動かすにはJavaScriptを有効にしてください。</noscript>
+</body>
+</html>
