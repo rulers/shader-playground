@@ -2,16 +2,37 @@ import fs from 'node:fs';
 import assert from 'node:assert/strict';
 const {mountNoodles}=await import('data:text/javascript;base64,'+Buffer.from(fs.readFileSync('assets/noodle-engine.js','utf8')).toString('base64'));
 for(const mode of ['day','night']) {
- let now=0,frame,draws=0;
+ let now=0,frame,draws=0, xs=[];
  class El {constructor(){this.listeners={};this.attrs={};this.value='1';this.textContent='';this.hidden=true;this.output={value:''};this.parentElement={querySelector:()=>this.output};} addEventListener(k,f){(this.listeners[k]??=[]).push(f)} emit(k,e={}){for(const f of this.listeners[k]??[])f({preventDefault(){},...e})}dispatchEvent(e){this.emit(e.type,e)}setAttribute(k,v){this.attrs[k]=v}focus(){} }
  const ids=['noodles','state-label','control-speed','control-elasticity','control-influence','pause','settings-toggle','settings-panel','settings-close','reset'];
  const els=Object.fromEntries(ids.map(id=>[id,new El()]));const canvas=els.noodles;
- const ctx=new Proxy({},{get:(t,k)=>t[k]??((...args)=>{for(const v of args)if(typeof v==='number')assert(Number.isFinite(v),k+' nonfinite');if(k==='fillRect')draws++}),set:(t,k,v)=>{t[k]=v;return true}});
+ const ctx=new Proxy({},{get:(t,k)=>t[k]??((...args)=>{for(const v of args)if(typeof v==='number')assert(Number.isFinite(v),k+' nonfinite');if(k==='fillRect'){draws++;xs=[];}if(k==='moveTo'||k==='lineTo'||k==='quadraticCurveTo')for(let i=0;i<args.length;i+=2)xs.push(args[i])}),set:(t,k,v)=>{t[k]=v;return true}});
  canvas.getContext=()=>ctx;canvas.getBoundingClientRect=()=>({left:0,top:0});let capture=null;canvas.setPointerCapture=id=>capture=id;canvas.hasPointerCapture=id=>capture===id;canvas.releasePointerCapture=()=>{capture=null;canvas.emit('lostpointercapture')};
  const doc=new El(),win=new El(),media=new El();media.matches=false;doc.hidden=false;doc.querySelector=s=>els[s.slice(1)];
  Object.assign(globalThis,{document:doc,window:win,innerWidth:1000,innerHeight:700,devicePixelRatio:3,matchMedia:()=>media,requestAnimationFrame:f=>frame=f,performance:{now:()=>now}});
  mountNoodles({mode}); const tick=n=>{for(let i=0;i<n;i++){now+=16.67;frame(now)}};
  assert.equal(canvas.width,2000);tick(60);
+ const span=()=>Math.max(...xs)-Math.min(...xs);
+ if(mode==='night') {
+  // A tap within one animation frame must still produce a visible reaction.
+  const tap={pointerId:9,button:0,clientX:500,clientY:350};
+  const tapSpan=span();canvas.emit('pointerdown',tap);canvas.emit('pointerup',tap);
+  assert.equal(els['state-label'].textContent,'DISCO!','same-frame tap must not be discarded');
+  tick(10);assert(span()>tapSpan+1,'tap must move the rendered strands, not only the label');
+  tick(240);const idleSpan=span();
+  canvas.emit('pointerdown',tap);tick(120);
+  assert(span()<idleSpan*.8,'hold must visibly compress the whole composition');
+  canvas.emit('pointercancel',{pointerId:9});tick(240);
+  assert(span()>idleSpan*.95,'cancel must restore the composition without burst');
+  canvas.emit('keydown',{code:'Space',key:' ',repeat:false});canvas.emit('keyup',{code:'Space',key:' '});
+  assert.equal(els['state-label'].textContent,'DISCO!','keyboard tap must react');tick(240);
+  els['control-influence'].value='0';els['control-influence'].emit('input');
+  canvas.emit('pointerdown',{...tap,pointerType:'touch'});canvas.emit('pointerup',tap);
+  assert.equal(els['state-label'].textContent,'ゆっくりリズムへ。');
+  tick(240);els['control-influence'].value='.7';els['control-influence'].emit('input');
+
+ }
+
  els['settings-toggle'].emit('click');assert.equal(els['settings-panel'].hidden,false);
  els.pause.emit('click');let before=draws;tick(20);assert.equal(draws,before);els.pause.emit('click');
  const down={pointerId:1,button:0,clientX:500,clientY:150};canvas.emit('pointerdown',down);tick(100);
