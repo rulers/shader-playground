@@ -84,15 +84,17 @@ export function mountNoodles({ mode = 'day' } = {}) {
   function impulse(x,y,power=1) {
     noodles.forEach(line=>line.forEach(p=>{
       const dx=p.x-x,dy=p.y-y,d=Math.hypot(dx,dy),fall=Math.exp(-d/Math.max(width,height)*5);
-      p.vx+=(dx/(d||1))*130*power*fall;p.vy+=(dy/(d||1))*130*power*fall-70*power*fall;
+      const reach=night?.35+.65*fall:fall, strength=night?260:130;
+      p.vx+=(dx/(d||1))*strength*power*reach;p.vy+=(dy/(d||1))*strength*power*reach-70*power*reach;
     }));wake();
   }
-  function startHold(source) { if(held)return;recovering=false;held=true;holdSource=source;charge=0;wake();say('HOLD — リズムをためる…'); }
+  function startHold(source) { if(held)return;recovering=false;held=true;holdSource=source;charge=0;wake();say('HOLD — リズムをためる…');draw(); }
   function releaseHold() {
     if(!held)return;
-    const energy=clamp(charge,0,1);recovering=energy>.02;held=false;holdSource=null;charge=0;
-    if(energy>.02){burst=energy*values[2];if(burst>0)impulse(width*.5,height*.5,burst*4);say(burst>0?'DISCO!':'ゆっくりリズムへ。');}
-    else say('押して、ためて、離す。');wake();
+    const energy=clamp(Math.max(charge,.3),0,1);recovering=true;held=false;holdSource=null;charge=0;
+    burst=energy*values[2];
+    if(burst>0)impulse(width*.5,height*.5,burst*4);
+    say(burst>0?'DISCO!':'ゆっくりリズムへ。');wake();
   }
   canvas.addEventListener('pointerdown',event=>{
     if(paused||pointer!==null||held||event.button!==0)return;
@@ -128,7 +130,7 @@ export function mountNoodles({ mode = 'day' } = {}) {
   function step(dt) {
     time+=dt*values[0];
     freeze+=(Number(held)-freeze)*Math.min(1,dt*7);
-    if(held)charge=Math.min(1,charge+dt*.65);
+    if(held){charge=Math.min(1,charge+dt*.65);say(`HOLD — ${Math.floor(charge*10)*10}% · 離して解放`);}
     burst*=Math.exp(-dt*2);
     if(recovering&&!held&&burst<.025&&freeze<.02){recovering=false;say('DANCE — 押して、ためて、離す。');}
     const amplitude=reduced?0:(night?15:5)*(1-freeze);
@@ -137,7 +139,7 @@ export function mountNoodles({ mode = 'day' } = {}) {
     const force=noodles.map((line,i)=>line.map((p,j)=>{
       const home=base(i,j),u=j/11;
       const wobble=Math.sin(time*(night?3.5:1.1)+i*1.2+u*4)*amplitude;
-      const compression=night?freeze*(.025+charge*.025)*values[1]:0;
+      const compression=night?freeze*clamp((.24+charge*.24)*values[1],.12,.64):0;
       let tx=home.x+(width*.5-home.x)*compression;
       let ty=home.y+wobble+(height*.5-home.y)*compression;
       if(dragged&&dragged.line===i){const fall=Math.exp(-Math.pow(j-dragged.point,2)/2.4);tx+=(dragged.x-home.x)*fall;ty+=(dragged.y-home.y)*fall;}
