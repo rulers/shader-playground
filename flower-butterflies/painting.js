@@ -5,7 +5,8 @@ export function random(seed) {
 
 export function createPainting(aspect) {
   const canvas = document.createElement('canvas');
-  canvas.height = 1800; canvas.width = Math.round(1800 * aspect);
+  canvas.height = Math.min(1800, Math.round(3200 / Math.max(1, aspect)));
+  canvas.width = Math.max(1, Math.round(canvas.height * aspect));
   const ctx = canvas.getContext('2d'), rand = random(5173);
   const w = canvas.width, h = canvas.height, unit = h / 16;
   ctx.fillStyle = '#b9a76c'; ctx.fillRect(0, 0, w, h);
@@ -24,9 +25,10 @@ export function createPainting(aspect) {
   const targets = [];
   function leaf(x, y, angle, length) {
     ctx.save(); ctx.translate(x, y); ctx.rotate(angle);
+    const broad = .26 + rand() * .2, curl = (rand() - .5) * .17;
     ctx.beginPath(); ctx.moveTo(0, 0);
-    ctx.bezierCurveTo(length * .2, -length * .42, length * .55, -length * .16, length, 0);
-    ctx.bezierCurveTo(length * .56, length * .22, length * .25, length * .32, 0, 0);
+    ctx.bezierCurveTo(length * .2, -length * broad, length * .58, -length * (broad + curl), length, length * curl);
+    ctx.bezierCurveTo(length * .6, length * broad * .5, length * .28, length * broad * .8, 0, 0);
     ctx.fillStyle = ['#30362b', '#434832', '#53523a', '#272f29'][Math.floor(rand() * 4)];
     ctx.fill(); ctx.strokeStyle = '#292b24'; ctx.lineWidth = .9; ctx.stroke();
     ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(length * .5, -length * .03, length * .9, 0);
@@ -37,56 +39,82 @@ export function createPainting(aspect) {
     }
     ctx.restore();
   }
-  function bloom(x, y, radius, color, variety) {
-    const colors = color === 'red' ? ['#b6422b', '#ce5031', '#dc6545'] : color === 'pink' ? ['#c4837c', '#d8a89b', '#e5c6b3'] : ['#c8c8af', '#dfdfc9', '#f3eed6'];
-    ctx.save(); ctx.translate(x, y); ctx.scale(1, .76 + rand() * .18); ctx.rotate(rand() * 3);
-    const rings = variety ? 4 : 3, petals = variety ? 28 : 15;
+  function bloom(x, y, radius, color, openness) {
+    const colors = color === 'red' ? ['#713931', '#a54d43', '#c37b6a', '#e3b4a1'] : color === 'pink' ? ['#a16b66', '#c3948c', '#e2bcb0', '#f4ddd0'] : ['#a8a28a', '#d0cbb4', '#e6e1cb', '#fff3dc'];
+    ctx.save(); ctx.translate(x, y); ctx.scale(1, .72 + rand() * .19); ctx.rotate((rand() - .5) * .6);
+    ctx.fillStyle = colors[0]; ctx.beginPath(); ctx.ellipse(0, 0, radius * .82, radius * .7, 0, 0, 7); ctx.fill();
+    const rings = openness > .65 ? 4 : 5;
     for (let layer = 0; layer < rings; layer++) {
-      const r = radius * (1 - layer * .2);
+      const petals = 7 + layer * 2 + Math.floor(rand() * 3);
+      const r = radius * (1 - layer * .15);
       for (let j = 0; j < petals; j++) {
-        const angle = j / petals * Math.PI * 2 + layer * .24 + (rand() - .5) * .12;
-        const reach = r * (.85 + rand() * .22), breadth = radius * (variety ? .08 : .19);
-        ctx.save(); ctx.rotate(angle);
-        ctx.beginPath(); ctx.moveTo(radius * .06, 0);
-        ctx.bezierCurveTo(reach * .5, -breadth, reach * 1.16, -breadth, reach, 0);
-        ctx.bezierCurveTo(reach * 1.05, breadth * .85, reach * .4, breadth * .6, radius * .06, 0);
-        ctx.fillStyle = colors[Math.min(layer, 2)]; ctx.fill();
-        ctx.strokeStyle = color === 'red' ? '#e4a17b' : '#fff6df'; ctx.lineWidth = radius * .022; ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(reach * .3, 0); ctx.quadraticCurveTo(reach * .7, -breadth * .2, reach * .94, 0);
-        ctx.strokeStyle = color === 'red' ? '#803d2944' : '#8c6b5944'; ctx.lineWidth = .65; ctx.stroke(); ctx.restore();
+        const angle = j / petals * Math.PI * 2 + layer * .49 + (rand() - .5) * .28;
+        const reach = r * (.83 + rand() * .24), breadth = r * (.29 + rand() * .2);
+        const fold = .73 + rand() * .21, root = radius * (.07 + openness * .12);
+        ctx.save(); ctx.rotate(angle); ctx.translate((rand() - .5) * radius * .09, 0);
+        // Broad, cupped petals with a softly notched, rolled outer lip.
+        ctx.beginPath(); ctx.moveTo(root, -breadth * .13);
+        ctx.bezierCurveTo(reach * .36, -breadth * .7, reach * .91, -breadth, reach * .97, -breadth * .42);
+        ctx.bezierCurveTo(reach * 1.12, -breadth * .22, reach * fold, -breadth * .1, reach, breadth * .1);
+        ctx.bezierCurveTo(reach * 1.07, breadth * .39, reach * .86, breadth * .66, reach * .7, breadth * .55);
+        ctx.bezierCurveTo(reach * .45, breadth * .73, reach * .27, breadth * .3, root, breadth * .13);
+        ctx.closePath();
+        const wash = ctx.createLinearGradient(root, 0, reach, -breadth * .3);
+        wash.addColorStop(0, colors[0]); wash.addColorStop(.48, colors[1]); wash.addColorStop(1, colors[2 + (layer > 1 ? 1 : 0)]);
+        ctx.fillStyle = wash; ctx.fill();
+        ctx.strokeStyle = color === 'red' ? '#edc5afbd' : '#fff5e4d9'; ctx.lineWidth = radius * .014; ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(reach * .45, -breadth * .2);
+        ctx.bezierCurveTo(reach * .65, -breadth * .35, reach * .84, -breadth * .3, reach * .91, -breadth * .36);
+        ctx.strokeStyle = colors[3]; ctx.lineWidth = radius * .019; ctx.stroke();
+        ctx.restore();
       }
     }
-    ctx.fillStyle = '#a88a37'; ctx.beginPath(); ctx.ellipse(0, 0, radius * .26, radius * .22, 0, 0, Math.PI * 2); ctx.fill();
-    for (let i = 0; i < 85; i++) {
-      const a = rand() * Math.PI * 2, r = Math.sqrt(rand()) * radius * .25;
-      ctx.fillStyle = i % 3 ? '#e6c56a' : '#80642e'; ctx.beginPath(); ctx.arc(Math.cos(a) * r, Math.sin(a) * r * .8, .8 + rand(), 0, 7); ctx.fill();
+    // Open flowers reveal sparse stamens; the fuller cups conceal their centre.
+    if (openness > .55) for (let i = 0; i < 32; i++) {
+      const a = rand() * Math.PI * 2, r = Math.sqrt(rand()) * radius * .2 * openness;
+      const xx = Math.cos(a) * r, yy = Math.sin(a) * r * .7;
+      ctx.beginPath(); ctx.moveTo(xx * .3, yy * .3 + radius * .07); ctx.lineTo(xx, yy - radius * .04);
+      ctx.strokeStyle = '#a48548'; ctx.lineWidth = .8; ctx.stroke();
+      ctx.fillStyle = i % 3 ? '#e4c16b' : '#94703e'; ctx.beginPath(); ctx.ellipse(xx, yy - radius * .04, 1.1, 1.7, a, 0, 7); ctx.fill();
     }
     ctx.restore();
     targets.push({ x: (x - w / 2) / unit, y: (h / 2 - y) / unit });
   }
   // Tall left bank, lower right bank, and a hollow opening between them.
   const plants = [];
-  const count = Math.max(26, Math.round(aspect * 34));
+  const count = Math.max(23, Math.round(aspect * 25));
   for (let i = 0; i < count; i++) {
     const x = rand() * w, nx = x / w;
-    const bank = nx < .37 ? .45 + rand() * .45 : nx > .72 ? .18 + rand() * .23 : .12 + rand() * .19;
+    const bank = nx < .37 ? .35 + rand() * .48 : nx > .72 ? .2 + rand() * .3 : .12 + rand() * .27;
     const top = h * (1 - bank * .65);
-    plants.push({ x, top, bend: (rand() - .5) * unit * 1.7, radius: unit * (.36 + rand() * .32), color: rand() < .24 ? 'red' : rand() < .45 ? 'pink' : 'white', variety: rand() > .45 });
+    plants.push({ x, top, bend: (rand() - .5) * unit * 2.7, radius: unit * (.43 + rand() * .34), color: rand() < .18 ? 'red' : rand() < .5 ? 'pink' : 'white', variety: .2 + rand() * .8 });
   }
   // A few unmistakably tall, open stems on the left of the reference composition.
-  plants.push({ x: w * .17, top: h * .48, bend: unit * .45, radius: unit * .68, color: 'pink', variety: false });
-  plants.push({ x: w * .29, top: h * .59, bend: unit * .55, radius: unit * .6, color: 'white', variety: true });
+  plants.push({ x: w * .17, top: h * .48, bend: unit * .8, radius: unit * .8, color: 'pink', variety: .28 });
+  plants.push({ x: w * .29, top: h * .59, bend: unit * .55, radius: unit * .73, color: 'white', variety: .72 });
   plants.sort((a, b) => a.top - b.top);
   for (const p of plants) {
     const root = p.x - p.bend, height = h + 30 - p.top;
     ctx.beginPath(); ctx.moveTo(root, h + 30); ctx.bezierCurveTo(root - p.bend * .3, h - height * .35, p.x + p.bend * .25, p.top + height * .2, p.x, p.top);
     ctx.strokeStyle = '#33362b'; ctx.lineWidth = unit * .035; ctx.stroke();
     ctx.strokeStyle = '#a29259'; ctx.lineWidth = unit * .009; ctx.stroke();
-    for (let j = 1; j < 7; j++) {
-      const t = j / 8, yy = h + 20 - height * t, xx = root + p.bend * t;
-      const side = j % 2 ? 1 : -1;
-      leaf(xx, yy, side === 1 ? -.45 - rand() * .6 : Math.PI + .2 + rand() * .65, unit * (.34 + rand() * .42));
-      if (j % 2 === 0) leaf(xx, yy, side === 1 ? .3 : Math.PI - .3, unit * (.3 + rand() * .35));
+    const nodes = 4 + Math.floor(rand() * 4);
+    for (let j = 0; j < nodes; j++) {
+      const t = .12 + (j + rand() * .7) / nodes * .65, s = 1 - t;
+      const yy = s * s * s * (h + 30) + 3 * s * s * t * (h - height * .35) + 3 * s * t * t * (p.top + height * .2) + t * t * t * p.top;
+      const xx = s * s * s * root + 3 * s * s * t * (root - p.bend * .3) + 3 * s * t * t * (p.x + p.bend * .25) + t * t * t * p.x;
+      const side = rand() > .5 ? 1 : -1;
+      const branchX = xx + side * unit * (.2 + rand() * .4), branchY = yy - unit * (.14 + rand() * .3);
+      ctx.beginPath(); ctx.moveTo(xx, yy); ctx.quadraticCurveTo(branchX, yy, branchX, branchY);
+      ctx.strokeStyle = '#414331'; ctx.lineWidth = unit * .019; ctx.stroke();
+      const angle = side === 1 ? -.5 - rand() * .6 : Math.PI + .2 + rand() * .55;
+      leaf(branchX, branchY, angle, unit * (.45 + rand() * .45));
+      if (rand() > .25) leaf(branchX, branchY, angle + side * .65, unit * (.28 + rand() * .34));
+      if (rand() > .6) leaf(branchX, branchY, angle - side * .65, unit * (.24 + rand() * .3));
+    }
+    // Overlapping basal leaves close the lower edge, rather than a row of bare stems.
+    for (let j = 0; j < 3; j++) {
+      leaf(root + (rand() - .5) * unit * .35, h - rand() * unit * .4, -Math.PI * (.14 + rand() * .72), unit * (.5 + rand() * .55));
     }
   }
   for (const p of plants) bloom(p.x, p.top, p.radius, p.color, p.variety);

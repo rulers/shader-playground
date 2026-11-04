@@ -4,28 +4,38 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 import assert from 'node:assert/strict';
 import * as Three from '../third_party/three/three.module.js';
+import { random } from '../flower-butterflies/painting.js';
+import { resetFlight, updateFlight, decayWind, resizeFlight } from '../flower-butterflies/flight.js';
 
 const source = fs.readFileSync(new URL('../flower-butterflies/app.js', import.meta.url), 'utf8').replace(/^import .*;\n/gm, '');
 for (const reduced of [false, true]) {
   class Element {
-    constructor() { this.events = {}; this.attrs = {}; this.textContent = ''; }
+    constructor() { this.events = {}; this.attrs = {}; this.textContent = ''; this.hidden = true; }
     addEventListener(name, fn) { (this.events[name] ??= []).push(fn); }
     emit(name, event = {}) { for (const fn of this.events[name] ?? []) fn({ target: this, preventDefault() {}, ...event }); }
     setAttribute(name, value) { this.attrs[name] = value; }
+    focus() { doc.activeElement = this; }
   }
-  const elements = Object.fromEntries(['view', 'pause', 'reset', 'hide', 'status'].map(id => [id, new Element()]));
+  const elements = Object.fromEntries(['view', 'pause', 'reset', 'hide', 'status', 'toggle', 'controls', 'close', 'activity', 'wind', 'activity-value', 'wind-value'].map(id => [id, new Element()]));
+  elements.activity.value = '.55'; elements.wind.value = '.8';
   const doc = new Element(), media = new Element(), win = new Element();
   const classes = new Set();
   doc.querySelector = selector => elements[selector.slice(1)]; doc.hidden = false;
   doc.body = { classList: { toggle(name) { if (classes.has(name)) { classes.delete(name); return false; } classes.add(name); return true; }, remove(name) { classes.delete(name); } } };
   media.matches = reduced;
-  let next = 0, time = 0, renders = 0, snapshot;
-  const frames = new Map();
+  let captured = null;
+  elements.view.getBoundingClientRect = () => ({ left: 0, top: 0, width: context.innerWidth, height: context.innerHeight });
+  elements.view.setPointerCapture = id => { captured = id; };
+  elements.view.hasPointerCapture = id => captured === id;
+  elements.view.releasePointerCapture = () => { captured = null; };
+  let next = 0, time = 0, renders = 0, snapshot, groups, disposed = false, geometryDisposals = 0, textureDisposals = 0;
+  const frames = new Map(), timers = new Map();
+  const flushTimers = () => { const pending = [...timers.values()]; timers.clear(); for (const fn of pending) fn(); };
   class Renderer {
-    setSize() {} setPixelRatio() {}
+    setSize() {} setPixelRatio() {} dispose() { disposed = true; }
     render(scene) {
       renders++;
-      const groups = scene.children.filter(child => child.isGroup);
+      groups = scene.children.filter(child => child.isGroup);
       assert.equal(groups.length, 17);
       for (const group of groups) assert(group.position.toArray().every(Number.isFinite));
       snapshot = JSON.stringify(groups.map(group => [group.position.toArray(), group.children[0].rotation.y]));
@@ -35,30 +45,102 @@ for (const reduced of [false, true]) {
     THREE: { ...Three, WebGLRenderer: Renderer }, document: doc, matchMedia: () => media,
     innerWidth: 390, innerHeight: 844, devicePixelRatio: 3, console,
     createPainting: () => ({ canvas: { width: 390, height: 844 }, targets: [{ x: -2, y: -4 }, { x: 2, y: -5 }] }),
-    wingTexture: () => ({ width: 384, height: 512 }), random: () => () => .5,
-    addEventListener: (...args) => win.addEventListener(...args), setTimeout: fn => fn(), clearTimeout() {},
+    wingTexture: () => ({ width: 384, height: 512 }), random, resetFlight, updateFlight, decayWind, resizeFlight,
+    addEventListener: (...args) => win.addEventListener(...args),
+    setTimeout(fn) { timers.set(++next, fn); return next; }, clearTimeout(id) { timers.delete(id); },
     requestAnimationFrame(fn) { frames.set(++next, fn); return next; }, cancelAnimationFrame(id) { frames.delete(id); }
   };
-  const tick = () => { time += 16.67; const pending = [...frames.values()]; frames.clear(); for (const fn of pending) fn(time); };
+  const tick = (count = 1, millis = 16.67) => { for (let i = 0; i < count; i++) { time += millis; const pending = [...frames.values()]; frames.clear(); for (const fn of pending) fn(time); } };
   vm.runInNewContext(source, context);
   assert.equal(elements.pause.attrs['aria-pressed'], String(reduced));
   assert.equal(frames.size, reduced ? 0 : 1);
+  const resetSnapshot = snapshot;
+  elements.toggle.emit('click'); assert.equal(elements.controls.hidden, false); assert.equal(elements.toggle.attrs['aria-expanded'], 'true'); assert.equal(doc.activeElement, elements.close);
+  elements.close.emit('click'); assert.equal(elements.controls.hidden, true); assert.equal(doc.activeElement, elements.toggle);
   if (reduced) elements.pause.emit('click');
   tick(); const initial = snapshot; tick(); assert.notEqual(snapshot, initial);
   elements.pause.emit('click'); assert.equal(frames.size, 0);
   const frozen = snapshot; tick(); assert.equal(snapshot, frozen);
   elements.reset.emit('click'); assert.equal(frames.size, 0); assert.equal(elements.pause.attrs['aria-pressed'], 'true');
+  assert.equal(snapshot, resetSnapshot, 'reset restores the seeded initial pose');
   elements.hide.emit('click', { currentTarget: elements.hide }); assert(classes.has('quiet'));
   doc.emit('keydown', { key: 'Escape' }); assert(!classes.has('quiet'));
   elements.pause.emit('click'); doc.hidden = true; doc.emit('visibilitychange'); assert.equal(frames.size, 0);
   doc.hidden = false; doc.emit('visibilitychange'); assert.equal(frames.size, 1);
   media.emit('change', { matches: true }); assert.equal(frames.size, 0);
   elements.pause.emit('click');
+  const contextPose = snapshot;
   elements.view.emit('webglcontextlost'); assert.equal(frames.size, 0);
-  elements.view.emit('webglcontextrestored'); assert.equal(frames.size, 1);
-  context.innerWidth = 1280; context.innerHeight = 800; win.emit('resize');
+  elements.view.emit('webglcontextrestored'); assert.equal(frames.size, 0, 'wait for Three.js context restoration');
+  flushTimers(); assert.equal(frames.size, 1); assert.equal(snapshot, contextPose, 'same-size context restore preserves pose');
+  // Zero activity freezes the normal flight, making wind displacement measurable.
+  elements.activity.value = '0'; elements.activity.emit('input'); assert.equal(elements['activity-value'].textContent, '0.00');
+  elements.wind.value = '1.5'; elements.wind.emit('input'); assert.equal(elements['wind-value'].textContent, '1.50');
+  tick(30);
+  const position = groups[0].position.clone(), rect = elements.view.getBoundingClientRect();
+  const x = (position.x / (16 * rect.width / rect.height) + .5) * rect.width;
+  const y = (.5 - position.y / 16) * rect.height;
+  const mouse = { pointerId: 1, pointerType: 'mouse', isPrimary: true, clientX: x, clientY: y, timeStamp: 100 };
+  elements.view.emit('pointermove', mouse);
+  elements.view.emit('pointermove', { ...mouse, clientX: x + 30, timeStamp: 132 }); tick(30);
+  assert(groups[0].position.distanceTo(position) > .005, 'mouse gust displaces nearby butterfly');
+  assert(groups[0].position.distanceTo(position) < .8, 'gust is bounded');
+  tick(1200); assert(groups[0].position.distanceTo(position) < .0001, 'wind decays and butterfly returns to normal flight');
+  const touch = { ...mouse, pointerId: 2, pointerType: 'touch', button: 0, timeStamp: 200 };
+  elements.view.emit('pointerdown', touch); assert.equal(captured, 2);
+  elements.view.emit('pointermove', { ...touch, clientX: x - 30, timeStamp: 232 }); tick(30);
+  assert(groups[0].position.distanceTo(position) > .005, 'touch gust displaces butterfly');
+  elements.view.emit('pointercancel', touch); assert.equal(captured, null);
+  elements.pause.emit('click'); const pausePosition = groups[0].position.clone();
+  elements.view.emit('pointermove', { ...mouse, clientX: x + 100, timeStamp: 500 }); tick(30);
+  assert.equal(groups[0].position.distanceTo(pausePosition), 0, 'paused input is ignored');
+  elements.reset.emit('click'); assert.equal(elements.activity.value, '.55'); assert.equal(elements.wind.value, '.8'); assert.equal(snapshot, resetSnapshot);
+  elements.pause.emit('click');
+  context.innerWidth = 1280; context.innerHeight = 800; win.emit('resize'); flushTimers();
   assert(renders > 5);
+  const beforeLostResize = renders;
+  elements.view.emit('webglcontextlost'); context.innerWidth = 844; context.innerHeight = 390;
+  win.emit('resize'); flushTimers(); assert.equal(renders, beforeLostResize, 'no rendering while context is lost');
+  elements.view.emit('webglcontextrestored'); flushTimers(); assert.equal(frames.size, 1);
   doc.emit('keydown', { code: 'Space', repeat: true, target: { tagName: 'BODY' } }); assert.equal(frames.size, 1);
   doc.emit('keydown', { code: 'Space', repeat: false, target: { tagName: 'BODY' } }); assert.equal(frames.size, 0);
-  console.log(`reduced-motion=${reduced}: scene, animation, pause, reset, UI, visibility, resize, context recovery PASS`);
+  elements.toggle.emit('click'); doc.emit('keydown', { key: 'Escape' }); assert.equal(elements.controls.hidden, true);
+  for (const group of groups) group.traverse(object => {
+    object.geometry?.addEventListener('dispose', () => geometryDisposals++);
+    object.material?.map?.addEventListener('dispose', () => textureDisposals++);
+  });
+  win.emit('pagehide', { persisted: true }); assert.equal(disposed, false);
+  win.emit('pageshow', { persisted: true }); assert.equal(frames.size, 0, 'bfcache preserves pause');
+  win.emit('pagehide', { persisted: false }); assert(disposed && geometryDisposals > 0 && textureDisposals > 0);
+  console.log(`reduced-motion=${reduced}: 17 butterflies, animation, pause/reset, mouse/touch wind, decay, UI/settings, resize, visibility, context recovery, GPU disposal PASS`);
 }
+
+// Behavior, locality, stability and normal-flight return, independent of DOM stubs.
+const flowers = [{ x: -2, y: -4 }, { x: 2, y: -5 }], wind = { x: 0, y: 0, vx: 0, vy: 0 };
+const flock = Array.from({ length: 17 }, (_, i) => { const b = {}; resetFlight(b, i, 9, flowers); return b; });
+const states = new Set(); let visits = 0;
+for (let tick = 0; tick < 36000; tick++) {
+  for (const b of flock) {
+    const x = b.x, y = b.y;
+    updateFlight(b, 1 / 60, 1, 9, flowers, wind, 1); states.add(b.state);
+    assert(Number.isFinite(b.x + b.y + b.flap));
+    assert(Math.hypot(b.x - x, b.y - y) < .03, 'no teleport on state transition');
+    assert(Math.abs(b.x) <= 4.05 && b.y >= -7.4 && b.y <= 6.5);
+  }
+}
+for (const state of ['flap', 'glide', 'descend', 'approach', 'rest']) assert(states.has(state), state);
+visits = flock.reduce((sum, b) => sum + b.visits, 0); assert(visits > 10);
+assert(new Set(flock.map(b => b.wingRate)).size === 17);
+const near = {}, far = {}, disabled = {};
+for (const b of [near, far, disabled]) resetFlight(b, 0, 9, flowers);
+far.x += 8; wind.x = near.x; wind.y = near.y; wind.vx = 3;
+for (let i = 0; i < 30; i++) {
+  updateFlight(near, 1 / 60, 0, 30, flowers, wind, 1);
+  updateFlight(far, 1 / 60, 0, 30, flowers, wind, 1);
+  updateFlight(disabled, 1 / 60, 0, 30, flowers, wind, 0);
+  decayWind(wind, 1 / 60);
+}
+assert(near.offsetX > .01 && far.offsetX < near.offsetX * .01); assert.equal(disabled.offsetX, 0);
+for (let i = 0; i < 1200; i++) { updateFlight(near, 1 / 60, 0, 30, flowers, wind, 1); decayWind(wind, 1 / 60); }
+assert(Math.abs(near.offsetX) < .0001 && Math.abs(wind.vx) < .0001);
+console.log(`flight: all five behaviors, ${visits} flower visits, individual variation, bounded movement, wind locality/zero strength/decay PASS`);
