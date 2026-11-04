@@ -25,10 +25,10 @@ WebGL・three.js・Canvas 2Dなどを使った、ブラウザー表現の実験�
 
 ## ローカルで動かす
 
-リポジトリのルートで静的HTTPサーバーを起動します。
+Node.jsとnpmが必要です。リポジトリのルートで実行してください。初回は[http-server](https://github.com/http-party/http-server)を取得します。
 
 ```sh
-python3 -m http.server 8000
+npx --yes http-server@14.1.1 . -a 127.0.0.1 -p 8000 -c-1
 ```
 
 [http://localhost:8000](http://localhost:8000) を開いてください。
