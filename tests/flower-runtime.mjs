@@ -7,9 +7,10 @@ import * as Three from '../third_party/three/three.module.js';
 import { random } from '../flower-butterflies/painting.js';
 import { resetFlight, updateFlight, decayWind, resizeFlight } from '../flower-butterflies/flight.js';
 import { SPECIES, createButterfly, poseButterfly } from '../flower-butterflies/butterfly.js';
+import { createFlockLayout } from '../flower-butterflies/flock.js';
 
 const source = fs.readFileSync(new URL('../flower-butterflies/app.js', import.meta.url), 'utf8').replace(/^import .*;\n/gm, '');
-for (const reduced of [false, true]) {
+for (const [viewportWidth, viewportHeight] of [[390, 844], [1280, 800]]) for (const reduced of [false, true]) {
   class Element {
     constructor() { this.events = {}; this.attrs = {}; this.textContent = ''; this.hidden = true; }
     addEventListener(name, fn) { (this.events[name] ??= []).push(fn); }
@@ -48,10 +49,10 @@ for (const reduced of [false, true]) {
   }
   const context = {
     THREE: { ...Three, WebGLRenderer: Renderer }, document: doc, matchMedia: () => media,
-    innerWidth: 390, innerHeight: 844, devicePixelRatio: 3, console,
+    innerWidth: viewportWidth, innerHeight: viewportHeight, devicePixelRatio: 3, console,
     createPainting: () => ({ canvas: { width: 390, height: 844 }, targets: [{ x: -2, y: -4 }, { x: 2, y: -5 }] }),
     wingTexture: () => ({ width: 384, height: 640 }), random, resetFlight, updateFlight, decayWind, resizeFlight,
-    SPECIES, createButterfly, poseButterfly,
+    SPECIES, createButterfly, poseButterfly, createFlockLayout,
     addEventListener: (...args) => win.addEventListener(...args),
     setTimeout(fn) { timers.set(++next, fn); return next; }, clearTimeout(id) { timers.delete(id); },
     requestAnimationFrame(fn) { frames.set(++next, fn); return next; }, cancelAnimationFrame(id) { frames.delete(id); }
@@ -104,6 +105,14 @@ for (const reduced of [false, true]) {
   elements.pause.emit('click');
   context.innerWidth = 1280; context.innerHeight = 800; win.emit('resize'); flushTimers();
   assert(renders > 5);
+  const sameObjects = [...groups], resizedLayout = createFlockLayout(17, 16 * 1280 / 800);
+  elements.reset.emit('click');
+  groups.forEach((group, i) => {
+    assert.equal(group, sameObjects[i], 'reset reuses model objects');
+    assert.equal(group.position.x, resizedLayout[i].x); assert.equal(group.position.y, resizedLayout[i].y);
+    assert.equal(group.rotation.z, resizedLayout[i].heading); assert.equal(group.rotation.y, resizedLayout[i].yaw);
+    assert.equal(group.scale.x, resizedLayout[i].scale);
+  });
   const beforeLostResize = renders;
   elements.view.emit('webglcontextlost'); context.innerWidth = 844; context.innerHeight = 390;
   win.emit('resize'); flushTimers(); assert.equal(renders, beforeLostResize, 'no rendering while context is lost');
@@ -118,12 +127,13 @@ for (const reduced of [false, true]) {
   win.emit('pagehide', { persisted: true }); assert.equal(disposed, false);
   win.emit('pageshow', { persisted: true }); assert.equal(frames.size, 0, 'bfcache preserves pause');
   win.emit('pagehide', { persisted: false }); assert(disposed && geometryDisposals > 0 && textureDisposals > 0);
-  console.log(`reduced-motion=${reduced}: 17 butterflies, animation, pause/reset, mouse/touch wind, decay, UI/settings, resize, visibility, context recovery, GPU disposal PASS`);
+  console.log(`${viewportWidth}x${viewportHeight}, reduced-motion=${reduced}: 17 butterflies, animation, pause/reset, mouse/touch wind, decay, UI/settings, resize, visibility, context recovery, GPU disposal PASS`);
 }
 
 // Behavior, locality, stability and normal-flight return, independent of DOM stubs.
 const flowers = [{ x: -2, y: -4 }, { x: 2, y: -5 }], wind = { x: 0, y: 0, vx: 0, vy: 0 };
-const flock = Array.from({ length: 17 }, (_, i) => { const b = {}; resetFlight(b, i, 9, flowers); return b; });
+const initialFlock = createFlockLayout(17, 9);
+const flock = initialFlock.map((spawn, i) => { const b = {}; resetFlight(b, i, 9, flowers, spawn); return b; });
 const states = new Set(), attitudes = Array.from({ length: 17 }, () => new Set()); let visits = 0;
 for (let tick = 0; tick < 36000; tick++) {
   for (const b of flock) {
@@ -141,7 +151,7 @@ visits = flock.reduce((sum, b) => sum + b.visits, 0); assert(visits > 10);
 assert(new Set(flock.map(b => b.wingRate)).size === 17);
 for (const views of attitudes) for (const view of ['front', 'oblique', 'left', 'right']) assert(views.has(view), `flight attitude ${view}`);
 const near = {}, far = {}, disabled = {};
-for (const b of [near, far, disabled]) resetFlight(b, 0, 9, flowers);
+for (const b of [near, far, disabled]) resetFlight(b, 0, 9, flowers, initialFlock[0]);
 far.x += 8; wind.x = near.x; wind.y = near.y; wind.vx = 3;
 for (let i = 0; i < 30; i++) {
   updateFlight(near, 1 / 60, 0, 30, flowers, wind, 1);
@@ -155,7 +165,7 @@ assert(Math.abs(near.offsetX) < .0001 && Math.abs(wind.vx) < .0001);
 console.log(`flight: all five behaviors, ${visits} flower visits, individual variation, bounded movement, wind locality/zero strength/decay PASS`);
 console.log('attitude: every butterfly shows front, oblique, left and right views in flight PASS');
 const turning = {};
-resetFlight(turning, 0, 9, flowers);
+resetFlight(turning, 0, 9, flowers, initialFlock[0]);
 Object.assign(turning, { x: 0, y: 0, vx: .002, vy: -.3, goalX: .02, goalY: -5, heading: Math.PI - .01, state: 'glide', remaining: 100 });
 const previousHeading = turning.heading;
 updateFlight(turning, 1 / 60, 1, 9, flowers, { x: 0, y: 0, vx: 0, vy: 0 }, 0);
@@ -164,3 +174,45 @@ const heldHeading = turning.heading, heldYaw = turning.yaw;
 updateFlight(turning, 1 / 60, 0, 9, flowers, { x: 0, y: 0, vx: 0, vy: 0 }, 0);
 assert.equal(turning.heading, heldHeading); assert.equal(turning.yaw, heldYaw);
 console.log('attitude: shortest-angle turn and low-speed heading stability PASS');
+
+for (const [pixelsWide, pixelsHigh] of [[390, 844], [1280, 800]]) {
+  const width = 16 * pixelsWide / pixelsHigh, layout = createFlockLayout(17, width);
+  assert.deepEqual(layout, createFlockLayout(17, width), 'deterministic composition');
+  const count = pose => layout.filter(b => b.pose === pose).length;
+  assert.deepEqual([count('side'), count('oblique'), count('front')], [7, 7, 3]);
+  let minimumGap = Infinity;
+  for (let i = 0; i < layout.length; i++) {
+    const b = layout[i];
+    assert.equal(b.species, initialFlock[i].species); assert.equal(b.size, initialFlock[i].size); assert.equal(b.pose, initialFlock[i].pose);
+    const direction = Math.atan2(-b.vx, b.vy);
+    assert(Math.abs(Math.atan2(Math.sin(direction - b.heading), Math.cos(direction - b.heading))) < 1e-12);
+    const gx = b.goalX - b.x, gy = b.goalY - b.y;
+    assert(Math.abs(gx * b.vy - gy * b.vx) < 1e-12 && gx * b.vx + gy * b.vy > 0, 'goal continues initial velocity');
+    assert(Math.abs(b.goalX) <= width * .43 && b.goalY >= -5.8 && b.goalY <= 6.3, 'first goal remains inside the flight bounds');
+    assert(Math.abs(b.flap - (.14 + (1 + Math.sin(b.phase)) * .525)) < 1e-12, 'initial wing pose matches its stroke phase');
+    const category = Math.abs(b.yaw) > 1.05 ? 'side' : Math.abs(b.yaw) < .35 ? 'front' : 'oblique';
+    assert.equal(category, b.pose);
+    assert(Math.abs(b.x) + b.radius < width / 2 && Math.abs(b.y) + b.radius < 8, 'whole silhouette is inside viewport');
+    const material = new Three.MeshBasicMaterial();
+    const model = createButterfly(b.species, { fore: material, hind: material });
+    model.group.scale.setScalar(b.scale);
+    Object.assign(model, b, { offsetX: 0, offsetY: 0, bank: 0 });
+    poseButterfly(model); model.group.updateMatrixWorld(true);
+    const point = new Three.Vector3(), disposedMaterials = new Set();
+    model.group.traverse(object => {
+      if (object.geometry) {
+        const vertices = object.geometry.attributes.position;
+        for (let vertex = 0; vertex < vertices.count; vertex++) {
+          point.fromBufferAttribute(vertices, vertex).applyMatrix4(object.matrixWorld);
+          assert(Math.hypot(point.x - b.x, point.y - b.y) <= b.radius + 1e-6, 'spacing radius contains the actual posed mesh');
+        }
+        object.geometry.dispose();
+      }
+      if (object.material) disposedMaterials.add(object.material);
+    });
+    disposedMaterials.forEach(value => value.dispose());
+    for (let j = 0; j < i; j++) minimumGap = Math.min(minimumGap, Math.hypot(b.x - layout[j].x, b.y - layout[j].y) - b.radius - layout[j].radius);
+  }
+  assert(minimumGap >= .24, `initial silhouettes need breathing room: ${minimumGap}`);
+  console.log(`initial ${pixelsWide}x${pixelsHigh}: spacing margin ${minimumGap.toFixed(3)}, side/oblique/front=7/7/3, independent attributes, aligned velocity/pose/goal, reset reproducibility PASS`);
+}

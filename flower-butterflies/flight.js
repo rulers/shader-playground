@@ -1,23 +1,26 @@
 import { random } from './painting.js';
 
-const TAU = Math.PI * 2;
 const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
 
+export function flightYaw(vx, vy) {
+  const motion = Math.hypot(vx, vy);
+  return motion ? Math.sign(vx) * (.1 + Math.pow(Math.abs(vx) / motion, 1.8) * 1.15) : 0;
+}
+
 // Each butterfly owns a repeatable random sequence. Goals change at irregular
-// intervals; sine is used only for the wing stroke, never to prescribe a path.
-export function resetFlight(b, index, width, targets) {
+// intervals; trigonometry controls wings and attitude, never a prescribed path.
+export function resetFlight(b, index, width, targets, spawn) {
   b.random = random(8241 + index * 731);
   const r = b.random;
-  b.x = (r() - .5) * width * .77; b.y = -3.5 + r() * 9.4;
-  b.z = .35 + r() * .5; b.vx = (r() - .5) * .18; b.vy = 0;
+  b.x = spawn.x; b.y = spawn.y; b.z = spawn.z;
+  b.vx = spawn.vx; b.vy = spawn.vy;
   b.pace = .66 + r() * .6; b.wingRate = 7 + r() * 4;
-  b.phase = r() * TAU; b.flap = .5; b.bank = 0;
-  b.heading = Math.atan2(-b.vx, .12); b.yaw = Math.sign(b.vx) * .35;
+  b.phase = spawn.phase; b.flap = spawn.flap; b.bank = 0;
+  b.heading = spawn.heading; b.yaw = spawn.yaw;
   b.offsetX = b.offsetY = b.windX = b.windY = 0;
   b.flower = index % targets.length; b.state = 'flap';
   b.remaining = 1 + r() * 4; b.visits = 0;
-  b.goalX = clamp(b.x + (r() - .5) * 3, -width * .43, width * .43);
-  b.goalY = clamp(b.y + .8 + r() * 1.8, -5.7, 6.3);
+  b.goalX = spawn.goalX; b.goalY = spawn.goalY;
 }
 
 function chooseState(b, width, targets) {
@@ -84,7 +87,7 @@ export function updateFlight(b, dt, activity, width, targets, wind, strength) {
     b.heading += turn * (1 - Math.exp(-dt * 2.4));
     // Horizontal travel reveals a lateral silhouette; vertical travel opens up
     // the dorsal view. Do not snap or flip the heading around ±pi.
-    const yaw = Math.sign(moveX) * (.1 + Math.pow(Math.abs(moveX) / motion, 1.8) * 1.15);
+    const yaw = flightYaw(moveX, moveY);
     b.yaw += (yaw - b.yaw) * (1 - Math.exp(-dt * 1.8));
   }
 }

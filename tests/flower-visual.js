@@ -2,6 +2,7 @@ import * as THREE from '../third_party/three/three.module.js';
 import { SPECIES, createButterfly, poseButterfly } from '../flower-butterflies/butterfly.js';
 import { wingTexture } from '../flower-butterflies/painting.js';
 import { resetFlight, updateFlight } from '../flower-butterflies/flight.js';
+import { createFlockLayout } from '../flower-butterflies/flock.js';
 
 const report = document.querySelector('#report'), lines = [];
 const assert = (condition, message) => { if (!condition) throw new Error(message); };
@@ -15,7 +16,8 @@ let renderer;
 function classify(b) { return Math.abs(b.yaw) < .35 ? 'front' : Math.abs(b.yaw) > 1.05 ? b.yaw < 0 ? 'left' : 'right' : 'oblique'; }
 function flightSamples() {
   const flowers = [{ x: -2, y: -4 }, { x: 2, y: -5 }];
-  const flock = SPECIES.map((_, i) => { const b = {}; resetFlight(b, i, 9, flowers); return b; });
+  const layout = createFlockLayout(17, 9);
+  const flock = SPECIES.map((_, i) => { const b = {}; resetFlight(b, i, 9, flowers, layout[i]); return b; });
   const samples = SPECIES.map(() => ({}));
   for (let tick = 0; tick < 36000; tick++) for (let i = 0; i < flock.length; i++) {
     const b = flock[i]; updateFlight(b, 1 / 60, .8, 9, flowers, idleWind, 0);

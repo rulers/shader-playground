@@ -1,13 +1,14 @@
 import * as THREE from '../third_party/three/three.module.js';
-import { createPainting, wingTexture, random } from './painting.js';
+import { createPainting, wingTexture } from './painting.js';
 import { resetFlight, updateFlight, decayWind, resizeFlight } from './flight.js';
 import { SPECIES, createButterfly, poseButterfly } from './butterfly.js';
+import { createFlockLayout } from './flock.js';
 
 const canvas = document.querySelector('#view'), pause = document.querySelector('#pause');
 const status = document.querySelector('#status'), motion = matchMedia('(prefers-reduced-motion: reduce)');
 let renderer, scene, camera, backdrop, butterflies = [], targets = [], width = 10;
 let paused = motion.matches, last = null, frame = 0, lost = false;
-const rand = random(142), textures = [], controls = document.querySelector('#controls');
+const textures = [], controls = document.querySelector('#controls');
 const wingMaterials = [];
 const activityInput = document.querySelector('#activity'), windInput = document.querySelector('#wind');
 let activity = .55, windStrength = .8;
@@ -72,12 +73,20 @@ addEventListener('blur', clearWind);
 function texture(source) {
   const tex = new THREE.CanvasTexture(source); tex.colorSpace = THREE.SRGBColorSpace; return tex;
 }
-function makeButterfly(index) {
-  const species = index % SPECIES.length;
-  const butterfly = createButterfly(species, wingMaterials[species]);
-  butterfly.group.scale.setScalar((.38 + rand() * .38) * SPECIES[species].size);
+function makeButterfly(spawn, index) {
+  const butterfly = createButterfly(spawn.species, wingMaterials[spawn.species]);
+  butterfly.group.scale.setScalar(spawn.scale);
   scene.add(butterfly.group);
   return { ...butterfly, index };
+}
+
+function resetFlock() {
+  const layout = createFlockLayout(17, width);
+  if (!butterflies.length) butterflies = layout.map(makeButterfly);
+  for (const b of butterflies) {
+    b.group.scale.setScalar(layout[b.index].scale);
+    resetFlight(b, b.index, width, targets, layout[b.index]);
+  }
 }
 
 function resize() {
@@ -87,10 +96,8 @@ function resize() {
   camera.left = -width / 2; camera.right = width / 2; camera.top = 8; camera.bottom = -8; camera.updateProjectionMatrix();
   renderer.setSize(innerWidth, innerHeight); renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   const painting = createPainting(aspect); targets = painting.targets;
-  for (const b of butterflies) {
-    if (initial) resetFlight(b, b.index, width, targets);
-    else resizeFlight(b, width / previousWidth, targets, width);
-  }
+  if (initial) resetFlock();
+  else for (const b of butterflies) resizeFlight(b, width / previousWidth, targets, width);
   if (backdrop) { scene.remove(backdrop); backdrop.geometry.dispose(); backdrop.material.map.dispose(); backdrop.material.dispose(); }
   backdrop = new THREE.Mesh(new THREE.PlaneGeometry(width, 16), new THREE.MeshBasicMaterial({ map: texture(painting.canvas) }));
   backdrop.position.z = -1; scene.add(backdrop); draw();
@@ -123,7 +130,7 @@ function sync() {
 pause.addEventListener('click', () => { paused = !paused; sync(); });
 document.querySelector('#reset').addEventListener('click', () => {
   activityInput.value = '.55'; windInput.value = '.8'; readSettings();
-  if (targets.length) for (const b of butterflies) resetFlight(b, b.index, width, targets);
+  if (targets.length) resetFlock();
   sync();
 });
 document.querySelector('#hide').addEventListener('click', event => {
@@ -162,7 +169,6 @@ try {
     }
     wingMaterials.push(materials);
   }
-  butterflies = Array.from({ length: 17 }, (_, index) => makeButterfly(index));
   readSettings(); resize(); sync();
   let resizing;
   addEventListener('resize', () => { clearTimeout(resizing); resizing = setTimeout(() => { if (!lost) resize(); }, 120); });
