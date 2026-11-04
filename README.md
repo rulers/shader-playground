@@ -21,6 +21,7 @@ GitHub Pagesは `main` ブランチのルート `/` です
 | 墨の庭 / Ink Playground | [DEMO](https://rulers.github.io/shader-playground/inkplay/) | [操作と仕組み](tutorials/11_interactive_ink.md) | MIT |
 | 墨が鯉になる / Ink Becomes Koi | [DEMO](https://rulers.github.io/shader-playground/ink-to-koi/) | [操作と仕組み](ink-to-koi/README.md) | MIT |
 | 水のあわい / Between Depth and Light | [DEMO](https://rulers.github.io/shader-playground/koi/) | [操作と仕組み](koi/README.md) | MIT／three.js MIT |
+| 花間の蝶 / Butterflies Among Blooms | [DEMO](https://rulers.github.io/shader-playground/flower-butterflies/) | [操作と仕組み](flower-butterflies/README.md) | MIT／three.js MIT |
 | Heartfelt：雨粒と曇りガラス | [DEMO](https://rulers.github.io/shader-playground/rain/) | [設定と仕組み](tutorials/10_heartfelt.md) | CC BY-NC-SA 3.0 |
 | 言葉の肖像：芥川龍之介 × 羅生門 | [DEMO](https://rulers.github.io/shader-playground/portraits/) | [操作と仕組み](portraits/README.md) | 実装MIT／フォントOFL等、[素材別条件](portraits/NOTICE.md) |
 | 言葉の肖像：夏目漱石 × 吾輩は猫である | [DEMO](https://rulers.github.io/shader-playground/soseki/) | [操作と仕組み](soseki/README.md) | 実装MIT／three.js MIT／フォントOFL等、[素材別条件](soseki/NOTICE.md) |
