@@ -1,3 +1,5 @@
+import { SPECIES, traceWing } from './butterfly.js';
+
 // All botanical marks are drawn here; no reference-image pixels are used.
 export function random(seed) {
   return () => { seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0; return seed / 4294967296; };
@@ -121,30 +123,56 @@ export function createPainting(aspect) {
   return { canvas, targets };
 }
 
-export function wingTexture(kind) {
-  const canvas = document.createElement('canvas'); canvas.width = 384; canvas.height = 512;
-  const c = canvas.getContext('2d');
-  const palettes = [['#d4b65f','#302e26','#f4dd8a'], ['#dedac2','#514b3c','#f4efd8'], ['#303b3e','#191f22','#8d9c93'], ['#b4844e','#443b2d','#debb7a']];
-  const [base, ink, spot] = palettes[kind % palettes.length];
-  c.beginPath(); c.moveTo(26, 260);
-  c.bezierCurveTo(55, 190, 167, 13, 317, 25);
-  c.bezierCurveTo(375, 29, 349, 154, 315, 225);
-  c.bezierCurveTo(306, 251, 284, 269, 263, 275);
-  c.bezierCurveTo(337, 312, 319, 381, 272, 404);
-  c.quadraticCurveTo(256, 421, 259, 469); c.quadraticCurveTo(239, 455, 230, 414);
-  c.bezierCurveTo(153, 456, 82, 376, 26, 260);
-  c.fillStyle = base; c.fill(); c.strokeStyle = ink; c.lineWidth = 13; c.stroke();
-  c.save(); c.clip();
-  for (let i = 0; i < 10; i++) {
-    const y = 35 + i * 39, x = 310 + Math.sin(i * .65) * 20;
-    c.beginPath(); c.moveTo(27, 260); c.quadraticCurveTo(155, 200 + i * 13, x, y);
-    c.strokeStyle = ink; c.lineWidth = kind === 2 ? 3 : 5; c.stroke();
-    c.fillStyle = spot; c.beginPath(); c.ellipse(x - 15, y + 5, 9, 13, -.4, 0, 7); c.fill();
+export function wingTexture(kind, part = 'fore') {
+  const canvas = document.createElement('canvas'); canvas.width = 384; canvas.height = 640;
+  const c = canvas.getContext('2d'), fore = part === 'fore';
+  const base = ['#dbc780', '#253735', '#eeeacf'][kind];
+  c.setTransform(384 / .85, 0, 0, -640 / 1.6, 0, .9 * 640 / 1.6);
+  c.beginPath(); traceWing(c, SPECIES[kind][part]);
+  c.fillStyle = base; c.fill(); c.save(); c.clip();
+  if (kind === 0) {
+    // Cream fields divided by dark swallowtail bars, scallops and an eye spot.
+    c.strokeStyle = '#35392e'; c.lineWidth = .033;
+    for (let j = 0; j < 5; j++) {
+      c.beginPath(); c.moveTo(.12 + j * .1, .2 + j * .105);
+      c.quadraticCurveTo(.21 + j * .08, .19 + j * .055, .16 + j * .092, .04); c.stroke();
+    }
+    if (!fore) {
+      c.fillStyle = '#536d70'; c.beginPath(); c.ellipse(.32, -.28, .075, .037, -.3, 0, 7); c.fill();
+      c.fillStyle = '#a95942'; c.beginPath(); c.arc(.25, -.28, .037, 0, 7); c.fill();
+      c.fillStyle = '#292f28'; c.beginPath(); c.arc(.25, -.28, .018, 0, 7); c.fill();
+    }
+  } else if (kind === 1) {
+    c.strokeStyle = '#81c1b4'; c.lineWidth = fore ? .105 : .09;
+    c.beginPath(); c.moveTo(.08, fore ? .1 : -.03);
+    if (fore) c.bezierCurveTo(.23, .18, .47, .43, .65, .7);
+    else c.quadraticCurveTo(.23, -.14, .43, -.16);
+    c.stroke();
+    if (!fore) for (let j = 0; j < 4; j++) {
+      c.fillStyle = '#c18a61'; c.beginPath(); c.ellipse(.15 + j * .075, -.2 - j * .025, .015, .009, -.6, 0, 7); c.fill();
+    }
+  } else if (fore) {
+    c.fillStyle = '#51584d'; c.beginPath(); c.moveTo(.36, .6);
+    c.bezierCurveTo(.61, .67, .7, .48, .56, .3); c.quadraticCurveTo(.48, .46, .36, .6); c.fill();
+    for (const [x, y] of [[.25, .22], [.4, .27]]) {
+      c.beginPath(); c.ellipse(x, y, .029, .037, .15, 0, 7); c.fill();
+    }
   }
-  c.beginPath(); c.moveTo(56, 247); c.bezierCurveTo(175, 175, 257, 167, 339, 127);
-  c.strokeStyle = ink; c.lineWidth = 8; c.stroke();
-  for (let i = 0; i < 5; i++) {
-    c.beginPath(); c.ellipse(192 + i * 22, 82 + i * 24, 7, 19, -.55, 0, 7); c.fillStyle = ink; c.fill();
+  // Fine veins follow each part and interrupt the blue band into small cells.
+  c.strokeStyle = kind === 2 ? '#67735b55' : '#293b3288'; c.lineWidth = kind === 1 ? .008 : .004;
+  for (let j = 0; j < 7; j++) {
+    c.beginPath(); c.moveTo(.025, .045);
+    c.quadraticCurveTo(.2, fore ? .15 : -.07, .18 + j * .085, fore ? .72 - j * .1 : -.37 + j * .025); c.stroke();
   }
-  c.restore(); return canvas;
+  c.restore();
+  c.beginPath(); traceWing(c, SPECIES[kind][part]);
+  c.strokeStyle = kind === 2 ? '#6a705e' : '#29352c'; c.lineWidth = kind === 2 ? .008 : .025; c.stroke();
+  if (kind === 0) {
+    c.save(); c.clip(); c.fillStyle = '#f1d99c';
+    for (let j = 0; j < 6; j++) {
+      c.beginPath(); c.ellipse(fore ? .66 - j * .021 : .49 - j * .058, fore ? .57 - j * .075 : -.22 - Math.sin(j / 5 * Math.PI) * .1, .012, .018, -.3, 0, 7); c.fill();
+    }
+    c.restore();
+  }
+  return canvas;
 }

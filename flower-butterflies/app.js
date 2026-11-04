@@ -1,12 +1,14 @@
 import * as THREE from '../third_party/three/three.module.js';
 import { createPainting, wingTexture, random } from './painting.js';
 import { resetFlight, updateFlight, decayWind, resizeFlight } from './flight.js';
+import { SPECIES, createButterfly, poseButterfly } from './butterfly.js';
 
 const canvas = document.querySelector('#view'), pause = document.querySelector('#pause');
 const status = document.querySelector('#status'), motion = matchMedia('(prefers-reduced-motion: reduce)');
 let renderer, scene, camera, backdrop, butterflies = [], targets = [], width = 10;
 let paused = motion.matches, last = null, frame = 0, lost = false;
 const rand = random(142), textures = [], controls = document.querySelector('#controls');
+const wingMaterials = [];
 const activityInput = document.querySelector('#activity'), windInput = document.querySelector('#wind');
 let activity = .55, windStrength = .8;
 let restoreTimer;
@@ -71,23 +73,11 @@ function texture(source) {
   const tex = new THREE.CanvasTexture(source); tex.colorSpace = THREE.SRGBColorSpace; return tex;
 }
 function makeButterfly(index) {
-  const group = new THREE.Group(), wings = [];
-  for (const side of [-1, 1]) {
-    const hinge = new THREE.Group();
-    const material = new THREE.MeshBasicMaterial({ map: textures[index % 4], transparent: true, side: THREE.DoubleSide, depthWrite: false });
-    const wing = new THREE.Mesh(new THREE.PlaneGeometry(.72, .96), material);
-    wing.position.set(side * .31, .02, 0); wing.scale.x = side;
-    hinge.add(wing); group.add(hinge); wings.push(hinge);
-  }
-  const body = new THREE.Mesh(new THREE.CapsuleGeometry(.023, .3, 3, 6), new THREE.MeshBasicMaterial({ color: '#292d28' }));
-  group.add(body);
-  for (const side of [-1, 1]) {
-    const points = [new THREE.Vector3(0, .15, .01), new THREE.Vector3(side * .045, .23, .01), new THREE.Vector3(side * .09, .25, .01)];
-    group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(points), new THREE.LineBasicMaterial({ color: '#292d28' })));
-  }
-  const scale = .38 + rand() * .38; group.scale.setScalar(scale);
-  scene.add(group);
-  return { group, wings, index };
+  const species = index % SPECIES.length;
+  const butterfly = createButterfly(species, wingMaterials[species]);
+  butterfly.group.scale.setScalar((.38 + rand() * .38) * SPECIES[species].size);
+  scene.add(butterfly.group);
+  return { ...butterfly, index };
 }
 
 function resize() {
@@ -109,9 +99,7 @@ function resize() {
 function draw() {
   if (document.hidden || lost) return;
   for (const b of butterflies) {
-    b.group.position.set(b.x + b.offsetX, b.y + b.offsetY, b.z);
-    b.group.rotation.set(.12 + b.vy * .28, b.bank * .45, b.bank + b.windX * .3);
-    b.wings[0].rotation.y = b.flap; b.wings[1].rotation.y = -b.flap;
+    poseButterfly(b);
   }
   renderer.render(scene, camera);
 }
@@ -166,7 +154,14 @@ try {
   renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   scene = new THREE.Scene(); camera = new THREE.OrthographicCamera(-5, 5, 8, -8, .1, 30); camera.position.z = 15;
-  for (let i = 0; i < 4; i++) textures.push(texture(wingTexture(i)));
+  for (let i = 0; i < SPECIES.length; i++) {
+    const materials = {};
+    for (const part of ['fore', 'hind']) {
+      const map = texture(wingTexture(i, part)); textures.push(map);
+      materials[part] = new THREE.MeshBasicMaterial({ map, transparent: true, side: THREE.DoubleSide, alphaTest: .2 });
+    }
+    wingMaterials.push(materials);
+  }
   butterflies = Array.from({ length: 17 }, (_, index) => makeButterfly(index));
   readSettings(); resize(); sync();
   let resizing;

@@ -12,6 +12,7 @@ export function resetFlight(b, index, width, targets) {
   b.z = .35 + r() * .5; b.vx = (r() - .5) * .18; b.vy = 0;
   b.pace = .66 + r() * .6; b.wingRate = 7 + r() * 4;
   b.phase = r() * TAU; b.flap = .5; b.bank = 0;
+  b.heading = Math.atan2(-b.vx, .12); b.yaw = Math.sign(b.vx) * .35;
   b.offsetX = b.offsetY = b.windX = b.windY = 0;
   b.flower = index % targets.length; b.state = 'flap';
   b.remaining = 1 + r() * 4; b.visits = 0;
@@ -74,6 +75,18 @@ export function updateFlight(b, dt, activity, width, targets, wind, strength) {
   b.windX = clamp(b.windX, -.85, .85); b.windY = clamp(b.windY, -.85, .85);
   b.offsetX = clamp(b.offsetX + b.windX * dt, -.65, .65);
   b.offsetY = clamp(b.offsetY + b.windY * dt, -.65, .65);
+  const moveX = b.vx * activity * b.pace + b.windX;
+  const moveY = b.vy * activity * b.pace + b.windY;
+  const motion = Math.hypot(moveX, moveY);
+  if (motion > .012) {
+    const direction = Math.atan2(-moveX, moveY);
+    const turn = Math.atan2(Math.sin(direction - b.heading), Math.cos(direction - b.heading));
+    b.heading += turn * (1 - Math.exp(-dt * 2.4));
+    // Horizontal travel reveals a lateral silhouette; vertical travel opens up
+    // the dorsal view. Do not snap or flip the heading around ±pi.
+    const yaw = Math.sign(moveX) * (.1 + Math.pow(Math.abs(moveX) / motion, 1.8) * 1.15);
+    b.yaw += (yaw - b.yaw) * (1 - Math.exp(-dt * 1.8));
+  }
 }
 
 export function decayWind(wind, dt) {

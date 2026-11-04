@@ -6,6 +6,7 @@ import assert from 'node:assert/strict';
 import * as Three from '../third_party/three/three.module.js';
 import { random } from '../flower-butterflies/painting.js';
 import { resetFlight, updateFlight, decayWind, resizeFlight } from '../flower-butterflies/flight.js';
+import { SPECIES, createButterfly, poseButterfly } from '../flower-butterflies/butterfly.js';
 
 const source = fs.readFileSync(new URL('../flower-butterflies/app.js', import.meta.url), 'utf8').replace(/^import .*;\n/gm, '');
 for (const reduced of [false, true]) {
@@ -37,15 +38,20 @@ for (const reduced of [false, true]) {
       renders++;
       groups = scene.children.filter(child => child.isGroup);
       assert.equal(groups.length, 17);
+      assert.deepEqual(groups.map(g => g.name).filter((v, i, all) => all.indexOf(v) === i).sort(), SPECIES.map(s => s.id).sort());
+      assert.deepEqual(SPECIES.map(s => groups.filter(g => g.name === s.id).length), [6, 6, 5]);
       for (const group of groups) assert(group.position.toArray().every(Number.isFinite));
-      snapshot = JSON.stringify(groups.map(group => [group.position.toArray(), group.children[0].rotation.y]));
+      for (const group of groups) assert.equal(group.children.filter(c => /-(fore|hind)$/.test(c.name)).length, 4);
+      for (const group of groups) assert(group.children[0].position.z > group.children[1].position.z, 'forewing overlaps hindwing in depth');
+      snapshot = JSON.stringify(groups.map(group => [group.position.toArray(), group.rotation.toArray(), group.children.slice(0, 4).map(c => c.rotation.toArray())]));
     }
   }
   const context = {
     THREE: { ...Three, WebGLRenderer: Renderer }, document: doc, matchMedia: () => media,
     innerWidth: 390, innerHeight: 844, devicePixelRatio: 3, console,
     createPainting: () => ({ canvas: { width: 390, height: 844 }, targets: [{ x: -2, y: -4 }, { x: 2, y: -5 }] }),
-    wingTexture: () => ({ width: 384, height: 512 }), random, resetFlight, updateFlight, decayWind, resizeFlight,
+    wingTexture: () => ({ width: 384, height: 640 }), random, resetFlight, updateFlight, decayWind, resizeFlight,
+    SPECIES, createButterfly, poseButterfly,
     addEventListener: (...args) => win.addEventListener(...args),
     setTimeout(fn) { timers.set(++next, fn); return next; }, clearTimeout(id) { timers.delete(id); },
     requestAnimationFrame(fn) { frames.set(++next, fn); return next; }, cancelAnimationFrame(id) { frames.delete(id); }
@@ -118,11 +124,13 @@ for (const reduced of [false, true]) {
 // Behavior, locality, stability and normal-flight return, independent of DOM stubs.
 const flowers = [{ x: -2, y: -4 }, { x: 2, y: -5 }], wind = { x: 0, y: 0, vx: 0, vy: 0 };
 const flock = Array.from({ length: 17 }, (_, i) => { const b = {}; resetFlight(b, i, 9, flowers); return b; });
-const states = new Set(); let visits = 0;
+const states = new Set(), attitudes = Array.from({ length: 17 }, () => new Set()); let visits = 0;
 for (let tick = 0; tick < 36000; tick++) {
   for (const b of flock) {
     const x = b.x, y = b.y;
     updateFlight(b, 1 / 60, 1, 9, flowers, wind, 1); states.add(b.state);
+    const yaw = Math.abs(b.yaw);
+    attitudes[flock.indexOf(b)].add(yaw < .35 ? 'front' : yaw > 1.05 ? b.yaw < 0 ? 'left' : 'right' : 'oblique');
     assert(Number.isFinite(b.x + b.y + b.flap));
     assert(Math.hypot(b.x - x, b.y - y) < .03, 'no teleport on state transition');
     assert(Math.abs(b.x) <= 4.05 && b.y >= -7.4 && b.y <= 6.5);
@@ -131,6 +139,7 @@ for (let tick = 0; tick < 36000; tick++) {
 for (const state of ['flap', 'glide', 'descend', 'approach', 'rest']) assert(states.has(state), state);
 visits = flock.reduce((sum, b) => sum + b.visits, 0); assert(visits > 10);
 assert(new Set(flock.map(b => b.wingRate)).size === 17);
+for (const views of attitudes) for (const view of ['front', 'oblique', 'left', 'right']) assert(views.has(view), `flight attitude ${view}`);
 const near = {}, far = {}, disabled = {};
 for (const b of [near, far, disabled]) resetFlight(b, 0, 9, flowers);
 far.x += 8; wind.x = near.x; wind.y = near.y; wind.vx = 3;
@@ -144,3 +153,14 @@ assert(near.offsetX > .01 && far.offsetX < near.offsetX * .01); assert.equal(dis
 for (let i = 0; i < 1200; i++) { updateFlight(near, 1 / 60, 0, 30, flowers, wind, 1); decayWind(wind, 1 / 60); }
 assert(Math.abs(near.offsetX) < .0001 && Math.abs(wind.vx) < .0001);
 console.log(`flight: all five behaviors, ${visits} flower visits, individual variation, bounded movement, wind locality/zero strength/decay PASS`);
+console.log('attitude: every butterfly shows front, oblique, left and right views in flight PASS');
+const turning = {};
+resetFlight(turning, 0, 9, flowers);
+Object.assign(turning, { x: 0, y: 0, vx: .002, vy: -.3, goalX: .02, goalY: -5, heading: Math.PI - .01, state: 'glide', remaining: 100 });
+const previousHeading = turning.heading;
+updateFlight(turning, 1 / 60, 1, 9, flowers, { x: 0, y: 0, vx: 0, vy: 0 }, 0);
+assert(Math.abs(turning.heading - previousHeading) < .02, 'heading follows shortest turn across ±pi');
+const heldHeading = turning.heading, heldYaw = turning.yaw;
+updateFlight(turning, 1 / 60, 0, 9, flowers, { x: 0, y: 0, vx: 0, vy: 0 }, 0);
+assert.equal(turning.heading, heldHeading); assert.equal(turning.yaw, heldYaw);
+console.log('attitude: shortest-angle turn and low-speed heading stability PASS');
