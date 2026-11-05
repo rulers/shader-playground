@@ -27,10 +27,13 @@ export function resetFlock(s) {
     s.velocity[k] = -Math.sin(heading) * s.speed[i]; s.velocity[k + 1] = Math.cos(heading) * s.speed[i]; s.velocity[k + 2] = 0;
     s.wing[w] = rng() * TAU; s.wing[w + 1] = 5.4 + rng() * 4.8; s.wing[w + 2] = .65 + rng() * .32; s.wing[w + 3] = rng() * TAU;
     // A few best-candidate samples avoid both a regular grid and accidental piles.
-    const radius = s.sizes[i] * .64 / halfH;
+    const radius = Math.max(s.sizes[i] * .75 / halfH,.020);
     let best = -Infinity, bestX = 0, bestY = 0;
     for (let candidate = 0; candidate < 18; candidate++) {
       const x = (placement() * 2 - 1) * (.96 * s.aspect - radius), y = (placement() * 2 - 1) * (.95 - radius);
+      // Reserve the existing lower-left caption on a narrow screen; no UI or
+      // wind changes. This is an initial-composition constraint only.
+      if(s.aspect<.8 && x<s.aspect*.30 && y<-.62)continue;
       let gap = Infinity;
       for (let j = 0; j < i; j++) gap = Math.min(gap, Math.hypot(x - placedX[j], y - placedY[j]) - radius - radii[j]);
       if (gap > best) { best = gap; bestX = x; bestY = y; }
@@ -69,8 +72,11 @@ function integrate(s, dt, activity, strength) {
     let desiredX = -Math.sin(wandering) * s.speed[i], desiredY = Math.cos(wandering) * s.speed[i];
     // Choose a new inward route, rather than balancing an outward goal against
     // the border force (which would leave butterflies parked around the rim).
-    if ((Math.abs(x) > boundX * .78 && x * desiredX > 0) || (Math.abs(y) > boundY * .78 && y * desiredY > 0)) {
-      const dx = (next(s,i) - .5) * boundX * 1.2 - x, dy = (next(s,i) - .5) * boundY * 1.2 - y;
+    const nearCaption = s.aspect < .8 && x < boundX * .40 && y < -boundY * .54;
+    if ((Math.abs(x) > boundX * .78 && x * desiredX > 0) || (Math.abs(y) > boundY * .78 && y * desiredY > 0) || (nearCaption && desiredY < .2)) {
+      const dx = (next(s,i) - .5) * boundX * 1.2 - x;
+      const targetY = (next(s,i) - .5) * boundY * 1.2;
+      const dy = (nearCaption ? Math.max(targetY,-boundY*.25) : targetY) - y;
       s.goal[i] = Math.atan2(-dx,dy); s.remaining[i] = 3 + next(s,i) * 4;
       wandering = s.goal[i]; desiredX = -Math.sin(wandering) * s.speed[i]; desiredY = Math.cos(wandering) * s.speed[i];
     }

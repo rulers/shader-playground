@@ -1,0 +1,135 @@
+{
+  "browser": "155.0.8059.79",
+  "renderer": "ANGLE / SwiftShader (software)",
+  "cells": [
+    {
+      "species": 0,
+      "view": 0,
+      "width": 208,
+      "height": 217,
+      "area": 20824,
+      "connected": 0.9993276988090665
+    },
+    {
+      "species": 0,
+      "view": 1,
+      "width": 162,
+      "height": 217,
+      "area": 16177,
+      "connected": 0.9995054707300488
+    },
+    {
+      "species": 0,
+      "view": 2,
+      "width": 48,
+      "height": 217,
+      "area": 5069,
+      "connected": 1
+    },
+    {
+      "species": 1,
+      "view": 0,
+      "width": 194,
+      "height": 185,
+      "area": 15140,
+      "connected": 0.9993394980184941
+    },
+    {
+      "species": 1,
+      "view": 1,
+      "width": 153,
+      "height": 185,
+      "area": 11794,
+      "connected": 0.9992369001187045
+    },
+    {
+      "species": 1,
+      "view": 2,
+      "width": 42,
+      "height": 185,
+      "area": 3748,
+      "connected": 0.9991995731056563
+    },
+    {
+      "species": 2,
+      "view": 0,
+      "width": 136,
+      "height": 130,
+      "area": 10483,
+      "connected": 0.9997138223790899
+    },
+    {
+      "species": 2,
+      "view": 1,
+      "width": 105,
+      "height": 130,
+      "area": 8174,
+      "connected": 0.9996329826278444
+    },
+    {
+      "species": 2,
+      "view": 2,
+      "width": 33,
+      "height": 130,
+      "area": 2488,
+      "connected": 1
+    }
+  ],
+  "overlaps": [
+    {
+      "view": 0,
+      "a": 0,
+      "b": 1,
+      "iou": 0.5064122614951517
+    },
+    {
+      "view": 0,
+      "a": 0,
+      "b": 2,
+      "iou": 0.6799458518661767
+    },
+    {
+      "view": 0,
+      "a": 1,
+      "b": 2,
+      "iou": 0.5436785845927018
+    },
+    {
+      "view": 1,
+      "a": 0,
+      "b": 1,
+      "iou": 0.5051772827110135
+    },
+    {
+      "view": 1,
+      "a": 0,
+      "b": 2,
+      "iou": 0.6770873412851096
+    },
+    {
+      "view": 1,
+      "a": 1,
+      "b": 2,
+      "iou": 0.5283156740957252
+    },
+    {
+      "view": 2,
+      "a": 0,
+      "b": 1,
+      "iou": 0.4790151091214326
+    },
+    {
+      "view": 2,
+      "a": 0,
+      "b": 2,
+      "iou": 0.6539112448288831
+    },
+    {
+      "view": 2,
+      "a": 1,
+      "b": 2,
+      "iou": 0.5466702089975204
+    }
+  ],
+  "errors": []
+}

@@ -6,7 +6,7 @@ import { createButterflies } from './butterflies.js';
 export function mount({ initialPaused } = {}) {
   const $ = id => document.getElementById(id), canvas = $('view'), motion = matchMedia('(prefers-reduced-motion: reduce)');
   const listeners = new AbortController(), on = (target,name,fn) => target.addEventListener(name,fn,{signal:listeners.signal});
-  const state = createFlock(innerWidth < 600 ? 144 : 180, innerWidth / innerHeight);
+  const state = createFlock(innerWidth < 600 ? 120 : 180, innerWidth / innerHeight);
   let renderer, scene, camera, butterflies, raf = 0, last = null, lost = false, disposed = false, failed = false, restoration;
   let paused = initialPaused ?? motion.matches, mode = 'auto', activity = 1, strength = .8, currentWhite = null;
   let pixelRatio = Math.min(devicePixelRatio || 1, innerWidth < 600 ? 1.5 : 2), slowFrames = 0, samples = 0;
@@ -30,7 +30,7 @@ export function mount({ initialPaused } = {}) {
   }
   function draw() {
     if(!renderer||lost||disposed||failed||document.hidden)return;
-    butterflies.attributes.iPosition.needsUpdate=true;butterflies.attributes.iPose.needsUpdate=true;
+    butterflies.update();
     butterflies.material.uniforms.uTime.value=state.time;
     butterflies.material.uniforms.uActivity.value=activity;
     butterflies.material.uniforms.uWhite.value=Number(whiteMode(mode,state.time));
@@ -58,7 +58,7 @@ export function mount({ initialPaused } = {}) {
   function resize() {
     if(!renderer||lost||disposed)return;
     clearInput();resizeFlock(state,innerWidth/innerHeight);
-    camera.aspect=state.aspect;camera.updateProjectionMatrix();
+    camera.aspect=state.aspect;camera.updateProjectionMatrix();butterflies.setViewport(innerHeight);
     const maxRatio=Math.sqrt(2400000/(innerWidth*innerHeight));
     renderer.setPixelRatio(Math.min(pixelRatio,maxRatio));renderer.setSize(innerWidth,innerHeight,false);draw();
   }
@@ -68,10 +68,11 @@ export function mount({ initialPaused } = {}) {
     if(event.pointerType==='touch'&&pointer.id===null)return;
     const rect=canvas.getBoundingClientRect(),x=(event.clientX-rect.left)/rect.width*2-1,y=1-(event.clientY-rect.top)/rect.height*2;
     if(pointer.time!==null){
-      const dt=clamp((event.timeStamp-pointer.time)/1000,.008,.10);
+      const dt=clamp((event.timeStamp-pointer.time)/1000,.008,1.25);
       const gap=(event.timeStamp-pointer.time)/1000;
-      // A new hover after a long gap starts a fresh gesture.
-      if(gap<.20)setWind(state,x,y,(x-pointer.x)*state.aspect/dt*.6,(y-pointer.y)/dt*.6);
+      // Slow GPUs may deliver legitimate moves more than 200ms apart. Use
+      // real elapsed time; retain a stale-hover guard without dropping slow drags.
+      if(gap<1.25)setWind(state,x,y,(x-pointer.x)*state.aspect/dt*.6,(y-pointer.y)/dt*.6);
     }
     pointer.x=x;pointer.y=y;pointer.time=event.timeStamp;
   }

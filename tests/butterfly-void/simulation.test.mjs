@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { createFlock, advance, resetFlock, resizeFlock, setWind, whiteMode, HALF_HEIGHT, CAMERA_Z } from '../../butterfly-void/simulation.mjs';
-for(const [count,aspect] of [[180,1.6],[144,390/844]]) {
+for(const [count,aspect] of [[180,1.6],[144,390/844],[120,390/844]]) {
   const s=createFlock(count,aspect), initial=Array.from(s.positions), sizes=Array.from(s.sizes);
   assert.equal(s.count,count);assert(new Set(s.wing).size>count);
   assert.equal(new Set(s.shapes).size,3);

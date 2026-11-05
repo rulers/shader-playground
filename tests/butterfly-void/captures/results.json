@@ -5,57 +5,57 @@
     {
       "viewport": "1280x800",
       "count": 180,
-      "calls": 1,
-      "triangles": 22320,
+      "calls": 3,
+      "triangles": 112632,
       "initialStats": {
-        "active": 80229,
-        "colored": 79430,
+        "active": 56705,
+        "colored": 25590,
         "white": 0,
         "hues": [
-          "blue",
           "red",
-          "green"
+          "green",
+          "blue"
         ],
-        "blackFraction": 0.9216513671875
+        "blackFraction": 0.9446240234375
       },
       "whiteStats": {
-        "active": 68751,
+        "active": 56643,
         "colored": 0,
-        "white": 56410,
+        "white": 43970,
         "hues": [],
-        "blackFraction": 0.9328603515625
+        "blackFraction": 0.9446845703125
       },
-      "softwareFps": 9.6,
-      "heapBytes": 4383200,
+      "softwareFps": 1,
+      "heapBytes": 4826940,
       "contextRestored": true,
       "errors": [],
       "warnings": []
     },
     {
       "viewport": "390x844",
-      "count": 144,
-      "calls": 1,
-      "triangles": 17856,
+      "count": 120,
+      "calls": 3,
+      "triangles": 75044,
       "initialStats": {
-        "active": 68628,
-        "colored": 67948,
+        "active": 40417,
+        "colored": 19113,
         "white": 0,
         "hues": [
-          "red",
           "blue",
+          "red",
           "green"
         ],
-        "blackFraction": 0.7915056507473569
+        "blackFraction": 0.8772116903633491
       },
       "whiteStats": {
-        "active": 66355,
+        "active": 43890,
         "colored": 0,
-        "white": 56860,
+        "white": 35198,
         "hues": [],
-        "blackFraction": 0.7984111070603962
+        "blackFraction": 0.8666605905942399
       },
-      "softwareFps": 15,
-      "heapBytes": 4619952,
+      "softwareFps": 3.2,
+      "heapBytes": 4739976,
       "contextRestored": true,
       "errors": [],
       "warnings": []
