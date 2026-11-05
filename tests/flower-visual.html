@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="ja">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>花間の蝶 — 見た目の回帰テスト</title>
+<style>
+  body{margin:24px;background:#eee7d3;color:#302f23;font:14px/1.8 sans-serif}
+  canvas,img{display:block;max-width:100%;height:auto}h1{font-size:22px}pre{white-space:pre-wrap}
+  #render,#snapshot-static,#snapshot-flight{display:none}
+</style>
+<h1>花間の蝶：3形状 × 正面・斜め・左横・右横</h1>
+<p>上：固定姿勢。下：実際の飛行シミュレーションから抽出した姿勢。同じ本番モデル・テクスチャ・姿勢関数を使用。</p>
+<pre id="report" role="status" data-status="running">検証中…</pre>
+<canvas id="render"></canvas>
+<img id="snapshot-static" alt="比較用の固定姿勢フレーム">
+<img id="snapshot-flight" alt="比較用の飛行姿勢フレーム">
+<img id="review-static" alt="3形状と4つの固定姿勢の一覧">
+<img id="review-flight" alt="飛行中に現れる4つの姿勢の一覧">
+<script type="module" src="flower-visual.js"></script>
+</html>
