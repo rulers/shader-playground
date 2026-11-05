@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#b9a76c">
+  <meta name="description" content="絹のような金茶の余白に、芍薬が咲き、蝶が舞う。そっと触れると風が生まれる、動く花鳥画。">
+  <title>花間の蝶 — Shader Playground</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <canvas id="view" tabindex="0" aria-describedby="hint" aria-label="金茶の絹地に芍薬が咲き、蝶が舞う花鳥画。マウスや指で風を送り、スペースで一時停止できます。"></canvas>
+  <header><a href="../">↖ SHADER PLAYGROUND</a><span>EXPERIMENT 14 / THREE.JS</span></header>
+  <main class="caption"><p class="eyebrow">A LIVING BOTANICAL PAINTING</p><h1>花間の蝶</h1><p class="english">BUTTERFLIES AMONG BLOOMS</p><p class="note">花に寄り、風にほどける。</p><span class="seal" aria-hidden="true">花<br>間</span></main>
+  <div class="dock">
+    <button id="toggle" aria-label="調整UIを開く" aria-expanded="false" aria-controls="controls">＋</button>
+    <section id="controls" aria-label="作品の調整" hidden>
+      <div class="heading">調整<button id="close" aria-label="調整UIを閉じる">×</button></div>
+      <label for="activity">蝶の活動量<output id="activity-value" for="activity">0.55</output><input id="activity" type="range" min="0" max="1.5" step=".05" value=".55"></label>
+      <label for="wind">風の影響度<output id="wind-value" for="wind">0.80</output><input id="wind" type="range" min="0" max="1.5" step=".05" value=".8"></label>
+      <div class="buttons"><button id="pause" aria-pressed="false">一時停止</button><button id="reset">最初から</button></div>
+      <button id="hide" aria-pressed="false">文字を隠す</button>
+      <p id="hint">マウスや指でそっと風を送れます。Spaceで再生／停止、Escapeでパネルを閉じて文字を表示。動きを減らす設定では停止して開きます。</p>
+    </section>
+  </div>
+  <footer><p id="status" role="status">絹地の庭を準備中…</p></footer>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
