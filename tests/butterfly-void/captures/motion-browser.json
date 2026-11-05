@@ -1,0 +1,25 @@
+{
+  "browser": "156.0.8078.80",
+  "mime": "video/mp4;codecs=avc1.42001E",
+  "frames": 361,
+  "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)",
+  "active": [
+    31478,
+    31741
+  ],
+  "snapshots": [
+    {
+      "count": 180,
+      "time": 6.0090000000000225,
+      "triangles": 26398,
+      "calls": 3
+    },
+    {
+      "count": 180,
+      "time": 6.003299999982133,
+      "triangles": 26398,
+      "calls": 3
+    }
+  ],
+  "errors": []
+}
