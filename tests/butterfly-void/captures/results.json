@@ -21,22 +21,22 @@
         "blackFraction": 0.9124169921875
       },
       "whiteStats": {
-        "active": 78668,
+        "active": 86424,
         "colored": 0,
-        "white": 66321,
+        "white": 73536,
         "hues": [],
-        "blackFraction": 0.92317578125
+        "blackFraction": 0.9156015625
       },
-      "softwareFps": 60.3,
-      "heapBytes": 5195696,
+      "softwareFps": 47.1,
+      "heapBytes": 5610508,
       "contextRestored": true,
       "errors": [],
       "warnings": [],
       "readbackWarnings": [
-        "[.WebGL-0x10c000d1a00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
-        "[.WebGL-0x10c000d1a00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
-        "[.WebGL-0x10c000d1a00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
-        "[.WebGL-0x10c000d1a00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
+        "[.WebGL-0x114000d0800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+        "[.WebGL-0x114000d0800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+        "[.WebGL-0x114000d0800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+        "[.WebGL-0x114000d0800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
       ]
     },
     {
@@ -58,14 +58,14 @@
         "blackFraction": 0.8040041317292502
       },
       "whiteStats": {
-        "active": 60753,
+        "active": 54684,
         "colored": 0,
-        "white": 52985,
+        "white": 47852,
         "hues": [],
-        "blackFraction": 0.8154301859278162
+        "blackFraction": 0.8338680277068903
       },
-      "softwareFps": 60.3,
-      "heapBytes": 6229156,
+      "softwareFps": 60.4,
+      "heapBytes": 7171084,
       "contextRestored": true,
       "errors": [],
       "warnings": [],

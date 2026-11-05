@@ -33,6 +33,9 @@ export function mount({ initialPaused } = {}) {
   function draw() {
     if(!renderer||lost||disposed||failed||document.hidden)return;
     butterflies.update();
+    // Depth now changes in flight; keep the distant-size floor in sync, including
+    // the first frame after a resize, reset or context restoration.
+    butterflies.setViewport(innerHeight);
     butterflies.material.uniforms.uTime.value=state.time;
     butterflies.material.uniforms.uActivity.value=activity;
     butterflies.material.uniforms.uWhite.value=Number(whiteMode(mode,clock.time));
@@ -60,7 +63,7 @@ export function mount({ initialPaused } = {}) {
   function resize() {
     if(!renderer||lost||disposed)return;
     clearInput();resizeFlock(state,innerWidth/innerHeight);
-    camera.aspect=state.aspect;camera.updateProjectionMatrix();butterflies.setViewport(innerHeight);
+    camera.aspect=state.aspect;camera.updateProjectionMatrix();
     const maxRatio=Math.sqrt(2400000/(innerWidth*innerHeight));
     renderer.setPixelRatio(Math.min(pixelRatio,maxRatio));renderer.setSize(innerWidth,innerHeight,false);draw();
   }
