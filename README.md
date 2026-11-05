@@ -22,6 +22,7 @@ WebGL・three.js・Canvas 2Dなどを使った、ブラウザー表現の実験�
 | [MAGNETIC SHAPES](https://rulers.github.io/shader-playground/magnetic-shapes/) | [操作と仕組み](magnetic-shapes/README.md) | [MIT](LICENSE) |
 | [光を彫る](https://rulers.github.io/shader-playground/light-sculpture/) | [操作と仕組み](light-sculpture/README.md) | [MIT](LICENSE) |
 | [花間の蝶](https://rulers.github.io/shader-playground/flower-butterflies/) | [操作と仕組み](flower-butterflies/README.md) | [MIT](LICENSE)／[three.js MIT](third_party/three/LICENSE) |
+| [蝶の虚空](https://rulers.github.io/shader-playground/butterfly-void/) | [操作と仕組み](butterfly-void/README.md) | [MIT](LICENSE)／[three.js MIT](third_party/three/LICENSE) |
 
 ## ローカルで動かす
 

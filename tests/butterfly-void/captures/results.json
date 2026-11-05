@@ -1,0 +1,64 @@
+{
+  "browser": "155.0.8059.79",
+  "renderer": "Chromium ANGLE / SwiftShader (software GPU)",
+  "results": [
+    {
+      "viewport": "1280x800",
+      "count": 180,
+      "calls": 1,
+      "triangles": 22320,
+      "initialStats": {
+        "active": 80229,
+        "colored": 79430,
+        "white": 0,
+        "hues": [
+          "blue",
+          "red",
+          "green"
+        ],
+        "blackFraction": 0.9216513671875
+      },
+      "whiteStats": {
+        "active": 68751,
+        "colored": 0,
+        "white": 56410,
+        "hues": [],
+        "blackFraction": 0.9328603515625
+      },
+      "softwareFps": 9.6,
+      "heapBytes": 4383200,
+      "contextRestored": true,
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "viewport": "390x844",
+      "count": 144,
+      "calls": 1,
+      "triangles": 17856,
+      "initialStats": {
+        "active": 68628,
+        "colored": 67948,
+        "white": 0,
+        "hues": [
+          "red",
+          "blue",
+          "green"
+        ],
+        "blackFraction": 0.7915056507473569
+      },
+      "whiteStats": {
+        "active": 66355,
+        "colored": 0,
+        "white": 56860,
+        "hues": [],
+        "blackFraction": 0.7984111070603962
+      },
+      "softwareFps": 15,
+      "heapBytes": 4619952,
+      "contextRestored": true,
+      "errors": [],
+      "warnings": []
+    }
+  ]
+}
