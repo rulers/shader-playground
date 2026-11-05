@@ -1,0 +1,10 @@
+<!doctype html>
+<html lang="ja"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,"><title>BUTTERFLY VOID — 造形検証</title>
+<style>body{margin:20px;background:#111;color:#eee;font:14px/1.7 system-ui}h1{font-size:20px}button{padding:8px 16px}canvas#sheet,canvas#comparison{display:block;width:min(100%,1800px);height:auto;margin-top:16px}#renderer{display:none}pre{white-space:pre-wrap}</style>
+<h1>蝶の造形：3種類 × 正面・斜め・真横 × カラー・白影</h1>
+<p>上段：Rounded、中段：Elegant、下段：Compact。<br>本番と同じ輪郭・インスタンスメッシュ・GLSL。真横はyaw = 90°。左3列はカラー、右3列は白影。</p>
+<button id="open" type="button">開いた翅</button> <button id="folded" type="button">閉じた翅</button> <button id="compare" type="button">Before / After</button> <button id="play" type="button">羽ばたきを再生</button> <span id="status" role="status">描画を準備中…</span>
+<img id="export" hidden alt="造形検証PNG"><canvas id="renderer"></canvas><canvas id="sheet" aria-label="Rounded、Elegant、Compactのカラーと白影、正面・斜め・横姿勢の比較"></canvas>
+<canvas id="comparison" aria-label="変更前と変更後の比較"></canvas>
+<script type="module" src="shapes.js"></script></html>

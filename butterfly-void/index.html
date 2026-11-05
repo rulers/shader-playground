@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#000000">
+  <meta name="description" content="色彩をまとって飛ぶ無数の蝶が、やがて白い影となる。黒い空間に風を送る、インタラクティブな蝶の群れ。">
+  <title>BUTTERFLY VOID — 蝶の虚空</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <canvas id="view" tabindex="0" aria-label="黒い空間を舞う蝶。マウスや指の動きで風を送れます。Spaceで一時停止、Cで色を切り替え。" aria-describedby="hint"></canvas>
+  <header><a href="../">↖ SHADER PLAYGROUND</a><span>EXPERIMENT 15 / THREE.JS + GLSL</span></header>
+  <main class="caption"><p>AN EXPLORATION OF COLOUR & ABSENCE</p><h1>BUTTERFLY VOID<span>蝶の虚空</span></h1></main>
+  <div class="dock">
+    <button id="toggle" type="button" aria-label="調整UIを開く" aria-expanded="false" aria-controls="controls">＋</button>
+    <section id="controls" aria-label="作品の調整" hidden>
+      <div class="heading">蝶の虚空<button id="close" type="button" aria-label="調整UIを閉じる">×</button></div>
+      <label for="mode">色彩<select id="mode"><option value="auto">自動 · 15秒ごと</option><option value="color">カラー</option><option value="white">白影</option></select></label>
+      <label for="activity">活動量<output id="activity-value" for="activity">1.00</output><input id="activity" type="range" min="0" max="1.8" step=".05" value="1"></label>
+      <label for="wind">風の強さ<output id="wind-value" for="wind">0.80</output><input id="wind" type="range" min="0" max="1.5" step=".05" value=".8"></label>
+      <div class="buttons"><button id="pause" type="button" aria-pressed="false">一時停止</button><button id="reset" type="button">リセット</button></div>
+      <p id="hint">なぞると、そこに風が生まれます。<br>Space：再生／停止　C：色彩　Esc：閉じる<br>動きを減らす設定では停止して開きます。</p>
+    </section>
+  </div>
+  <footer><p id="status" role="status">蝶の群れを準備中…</p><span aria-hidden="true">MOVE TO STIR THE VOID</span></footer>
+  <p id="fallback" role="alert" hidden></p>
+  <noscript><p class="no-script">この作品にはJavaScriptとWebGL 2が必要です。</p></noscript>
+  <script type="module" src="main.js"></script>
+</body>
+</html>

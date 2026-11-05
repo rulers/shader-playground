@@ -1,0 +1,141 @@
+{
+  "browser": "156.0.8078.80",
+  "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+  "cells": [
+    {
+      "species": 0,
+      "view": 0,
+      "width": 230,
+      "height": 202,
+      "area": 29940,
+      "connected": 0.9998663994655979
+    },
+    {
+      "species": 0,
+      "view": 1,
+      "width": 179,
+      "height": 202,
+      "area": 23252,
+      "connected": 0.9998709788405299
+    },
+    {
+      "species": 0,
+      "view": 2,
+      "width": 50,
+      "height": 202,
+      "area": 6650,
+      "connected": 1
+    },
+    {
+      "species": 1,
+      "view": 0,
+      "width": 194,
+      "height": 215,
+      "area": 25289,
+      "connected": 0.9998022855787101
+    },
+    {
+      "species": 1,
+      "view": 1,
+      "width": 151,
+      "height": 215,
+      "area": 19645,
+      "connected": 0.9998472893866124
+    },
+    {
+      "species": 1,
+      "view": 2,
+      "width": 41,
+      "height": 215,
+      "area": 5459,
+      "connected": 1
+    },
+    {
+      "species": 2,
+      "view": 0,
+      "width": 164,
+      "height": 137,
+      "area": 16092,
+      "connected": 0.9998757146408153
+    },
+    {
+      "species": 2,
+      "view": 1,
+      "width": 130,
+      "height": 137,
+      "area": 12499,
+      "connected": 0.9999199935994879
+    },
+    {
+      "species": 2,
+      "view": 2,
+      "width": 41,
+      "height": 137,
+      "area": 3574,
+      "connected": 1
+    }
+  ],
+  "overlaps": [
+    {
+      "view": 0,
+      "a": 0,
+      "b": 1,
+      "iou": 0.8780241935483871
+    },
+    {
+      "view": 0,
+      "a": 0,
+      "b": 2,
+      "iou": 0.7474121706398996
+    },
+    {
+      "view": 0,
+      "a": 1,
+      "b": 2,
+      "iou": 0.7192899033127278
+    },
+    {
+      "view": 1,
+      "a": 0,
+      "b": 1,
+      "iou": 0.8701857103650169
+    },
+    {
+      "view": 1,
+      "a": 0,
+      "b": 2,
+      "iou": 0.7515827793605572
+    },
+    {
+      "view": 1,
+      "a": 1,
+      "b": 2,
+      "iou": 0.7173861006941674
+    },
+    {
+      "view": 2,
+      "a": 0,
+      "b": 1,
+      "iou": 0.8379613356766257
+    },
+    {
+      "view": 2,
+      "a": 0,
+      "b": 2,
+      "iou": 0.7413453650533224
+    },
+    {
+      "view": 2,
+      "a": 1,
+      "b": 2,
+      "iou": 0.6939229249011858
+    }
+  ],
+  "errors": [],
+  "readbackWarnings": [
+    "[.WebGL-0x134000d6800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+    "[.WebGL-0x134000d6800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+    "[.WebGL-0x134000d6800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+    "[.WebGL-0x134000d6800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
+  ]
+}
