@@ -23,8 +23,8 @@ function pixelStats(image){let active=0,colored=0,white=0;const hues=new Set();
  try{
  for(const [width,height] of [[1280,800],[390,844]]){
   const context=await browser.newContext({viewport:{width,height},deviceScaleFactor:1,hasTouch:width<600,isMobile:width<600});
-  const page=await context.newPage(),errors=[],warnings=[],requests=[];
-  page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());if(m.type()==='warning')warnings.push(m.text());});
+  const page=await context.newPage(),errors=[],warnings=[],readbackWarnings=[],requests=[];
+  page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());if(m.type()==='warning')(/GPU stall due to ReadPixels/.test(m.text())?readbackWarnings:warnings).push(m.text());});
   page.on('request',r=>requests.push(r.url()));
   await page.route('**/butterfly-void/main.js',r=>r.fulfill({contentType:'text/javascript',body:"import {mount} from './app.js';window.__void=mount({initialPaused:true});"}));
   await page.goto(base+'/butterfly-void/');await page.waitForFunction(()=>window.__void&&!__void.snapshot().failed);
@@ -36,10 +36,12 @@ function pixelStats(image){let active=0,colored=0,white=0;const hues=new Set();
    const copy=document.createElement('canvas');copy.width=c.width;copy.height=c.height;const ctx=copy.getContext('2d'),img=ctx.createImageData(c.width,c.height);img.data.set(data);ctx.putImageData(img,0,0);
    return {hash:hash>>>0,png:copy.toDataURL(),error:gl.getError()};
   });}
+  const gpu=await page.evaluate(()=>{const gl=document.querySelector('#view').getContext('webgl2'),e=gl.getExtension('WEBGL_debug_renderer_info');return e?gl.getParameter(e.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER);});
   const initial=await snapshot();assert.equal(initial.count,width<600?120:180);assert.equal(initial.calls,3);assert.equal(initial.memory.geometries,3);assert.equal(initial.memory.textures,0);assert.equal(initial.programs,1);
   const initPixels=await pixels();assert.equal(initPixels.error,0);const initialStats=pixelStats(PNG.sync.read(Buffer.from(initPixels.png.split(',')[1],'base64')).data);
   assert(initialStats.active>1500,'must render visible butterflies, not just black');assert(initialStats.colored>initialStats.active*.30);assert.equal(initialStats.hues.length,3);assert(initialStats.blackFraction>.75,'preserve the black void');
   await page.screenshot({path:path.join(out,`${width}-initial.png`)});
+  if(process.env.RECORD_PREVIEW&&width===1280)await page.screenshot({path:path.join(root,'butterfly-void/preview.jpg'),type:'jpeg',quality:85});
   await page.evaluate(()=>{for(let i=0;i<40;i++)__void.step(.05,false);});const colorPixels=await pixels();assert.notEqual(colorPixels.hash,initPixels.hash,'positions and wing silhouettes animate');
   await page.screenshot({path:path.join(out,`${width}-color.png`)});
   await page.evaluate(()=>{for(let i=0;i<262;i++)__void.step(.05,false);});assert.equal((await snapshot()).white,true);
@@ -47,13 +49,17 @@ function pixelStats(image){let active=0,colored=0,white=0;const hues=new Set();
   await page.screenshot({path:path.join(out,`${width}-white.png`)});
   assert(whiteStats.white>whiteStats.active*.75,'white mode must draw solid white silhouettes (allow antialiased edges)');assert.equal(whiteStats.colored,0);
   await page.evaluate(()=>{for(let i=0;i<300;i++)__void.step(.05,false);});assert.equal((await snapshot()).white,false,'30s loop returns to color');
+  // One low-fps-sized active interval still advances colour, not flight.
+  await page.evaluate(()=>{__void.reset();__void.step(15.01);});
+  assert.equal((await snapshot()).white,true);assert((await snapshot()).simulationTime<.11);
+  await page.evaluate(()=>__void.step(15));assert.equal((await snapshot()).white,false);
   // Manual mode through the real UI, including keyboard focus.
   await page.locator('#toggle').click();await page.locator('#mode').selectOption('white');assert.equal((await snapshot()).white,true);
   await page.locator('#mode').selectOption('color');assert.equal((await snapshot()).white,false);
   await page.locator('#activity').focus();await page.keyboard.press('ArrowRight');assert.equal(await page.locator('#activity-value').textContent(),'1.05');
   await page.locator('#reset').click();await page.keyboard.press('Escape');assert.equal(await page.locator('#controls').isVisible(),false);assert.equal(await page.locator('#toggle').getAttribute('aria-expanded'),'false');
   assert.deepEqual((await snapshot()).positions,initial.positions);assert.equal((await pixels()).hash,initPixels.hash,'reset reuses buffers and reproduces the initial rendered frame');
-  const frozen=(await pixels()).hash;await page.waitForTimeout(150);assert.equal((await pixels()).hash,frozen);
+  const frozen=(await pixels()).hash,pausedTime=(await snapshot()).time;await page.waitForTimeout(150);assert.equal((await pixels()).hash,frozen);assert.equal((await snapshot()).time,pausedTime);
   await page.locator('#view').focus();await page.keyboard.press('Space');assert.equal((await snapshot()).paused,false);await page.waitForFunction(()=>__void.snapshot().time>0);assert((await snapshot()).time>0);
   // Aim at a currently visible butterfly, rather than relying on one fixed
   // gesture crossing an incidental initial layout. Input is still real pointer/touch.
@@ -82,7 +88,7 @@ function pixelStats(image){let active=0,colored=0,white=0;const hues=new Set();
   // Synthetic visibility event exercises the application contract in this real browser.
   await page.evaluate(()=>{__void.setPaused(false);Object.defineProperty(document,'hidden',{configurable:true,get:()=>true});document.dispatchEvent(new Event('visibilitychange'));});
   const hiddenTime=(await snapshot()).time;await page.waitForTimeout(120);assert.equal((await snapshot()).time,hiddenTime);
-  await page.evaluate(()=>{delete document.hidden;document.dispatchEvent(new Event('visibilitychange'));});await page.waitForFunction(t=>__void.snapshot().time>t,hiddenTime);assert((await snapshot()).time>hiddenTime);
+  assert.equal(await page.evaluate(()=>{delete document.hidden;document.dispatchEvent(new Event('visibilitychange'));return __void.snapshot().time;}),hiddenTime,'resume excludes hidden wall time');await page.waitForFunction(t=>__void.snapshot().time>t,hiddenTime);assert((await snapshot()).time>hiddenTime);
   await page.emulateMedia({reducedMotion:'reduce'});await page.waitForFunction(()=>__void.snapshot().paused);await page.locator('#view').focus();await page.keyboard.press('Space');assert.equal((await snapshot()).paused,false);
   await page.setViewportSize({width:height,height:width});await page.waitForTimeout(100);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
   await page.setViewportSize({width,height});await page.waitForTimeout(100);
@@ -92,7 +98,7 @@ function pixelStats(image){let active=0,colored=0,white=0;const hues=new Set();
   assert.equal(errors.length,0,errors.join('\n'));assert.equal(warnings.length,0,warnings.join('\n'));assert(requests.every(url=>url.startsWith(base)),'no third-party requests or stock footage');
   await page.evaluate(()=>__void.dispose());assert.equal((await snapshot()).disposed,true);
   await page.waitForTimeout(100);assert.equal(errors.length,0,errors.join('\n'));assert.equal(warnings.length,0,warnings.join('\n'));
-  results.push({viewport:`${width}x${height}`,count:initial.count,calls:initial.calls,triangles:initial.triangles,initialStats,whiteStats,softwareFps:Number(fps.toFixed(1)),heapBytes:heap,contextRestored:extension,errors,warnings});
+  results.push({viewport:`${width}x${height}`,gpu,software:/swiftshader|llvmpipe|software/i.test(gpu),count:initial.count,calls:initial.calls,triangles:initial.triangles,initialStats,whiteStats,softwareFps:Number(fps.toFixed(1)),heapBytes:heap,contextRestored:extension,errors,warnings,readbackWarnings});
   await context.close();
  }
  // Production entry point really auto-plays, without any test replacement.

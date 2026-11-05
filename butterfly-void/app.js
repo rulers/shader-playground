@@ -1,15 +1,17 @@
 import * as THREE from '../third_party/three/three.module.js';
 import { createFlock, advance, resetFlock, resizeFlock, clearWind, setWind, whiteMode, CAMERA_Z, clamp } from './simulation.mjs';
 import { createButterflies } from './butterflies.js';
+import { ArtworkClock } from './clock.mjs';
 
 // The controller is also used by the browser tests. Production exports no globals.
 export function mount({ initialPaused } = {}) {
   const $ = id => document.getElementById(id), canvas = $('view'), motion = matchMedia('(prefers-reduced-motion: reduce)');
   const listeners = new AbortController(), on = (target,name,fn) => target.addEventListener(name,fn,{signal:listeners.signal});
   const state = createFlock(innerWidth < 600 ? 120 : 180, innerWidth / innerHeight);
-  let renderer, scene, camera, butterflies, raf = 0, last = null, lost = false, disposed = false, failed = false, restoration;
+  let renderer, scene, camera, butterflies, raf = 0, lost = false, disposed = false, failed = false, restoration;
   let paused = initialPaused ?? motion.matches, mode = 'auto', activity = 1, strength = .8, currentWhite = null;
   let pixelRatio = Math.min(devicePixelRatio || 1, innerWidth < 600 ? 1.5 : 2), slowFrames = 0, samples = 0;
+  const clock = new ArtworkClock();
   const pointer = { id: null, x: 0, y: 0, time: null };
   function panel(open) {
     $('controls').hidden = !open; $('toggle').textContent = open ? '−' : '＋';
@@ -21,9 +23,9 @@ export function mount({ initialPaused } = {}) {
     if(id!==null&&canvas.hasPointerCapture(id))canvas.releasePointerCapture(id);
   }
   function clearInput() { release();clearWind(state); }
-  function stop() { cancelAnimationFrame(raf);raf=0;last=null; }
+  function stop() { cancelAnimationFrame(raf);raf=0;clock.pause(performance.now()); }
   function status() {
-    const white=whiteMode(mode,state.time);
+    const white=whiteMode(mode,clock.time);
     $('status').textContent=paused?'静止中 · 再生で群れが動きます':(white?'白い影に、風を送る。':'色彩の群れに、風を送る。');
     currentWhite=white;
     $('pause').textContent=paused?'再生':'一時停止';$('pause').setAttribute('aria-pressed',String(paused));
@@ -33,15 +35,15 @@ export function mount({ initialPaused } = {}) {
     butterflies.update();
     butterflies.material.uniforms.uTime.value=state.time;
     butterflies.material.uniforms.uActivity.value=activity;
-    butterflies.material.uniforms.uWhite.value=Number(whiteMode(mode,state.time));
+    butterflies.material.uniforms.uWhite.value=Number(whiteMode(mode,clock.time));
     renderer.render(scene,camera);
-    if(currentWhite!==whiteMode(mode,state.time))status();
+    if(currentWhite!==whiteMode(mode,clock.time))status();
   }
-  function schedule() { if(!raf&&!paused&&!document.hidden&&!lost&&!disposed&&!failed)raf=requestAnimationFrame(frame); }
+  function schedule() { if(!raf&&!paused&&!document.hidden&&!lost&&!disposed&&!failed){clock.resume(performance.now());raf=requestAnimationFrame(frame);} }
   function frame(now) {
     raf=0;if(paused||document.hidden||lost||disposed||failed)return;
-    const dt=last===null?0:clamp((now-last)/1000,0,.1);last=now;
-    advance(state,dt,activity,strength);draw();
+    const dt=clock.tick(now);
+    advance(state,Math.min(dt,.1),activity,strength);draw();
     // Lower resolution only after sustained slow frames. Never create GPU objects here.
     if(dt>0){samples++;if(dt>.027)slowFrames++;}
     if(samples>=180){if(slowFrames>100&&pixelRatio>.8){pixelRatio=Math.max(.8,pixelRatio*.8);resize();}samples=slowFrames=0;}
@@ -53,7 +55,7 @@ export function mount({ initialPaused } = {}) {
   function reset() {
     activity=1;strength=.8;mode='auto';$('activity').value='1';$('wind').value='.8';$('mode').value='auto';
     $('activity-value').textContent='1.00';$('wind-value').textContent='0.80';
-    resetFlock(state);sync();
+    clock.reset();resetFlock(state);sync();
   }
   function resize() {
     if(!renderer||lost||disposed)return;
@@ -128,7 +130,7 @@ export function mount({ initialPaused } = {}) {
   try{initializeRenderer();resize();sync();}catch(error){fail(error);}
   return {
     setPaused,setMode,reset,dispose,
-    step(seconds, render=true){if(!paused||lost||disposed)throw Error('Deterministic stepping requires a paused, live app');advance(state,seconds,activity,strength);if(render)draw();},
-    snapshot(){return {time:state.time,paused,mode,white:whiteMode(mode,state.time),lost,disposed,failed,count:state.count,positions:Array.from(state.positions),pose:Array.from(state.pose),wing:Array.from(state.wing),sizes:Array.from(state.sizes),gust:Array.from(state.gust),wind:{...state.wind},calls:renderer?.info.render.calls,triangles:renderer?.info.render.triangles,memory:renderer?{...renderer.info.memory}:null,programs:renderer?.info.programs?.length,pixelRatio:renderer?.getPixelRatio()};}
+    step(seconds, render=true){if(!paused||lost||disposed)throw Error('Deterministic stepping requires a paused, live app');clock.step(seconds);advance(state,seconds,activity,strength);if(render)draw();},
+    snapshot(){return {time:clock.time,simulationTime:state.time,paused,mode,white:whiteMode(mode,clock.time),lost,disposed,failed,count:state.count,positions:Array.from(state.positions),pose:Array.from(state.pose),wing:Array.from(state.wing),sizes:Array.from(state.sizes),gust:Array.from(state.gust),wind:{...state.wind},calls:renderer?.info.render.calls,triangles:renderer?.info.render.triangles,memory:renderer?{...renderer.info.memory}:null,programs:renderer?.info.programs?.length,pixelRatio:renderer?.getPixelRatio()};}
   };
 }

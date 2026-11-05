@@ -4,10 +4,11 @@ import {createButterflies,createSpeciesGeometry,SPECIES} from '../../butterfly-v
 const signatures=[];
 for(let species=0;species<3;species++){
  const geometry=createSpeciesGeometry(species);geometry.computeBoundingBox();
- assert(geometry.getIndex().count>300);assert(geometry.boundingBox.max.z-geometry.boundingBox.min.z>.08,'real body and staggered wings need depth');
- const p=geometry.getAttribute('position'),part=geometry.getAttribute('aPart');let tail=Infinity;
- for(let i=0;i<p.count;i++)if(part.getX(i)===1)tail=Math.min(tail,p.getY(i));
- if(species===0)assert(tail<-.65,'Papilio has an actual tail');else assert(tail>-.53,'other species are tailless');
+ assert(geometry.getIndex().count/3<=160,'silhouette stays within the per-instance triangle budget');
+ assert(geometry.getIndex().count/3>=120,'retain smooth sampled curves');
+ assert(geometry.boundingBox.max.z-geometry.boundingBox.min.z>.04,'quiet three-dimensional hinges/body');
+ const p=geometry.getAttribute('position');
+ assert(geometry.boundingBox.max.x<.9&&geometry.boundingBox.min.y>-.65,'no long spikes or tails');
  signatures.push(JSON.stringify(Array.from(p.array)));geometry.dispose();
 }
 assert.equal(new Set(signatures).size,3,'actual topology differs, not just a per-instance scale');
@@ -24,4 +25,4 @@ for(const aspect of [1.6,390/844]){
  let geometries=0,materials=0;for(const g of system.geometries)g.addEventListener('dispose',()=>geometries++);system.material.addEventListener('dispose',()=>materials++);
  system.dispose();assert.equal(geometries,3);assert.equal(materials,1);
 }
-console.log('PASS: 3 genuine outlines, Papilio tail only, volumetric body, species batches, state synchronization, distant-size floor, shared material and disposal');
+console.log('PASS: 3 genuine outlines, rounded silhouette budget, minimal body, species batches, state synchronization, distant-size floor, shared material and disposal');

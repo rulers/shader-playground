@@ -1,64 +1,75 @@
 {
-  "browser": "155.0.8059.79",
+  "browser": "156.0.8078.80",
   "renderer": "Chromium ANGLE / SwiftShader (software GPU)",
   "results": [
     {
       "viewport": "1280x800",
+      "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+      "software": true,
       "count": 180,
       "calls": 3,
-      "triangles": 112632,
+      "triangles": 26398,
       "initialStats": {
-        "active": 56705,
-        "colored": 25590,
+        "active": 89685,
+        "colored": 87380,
         "white": 0,
         "hues": [
           "red",
-          "green",
-          "blue"
+          "blue",
+          "green"
         ],
-        "blackFraction": 0.9446240234375
+        "blackFraction": 0.9124169921875
       },
       "whiteStats": {
-        "active": 56643,
+        "active": 78668,
         "colored": 0,
-        "white": 43970,
+        "white": 66321,
         "hues": [],
-        "blackFraction": 0.9446845703125
+        "blackFraction": 0.92317578125
       },
-      "softwareFps": 1,
-      "heapBytes": 4826940,
+      "softwareFps": 60.3,
+      "heapBytes": 5195696,
       "contextRestored": true,
       "errors": [],
-      "warnings": []
+      "warnings": [],
+      "readbackWarnings": [
+        "[.WebGL-0x10c000d1a00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+        "[.WebGL-0x10c000d1a00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+        "[.WebGL-0x10c000d1a00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels",
+        "[.WebGL-0x10c000d1a00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
+      ]
     },
     {
       "viewport": "390x844",
+      "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+      "software": true,
       "count": 120,
       "calls": 3,
-      "triangles": 75044,
+      "triangles": 17596,
       "initialStats": {
-        "active": 40417,
-        "colored": 19113,
+        "active": 64514,
+        "colored": 63050,
         "white": 0,
         "hues": [
+          "green",
           "blue",
-          "red",
-          "green"
+          "red"
         ],
-        "blackFraction": 0.8772116903633491
+        "blackFraction": 0.8040041317292502
       },
       "whiteStats": {
-        "active": 43890,
+        "active": 60753,
         "colored": 0,
-        "white": 35198,
+        "white": 52985,
         "hues": [],
-        "blackFraction": 0.8666605905942399
+        "blackFraction": 0.8154301859278162
       },
-      "softwareFps": 3.2,
-      "heapBytes": 4739976,
+      "softwareFps": 60.3,
+      "heapBytes": 6229156,
       "contextRestored": true,
       "errors": [],
-      "warnings": []
+      "warnings": [],
+      "readbackWarnings": []
     }
   ]
 }

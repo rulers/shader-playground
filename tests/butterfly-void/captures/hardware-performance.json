@@ -1,0 +1,94 @@
+{
+  "before": [
+    {
+      "viewport": [
+        1280,
+        800
+      ],
+      "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)",
+      "software": false,
+      "frames": 361,
+      "seconds": 6.0166,
+      "fps": 60.000664827311105,
+      "frameP95Ms": 17.200000000000728,
+      "count": 180,
+      "triangles": 112632,
+      "calls": 3,
+      "memory": {
+        "geometries": 3,
+        "textures": 0
+      },
+      "pixelRatio": 1,
+      "artTime": 7.9999999999999805,
+      "simulationTime": 7.9999999999999805
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)",
+      "software": false,
+      "frames": 362,
+      "seconds": 6.0333000000000006,
+      "fps": 60.00033149354416,
+      "frameP95Ms": 17.30000000000109,
+      "count": 120,
+      "triangles": 75044,
+      "calls": 3,
+      "memory": {
+        "geometries": 3,
+        "textures": 0
+      },
+      "pixelRatio": 1,
+      "artTime": 8.016699999999982,
+      "simulationTime": 8.016699999999982
+    }
+  ],
+  "after": [
+    {
+      "viewport": [
+        1280,
+        800
+      ],
+      "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)",
+      "software": false,
+      "frames": 361,
+      "seconds": 6.0165,
+      "fps": 60.00166209590294,
+      "frameP95Ms": 17.599999999976717,
+      "count": 180,
+      "triangles": 26398,
+      "calls": 3,
+      "memory": {
+        "geometries": 3,
+        "textures": 0
+      },
+      "pixelRatio": 1,
+      "artTime": 7.994599999994033,
+      "simulationTime": 7.993999999993951
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3, Unspecified Version)",
+      "software": false,
+      "frames": 362,
+      "seconds": 6.0342,
+      "fps": 59.991382453349246,
+      "frameP95Ms": 17.199999999999818,
+      "count": 120,
+      "triangles": 17596,
+      "calls": 3,
+      "memory": {
+        "geometries": 3,
+        "textures": 0
+      },
+      "pixelRatio": 1,
+      "artTime": 8.027000000000044,
+      "simulationTime": 8.026200000017829
+    }
+  ]
+}

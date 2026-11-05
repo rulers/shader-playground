@@ -31,5 +31,20 @@ function render(time=0,readback=true){
 }
 function frame(now){render(now/1000,false);if(playing)raf=requestAnimationFrame(frame);}
 document.querySelector('#play').onclick=()=>{playing=!playing;document.querySelector('#play').textContent=playing?'停止':'羽ばたきを再生';if(playing)raf=requestAnimationFrame(frame);else cancelAnimationFrame(raf);};
-window.shapeTest={render,setProfileYaw(yaw){for(let row=0;row<3;row++)state.pose[(row*3+2)*2+1]=yaw;},dispose(){cancelAnimationFrame(raf);butterflies.dispose();renderer.dispose();}};
-render(0,false);document.querySelector('#status').textContent='描画完了 · 停止状態（翅を開いた位相）';
+async function compare(time=0){
+ const current=render(time).sheet,before=new Image(),after=new Image();
+ before.src=`captures/before-${time===0?'open':'folded'}.png`;after.src=current;
+ await Promise.all([before.decode(),after.decode()]);
+ const comparison=document.querySelector('#comparison');comparison.width=W*2;comparison.height=(H+90)*2;
+ const c=comparison.getContext('2d');c.fillStyle='#171717';c.fillRect(0,0,comparison.width,comparison.height);
+ c.fillStyle='#fff';c.font='20px sans-serif';
+ c.fillText('BEFORE / 399b09e — biological outlines & markings',12,24);c.drawImage(before,0,30);
+ c.fillText('AFTER / Rounded · Elegant · Compact — bright pigment & soft contours',12,H+114);c.drawImage(after,0,H+120);
+ return comparison.toDataURL();
+}
+document.querySelector('#compare').onclick=async()=>{document.querySelector('#export').src=await compare(0);document.querySelector('#status').textContent='上：変更前 / 下：変更後';};
+window.shapeTest={render,compare,setProfileYaw(yaw){for(let row=0;row<3;row++)state.pose[(row*3+2)*2+1]=yaw;},dispose(){cancelAnimationFrame(raf);butterflies.dispose();renderer.dispose();}};
+document.querySelector('#open').onclick=()=>capture(0);
+document.querySelector('#folded').onclick=()=>capture(Math.PI/7);
+function capture(time){playing=false;cancelAnimationFrame(raf);document.querySelector('#export').src=render(time).sheet;document.querySelector('#status').textContent=time===0?'開いた翅 · 描画完了':'閉じた翅 · 描画完了';}
+capture(0);document.querySelector('#status').textContent='描画完了 · 停止状態（翅を開いた位相）';

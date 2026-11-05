@@ -32,10 +32,10 @@ function compare(a,b,rect={x:0,y:0,w:a.width,h:a.height}){let changed=0,active=0
 (async()=>{
  await new Promise(r=>server.listen(0,'127.0.0.1',r));
  const browser=await chromium.launch({executablePath:process.env.CHROMIUM_PATH||undefined,headless:true,args:['--no-sandbox','--disable-dev-shm-usage','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
- const errors=[],page=await browser.newPage({viewport:{width:1400,height:1100}});page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error'||m.type()==='warning')errors.push(m.text());});
+ const errors=[],readbackWarnings=[],page=await browser.newPage({viewport:{width:1400,height:1100}});page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(/GPU stall due to ReadPixels/.test(m.text()))readbackWarnings.push(m.text());else if(m.type()==='error'||m.type()==='warning')errors.push(m.text());});
  try{
  await page.goto(`http://127.0.0.1:${server.address().port}/tests/butterfly-void/shapes.html`);await page.waitForFunction(()=>window.shapeTest);
- const report={browser:await browser.version(),renderer:'ANGLE / SwiftShader (software)',cells:[],overlaps:[]};
+ const report={browser:await browser.version(),renderer:await page.evaluate(()=>{const gl=document.querySelector('#renderer').getContext('webgl2'),e=gl.getExtension('WEBGL_debug_renderer_info');return e?gl.getParameter(e.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER);}),cells:[],overlaps:[]};
  const frame=async time=>{const r=await page.evaluate(t=>shapeTest.render(t),time);assert.equal(r.glError,0);return {raw:r,color:decode(r.color),white:decode(r.white),sheet:decode(r.sheet)};};
  const initial=await frame(0);
  for(const [name,image] of [['color',initial.color],['white',initial.white]])fs.writeFileSync(path.join(out,`shapes-${name}.png`),PNG.sync.write(image));
@@ -49,22 +49,24 @@ function compare(a,b,rect={x:0,y:0,w:a.width,h:a.height}){let changed=0,active=0
   report.overlaps.push({view,a,b,iou:score});assert(score<.92,`species ${a}/${b} have the same normalized silhouette in view ${view}: ${score}`);
  }
  assert.equal(iou(cell(initial.white,0,0).normalized,cell(initial.white,0,0).normalized),1,'identical-shape negative control');
- // Features in the colour render are tested only inside the true white silhouette.
+ // Bright pigment fills the true silhouette; no dark biological markings.
  for(let row=0;row<3;row++){
-  let dark=0,cyan=0,ivory=0,chromatic=0,area=0;
+  let dark=0,chromatic=0,area=0;
   for(let y=row*290+10;y<row*290+295;y++)for(let x=0;x<300;x++){
-   const k=(y*900+x)*4;if(initial.white.data[k]<200)continue;area++;
+   const k=(y*900+x)*4;if(initial.white.data[k]<250)continue;area++;
    const [r,g,b]=initial.color.data.subarray(k,k+3),max=Math.max(r,g,b),min=Math.min(r,g,b);
-   if(max<90)dark++;if(g>100&&b>90&&r<g*.55)cyan++;if(r>170&&g>170&&b>140)ivory++;if(max-min>45)chromatic++;
+   if(max<120)dark++;if(max-min>45)chromatic++;
+   assert.equal(initial.white.data[k+1],initial.white.data[k]);assert.equal(initial.white.data[k+2],initial.white.data[k]);
   }
-  assert(dark>area*.025,'species needs actual dark margins/markings');
-  if(row===0)assert(chromatic>area*.25);if(row===1)assert(cyan>area*.12);if(row===2)assert(ivory>area*.40);
+  assert(dark<area*.01,'pigment must not sink into the black background');
+  assert(chromatic>area*.85,'all types use the vivid instance palette');
  }
  const phases=[0,Math.PI/14,Math.PI/7,3*Math.PI/14];
  for(let i=0;i<phases.length;i++){
   const f=i===0?initial:await frame(phases[i]);
-  for(let row=0;row<3;row++)for(let col=0;col<3;col++){const m=cell(f.white,row,col);assert(m.area>350&&m.width>=16&&m.height>70,'shape collapsed during a wing stroke');assert(m.connected>.95,'a wing detached during a wing stroke');}
+  for(let row=0;row<3;row++)for(let col=0;col<3;col++){const m=cell(f.white,row,col);assert(m.area>350&&m.width>=16&&m.height>70,'shape collapsed during a wing stroke');assert(m.connected>.95,`wing attachment at phase ${i}, row ${row}, col ${col}: ${m.connected}`);}
   if(i===0||i===2){const name=i===0?'shapes-open.png':'shapes-folded.png';fs.writeFileSync(path.join(out,name),PNG.sync.write(f.sheet));const baseline=path.join(fixtures,name);
+   const comparison=await page.evaluate(t=>shapeTest.compare(t),phases[i]);fs.writeFileSync(path.join(out,name.replace('shapes-','comparison-')),Buffer.from(comparison.split(',')[1],'base64'));
    if(process.env.RECORD_SHAPES)fs.writeFileSync(baseline,PNG.sync.write(f.sheet));
    else{assert(fs.existsSync(baseline),'missing reviewed baseline; use RECORD_SHAPES=1, inspect, then rerun');const expected=PNG.sync.read(fs.readFileSync(baseline));
     for(let row=0;row<3;row++)for(let col=0;col<6;col++){
@@ -81,6 +83,6 @@ function compare(a,b,rect={x:0,y:0,w:a.width,h:a.height}){let changed=0,active=0
   for(let row=0;row<3;row++){const m=cell(f.white,row,2);assert(m.width>=16&&m.area>350,'continuous front/profile rotation collapsed');assert(m.connected>.95,'a wing detached during continuous yaw');}
  }
  await page.evaluate(()=>shapeTest.dispose());await page.waitForTimeout(100);assert.deepEqual(errors,[]);
- report.errors=errors;fs.writeFileSync(path.join(out,'shapes-results.json'),JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2));console.log('PASS: 18 cells, normalized species silhouettes, pattern features, 4 stroke phases, continuous yaw, actual shaders and GPU disposal');
+ report.errors=errors;report.readbackWarnings=readbackWarnings;fs.writeFileSync(path.join(out,'shapes-results.json'),JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2));console.log('PASS: 18 cells, normalized species silhouettes, bright pigment, pure white, 4 stroke phases, continuous yaw, actual shaders and GPU disposal');
  }finally{await browser.close();server.close();}
 })().catch(e=>{console.error(e);server.close();process.exitCode=1;});
