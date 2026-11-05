@@ -18,10 +18,10 @@ for(const [count,aspect] of [[180,1.6],[144,390/844],[120,390/844]]) {
       const k=i*3,h=HALF_HEIGHT*(CAMERA_Z-s.positions[k+2])/CAMERA_Z;
       assert(Number.isFinite(s.positions[k]+s.positions[k+1]+s.pose[i*2]));
       assert(Math.abs(s.positions[k])<=h*aspect*.981&&Math.abs(s.positions[k+1])<=h*.981);
-      largestStep=Math.max(largestStep,Math.hypot(s.positions[k]-previous[k],s.positions[k+1]-previous[k+1]));
+      largestStep=Math.max(largestStep,Math.hypot(s.positions[k]-previous[k],s.positions[k+1]-previous[k+1],s.positions[k+2]-previous[k+2]));
     }
   }
-  assert(largestStep<.12,'no teleportation');
+  assert(largestStep<.18,`continuous movement at maximum activity: ${largestStep}`);
   resetFlock(s);assert.deepEqual(Array.from(s.positions),initial);assert.deepEqual(Array.from(s.sizes),sizes);
   resizeFlock(s,2);resetFlock(s);assert.equal(s.aspect,2);
   console.log(`${count} / aspect ${aspect.toFixed(3)}: deterministic spacing, 3 shapes/depths, poses ${JSON.stringify(poses)}, aligned headings, 120s bounded flight, max step ${largestStep.toFixed(4)} PASS`);

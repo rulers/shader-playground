@@ -2,6 +2,7 @@ import * as THREE from '../third_party/three/three.module.js';
 import { SPECIES, traceWing } from './shapes.js';
 import { PALETTE, CAMERA_Z } from './simulation.mjs';
 export { SPECIES };
+const silhouetteHeights = [1.33,1.41,1.06];
 
 export const vertexShader = /* glsl */`
 attribute float aWing;
@@ -133,7 +134,7 @@ export function createButterflies(state) {
     for(const batch of batches)for(let j=0;j<batch.ids.length;j++){
       const id=batch.ids[j],species=state.shapes[id];
       const worldPerPixel=2*(CAMERA_Z-state.positions[id*3+2])*Math.tan(Math.PI/8)/height;
-      const minimum=16*worldPerPixel/[1.33,1.41,1.06][species];
+      const minimum=16*worldPerPixel/silhouetteHeights[species];
       batch.attributes.iSize.array[j]=Math.max(state.sizes[id]*SPECIES[species].size,minimum);
     }
     for(const batch of batches)batch.attributes.iSize.needsUpdate=true;
