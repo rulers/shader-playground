@@ -225,7 +225,7 @@ function updatePointer(event){
   target.x=clamp((event.clientX-rect.left)/rect.width*2-1,-1,1);
   target.y=clamp(1-(event.clientY-rect.top)/rect.height*2,-1,1);
   if(time>=duration){pose();render();}
-  else schedule();
+  if(!paused)schedule();
 }
 function wire(){
   $('settings-toggle').addEventListener('click',()=>toggleSettings($('settings').hidden));
