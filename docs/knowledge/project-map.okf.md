@@ -5,7 +5,7 @@ project: "Shader Playground"
 record_type: "project-map"
 status: "accepted"
 created_at: "2026-11-06"
-updated_at: "2026-11-06"
+updated_at: "2026-11-07"
 source_revision: "f40ddff5d4202b127df99031cb9bee9f67a32d9b"
 ---
 
@@ -13,7 +13,7 @@ source_revision: "f40ddff5d4202b127df99031cb9bee9f67a32d9b"
 
 ## Knowledge / Context
 
-事実：調査したコミットのトップページには21作品のカードがある。この記録はトップの実装を起点とし、未実装・未検証・公開状態を推測しない。ルートREADMEの一覧も本整備で21作品へ揃える。
+事実：調査したコミットの調査時点のmainには21作品のカードがあり、feature/conure-flightブランチで22作品目を追加した。この記録はトップの実装を起点とし、未実装・未検証・公開状態を推測しない。ルートREADMEの一覧も本整備で21作品へ揃える。
 
 ## Decision / Rationale
 
@@ -42,10 +42,11 @@ source_revision: "f40ddff5d4202b127df99031cb9bee9f67a32d9b"
 | 磁力のモアレ | [magnetic-moire](../../magnetic-moire/index.html) | [README](../../magnetic-moire/README.md) |
 | 矛盾する部屋 | [paradox-room](../../paradox-room/index.html) | [README](../../paradox-room/README.md) |
 | 時間の残響 | [echo-of-time](../../echo-of-time/index.html) | [README](../../echo-of-time/README.md) |
+| 色彩の飛来 | [conure-flight](../../conure-flight/index.html) | [README](../../conure-flight/README.md) |
 
 ## Evidence / Validation
 
-- [index.html](../../index.html)のカードとディレクトリを照合したコード読解。今回21作品の実描画を確認した記録ではない。
+- [index.html](../../index.html)のカードとディレクトリを照合したコード読解。22作品の実描画を確認した記録ではない。
 - [architecture.md](../ai/architecture.md)：共有コードと生成元。
 - [validation.md](../ai/validation.md)：対象別の検証。テストの有無と完成度を同一視しない。
 
@@ -56,4 +57,5 @@ AIが修正対象を探す入口として使う。新作追加・改名・方式
 ## Decision history
 
 - 2026-11-06：トップページを根拠に21作品を索引化。既存READMEに不足していた6作品も追記。
+- 2026-11-07：参考サイトに着想したリアルタイム3D作品「色彩の飛来」をfeatureブランチへ追加。描画の実機検証は別途必要。
 
