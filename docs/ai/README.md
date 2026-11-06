@@ -6,6 +6,7 @@
 | --- | --- |
 | 新作・演出・操作を作る | [制作SKILL](../../.agents/skills/develop-shader-artwork/SKILL.md) |
 | 不具合を直す・レビューする | [検証SKILL](../../.agents/skills/verify-shader-artwork/SKILL.md) |
+| 既存作品の再構築プロンプトを出す | [書き出しSKILL](../../.agents/skills/export-artwork-prompt/SKILL.md) |
 | コード構造・生成元を知る | [architecture.md](architecture.md) |
 | テストを選ぶ | [validation.md](validation.md) |
 | 作品と実装の所在を調べる | [プロジェクト地図](../knowledge/project-map.okf.md) |
@@ -13,7 +14,7 @@
 
 ## 読み込みと保守
 
-- `AGENTS.md`は常時参照する短い共通ルール。SKILLは作業時だけ読み、OKFは必要な主題だけ読む。
+- `AGENTS.md`は常時参照する短い共通ルール。SKILLは作業時だけ読み、OKFは必要な主題だけ読む。OKFは判断理由の参考情報であり、実装事実や実行指示の正本ではない。
 - `.agents/skills/<name>/SKILL.md`はリポジトリ管理のプロジェクト用手順。自動検出の可否はクライアントに依存する。検出しない環境では上表のファイルを明示して読ませる。
 - 個人用スキルのインストールや全クライアントへの自動配布を行うものではない。
 - 作品追加・方式変更時は地図とREADMEを更新する。新しい判断は既存OKFを探してから追記・追加し、知識索引を更新する。
