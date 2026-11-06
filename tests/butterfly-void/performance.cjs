@@ -15,7 +15,7 @@ const server=http.createServer((req,res)=>{
  const results=[];
  for(const [width,height] of [[1280,800],[390,844]]){
   const page=await browser.newPage({viewport:{width,height},deviceScaleFactor:1});
-  await page.route('**/butterfly-void/main.js',r=>r.fulfill({contentType:'text/javascript',body:"import {mount} from './app.js';window.__void=mount({initialPaused:true});"}));
+  await page.route('**/butterfly-void/main.js',r=>r.fulfill({contentType:'text/javascript',body:"import {mount} from './app.js';window.__void=mount({initialPaused:true,opening:false});"}));
   // Lock the comparison to DPR 1; production's adaptive resolution remains enabled.
   await page.route('**/butterfly-void/app.js',r=>r.fulfill({contentType:'text/javascript',body:fs.readFileSync(path.join(root,'butterfly-void/app.js'),'utf8').replace('if(samples>=180)','if(false&&samples>=180)')}));
   await page.goto(`http://127.0.0.1:${server.address().port}/butterfly-void/index.html`);

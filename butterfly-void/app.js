@@ -2,12 +2,14 @@ import * as THREE from '../third_party/three/three.module.js';
 import { createFlock, advance, resetFlock, resizeFlock, clearWind, setWind, whiteMode, CAMERA_Z, clamp } from './simulation.mjs';
 import { createButterflies } from './butterflies.js';
 import { ArtworkClock } from './clock.mjs';
+import { Opening } from './opening.mjs';
 
 // The controller is also used by the browser tests. Production exports no globals.
-export function mount({ initialPaused } = {}) {
+export function mount({ initialPaused, opening: playOpening = true } = {}) {
   const $ = id => document.getElementById(id), canvas = $('view'), motion = matchMedia('(prefers-reduced-motion: reduce)');
   const listeners = new AbortController(), on = (target,name,fn) => target.addEventListener(name,fn,{signal:listeners.signal});
   const state = createFlock(innerWidth < 600 ? 120 : 180, innerWidth / innerHeight);
+  const opening=new Opening(state,playOpening&&!motion.matches);
   let renderer, scene, camera, butterflies, raf = 0, lost = false, disposed = false, failed = false, restoration;
   let paused = initialPaused ?? motion.matches, mode = 'auto', activity = 1, strength = .8, currentWhite = null;
   let pixelRatio = Math.min(devicePixelRatio || 1, innerWidth < 600 ? 1.5 : 2), slowFrames = 0, samples = 0;
@@ -32,10 +34,10 @@ export function mount({ initialPaused } = {}) {
   }
   function draw() {
     if(!renderer||lost||disposed||failed||document.hidden)return;
-    butterflies.update();
+    butterflies.update(opening.active?opening.time:Infinity);
     // Depth now changes in flight; keep the distant-size floor in sync, including
     // the first frame after a resize, reset or context restoration.
-    butterflies.setViewport(innerHeight);
+    butterflies.setViewport(innerHeight,opening.active?opening.floor:null);
     butterflies.material.uniforms.uTime.value=state.time;
     butterflies.material.uniforms.uActivity.value=activity;
     butterflies.material.uniforms.uWhite.value=Number(whiteMode(mode,clock.time));
@@ -46,11 +48,15 @@ export function mount({ initialPaused } = {}) {
   function frame(now) {
     raf=0;if(paused||document.hidden||lost||disposed||failed)return;
     const dt=clock.tick(now);
-    advance(state,Math.min(dt,.1),activity,strength);draw();
+    advanceMotion(dt);draw();
     // Lower resolution only after sustained slow frames. Never create GPU objects here.
     if(dt>0){samples++;if(dt>.027)slowFrames++;}
     if(samples>=180){if(slowFrames>100&&pixelRatio>.8){pixelRatio=Math.max(.8,pixelRatio*.8);resize();}samples=slowFrames=0;}
     schedule();
+  }
+  function advanceMotion(seconds) {
+    if(opening.active)opening.advance(seconds,activity,strength);
+    else advance(state,Math.min(seconds,.1),activity,strength);
   }
   function sync() { stop();clearInput();status();draw();schedule(); }
   function setPaused(value) { paused=Boolean(value);sync(); }
@@ -58,11 +64,11 @@ export function mount({ initialPaused } = {}) {
   function reset() {
     activity=1;strength=.8;mode='auto';$('activity').value='1';$('wind').value='.8';$('mode').value='auto';
     $('activity-value').textContent='1.00';$('wind-value').textContent='0.80';
-    clock.reset();resetFlock(state);sync();
+    clock.reset();resetFlock(state);opening.reset(playOpening&&!motion.matches);sync();
   }
   function resize() {
     if(!renderer||lost||disposed)return;
-    clearInput();resizeFlock(state,innerWidth/innerHeight);
+    clearInput();const ratio=(innerWidth/innerHeight)/state.aspect;resizeFlock(state,innerWidth/innerHeight);opening.resize(ratio);
     camera.aspect=state.aspect;camera.updateProjectionMatrix();
     const maxRatio=Math.sqrt(2400000/(innerWidth*innerHeight));
     renderer.setPixelRatio(Math.min(pixelRatio,maxRatio));renderer.setSize(innerWidth,innerHeight,false);draw();
@@ -128,12 +134,13 @@ export function mount({ initialPaused } = {}) {
     renderer.setClearColor(0x000000,1);renderer.outputColorSpace=THREE.SRGBColorSpace;
     renderer.debug.onShaderError=(gl,program,vertex,fragment)=>fail(new Error(gl.getProgramInfoLog(program)||gl.getShaderInfoLog(vertex)||gl.getShaderInfoLog(fragment)||'Shader compilation failed'));
     scene=new THREE.Scene();camera=new THREE.PerspectiveCamera(45,state.aspect,.1,80);camera.position.z=CAMERA_Z;
-    butterflies=createButterflies(state);scene.add(butterflies.mesh);
+    butterflies=createButterflies(state,{releaseTimes:playOpening?opening.starts:null});scene.add(butterflies.mesh);
+    if(opening.active)renderer.compile(scene,camera);
   }
   try{initializeRenderer();resize();sync();}catch(error){fail(error);}
   return {
     setPaused,setMode,reset,dispose,
-    step(seconds, render=true){if(!paused||lost||disposed)throw Error('Deterministic stepping requires a paused, live app');clock.step(seconds);advance(state,seconds,activity,strength);if(render)draw();},
-    snapshot(){return {time:clock.time,simulationTime:state.time,paused,mode,white:whiteMode(mode,clock.time),lost,disposed,failed,count:state.count,positions:Array.from(state.positions),pose:Array.from(state.pose),wing:Array.from(state.wing),sizes:Array.from(state.sizes),gust:Array.from(state.gust),wind:{...state.wind},calls:renderer?.info.render.calls,triangles:renderer?.info.render.triangles,memory:renderer?{...renderer.info.memory}:null,programs:renderer?.info.programs?.length,pixelRatio:renderer?.getPixelRatio()};}
+    step(seconds, render=true){if(!paused||lost||disposed)throw Error('Deterministic stepping requires a paused, live app');clock.step(seconds);advanceMotion(seconds);if(render)draw();},
+    snapshot(){return {time:clock.time,simulationTime:state.time,paused,mode,white:whiteMode(mode,clock.time),lost,disposed,failed,count:state.count,opening:{active:opening.active,time:opening.time,visible:opening.visible,starts:Array.from(opening.starts),durations:Array.from(opening.durations),controlled:Array.from(opening.mask)},velocity:Array.from(state.velocity),positions:Array.from(state.positions),pose:Array.from(state.pose),wing:Array.from(state.wing),sizes:Array.from(state.sizes),gust:Array.from(state.gust),wind:{...state.wind},calls:renderer?.info.render.calls,triangles:renderer?.info.render.triangles,memory:renderer?{...renderer.info.memory}:null,programs:renderer?.info.programs?.length,pixelRatio:renderer?.getPixelRatio()};}
   };
 }

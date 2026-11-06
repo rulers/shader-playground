@@ -54,15 +54,16 @@ export function setWind(s, x, y, vx, vy) {
   s.wind.vx = clamp(vx, -5, 5); s.wind.vy = clamp(vy, -5, 5);
 }
 export function clearWind(s) { s.wind.vx = s.wind.vy = 0; }
-export function advance(s, seconds, activity = 1, strength = .8) {
+export function advance(s, seconds, activity = 1, strength = .8, controlled = null) {
   const duration = clamp(seconds, 0, .1), steps = Math.max(1, Math.ceil(duration * 60)), dt = duration / steps;
-  for (let k = 0; k < steps; k++) integrate(s, dt, activity, strength);
+  for (let k = 0; k < steps; k++) integrate(s, dt, activity, strength, controlled);
 }
-function integrate(s, dt, activity, strength) {
+function integrate(s, dt, activity, strength, controlled) {
   s.time += dt;
   s.flightTime += dt * activity;
   const follow = 1 - Math.exp(-dt * 2.8), turn = 1 - Math.exp(-dt * 7), decay = Math.exp(-dt * 2.6);
   for (let i = 0; i < s.count; i++) {
+    if(controlled && controlled[i])continue;
     const k = i * 3, p = i * 2;
     s.remaining[i] -= dt * activity;
     if (s.remaining[i] <= 0) { s.goal[i] += (next(s, i) - .5) * 2.8; s.remaining[i] = .7 + next(s, i) * 1.5; }

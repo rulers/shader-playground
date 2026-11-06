@@ -1,0 +1,36 @@
+{
+  "base": "f837e52",
+  "failure": "shapes-folded.png/2/0: changed=0.04747012174690048, mean=5.010015264901895",
+  "images": {
+    "shapes-color.png": {
+      "current": "983392b8c246672b04c6cf79f2229bc312bfe131cae8ba839e7a68656bbed37f",
+      "main": "983392b8c246672b04c6cf79f2229bc312bfe131cae8ba839e7a68656bbed37f",
+      "identical": true
+    },
+    "shapes-white.png": {
+      "current": "84c94b7205ba640c753f0788ba37024f653f097e739186638230252d5b4fd18c",
+      "main": "84c94b7205ba640c753f0788ba37024f653f097e739186638230252d5b4fd18c",
+      "identical": true
+    },
+    "shapes-open.png": {
+      "current": "b9d550d8281ec9d1091f6b8f7860d716c5c61a123bb39163c183c37f6e808d16",
+      "main": "b9d550d8281ec9d1091f6b8f7860d716c5c61a123bb39163c183c37f6e808d16",
+      "identical": true
+    },
+    "shapes-folded.png": {
+      "current": "aeb1afc4478d6e58fccf60c8806a19e2bc7ca16917dbb041b504ebc2714a310b",
+      "main": "aeb1afc4478d6e58fccf60c8806a19e2bc7ca16917dbb041b504ebc2714a310b",
+      "identical": true
+    },
+    "comparison-open.png": {
+      "current": "a8408940d1b2eb62d4fb65b23175132fc0286b89f892dc957de1ffa279301e34",
+      "main": "a8408940d1b2eb62d4fb65b23175132fc0286b89f892dc957de1ffa279301e34",
+      "identical": true
+    },
+    "comparison-folded.png": {
+      "current": "3f75f1a24896b20cedcf63fdb0b7566632ed9f0d1719c22b3d7e9af352fc7b25",
+      "main": "3f75f1a24896b20cedcf63fdb0b7566632ed9f0d1719c22b3d7e9af352fc7b25",
+      "identical": true
+    }
+  }
+}

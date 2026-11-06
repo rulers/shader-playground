@@ -100,13 +100,14 @@ export function createSpeciesGeometry(species) {
   return geometry;
 }
 
-export function createButterflies(state) {
+export function createButterflies(state, {releaseTimes=null} = {}) {
   const material=new THREE.ShaderMaterial({vertexShader,fragmentShader,side:THREE.DoubleSide,uniforms:{uTime:{value:0},uActivity:{value:1},uWhite:{value:0}},toneMapped:false});
   const mesh=new THREE.Group(),batches=[],geometries=[];
   const color=new THREE.Color();
   for(let i=0;i<state.count;i++)color.set(PALETTE[i%PALETTE.length]).toArray(state.colors,i*3);
   for(let species=0;species<3;species++){
     const ids=[];for(let i=0;i<state.count;i++)if(state.shapes[i]===species)ids.push(i);
+    if(releaseTimes)ids.sort((a,b)=>releaseTimes[a]-releaseTimes[b]);
     const geometry=createSpeciesGeometry(species),attributes={};geometries.push(geometry);
     for(const [name,size] of [['iPosition',3],['iPose',2],['iWing',4],['iSize',1],['iColor',3]]){
       const attribute=new THREE.InstancedBufferAttribute(new Float32Array(ids.length*size),size);
@@ -122,19 +123,22 @@ export function createButterflies(state) {
     const object=new THREE.Mesh(geometry,material);object.frustumCulled=false;object.name=SPECIES[species].id;mesh.add(object);
     batches.push({ids,attributes,geometry});
   }
-  function update(){
-    for(const batch of batches){const p=batch.attributes.iPosition.array,r=batch.attributes.iPose.array;
+  function update(releaseTime=Infinity){
+    for(const batch of batches){
+      if(Number.isFinite(releaseTime)&&releaseTimes){let n=0;while(n<batch.ids.length&&releaseTimes[batch.ids[n]]<=releaseTime)n++;batch.geometry.instanceCount=n;}
+      else batch.geometry.instanceCount=batch.ids.length;
+      const p=batch.attributes.iPosition.array,r=batch.attributes.iPose.array;
       for(let j=0;j<batch.ids.length;j++){const id=batch.ids[j],k=id*3,q=id*2;p[j*3]=state.positions[k];p[j*3+1]=state.positions[k+1];p[j*3+2]=state.positions[k+2];r[j*2]=state.pose[q];r[j*2+1]=state.pose[q+1];}
       batch.attributes.iPosition.needsUpdate=true;batch.attributes.iPose.needsUpdate=true;
     }
   }
-  function setViewport(height) {
+  function setViewport(height, openingFloor=null) {
     // A minimum projected height keeps distant wings readable. It changes size,
     // never forces a wing to face the camera or changes the viewing angle.
     for(const batch of batches)for(let j=0;j<batch.ids.length;j++){
       const id=batch.ids[j],species=state.shapes[id];
       const worldPerPixel=2*(CAMERA_Z-state.positions[id*3+2])*Math.tan(Math.PI/8)/height;
-      const minimum=16*worldPerPixel/silhouetteHeights[species];
+      const minimum=16*worldPerPixel/silhouetteHeights[species]*(openingFloor?openingFloor[id]:1);
       batch.attributes.iSize.array[j]=Math.max(state.sizes[id]*SPECIES[species].size,minimum);
     }
     for(const batch of batches)batch.attributes.iSize.needsUpdate=true;

@@ -1,0 +1,220 @@
+{
+  "browser": "155.0.8059.79",
+  "method": "Real WebGL2 / SwiftShader; deterministic 120Hz simulation steps for captures, not a frame-rate measurement. Visibility event is synthetic.",
+  "results": [
+    {
+      "viewport": [
+        1280,
+        800
+      ],
+      "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "software": true,
+      "timeline": [
+        {
+          "time": 0.2,
+          "visible": 11,
+          "active": true,
+          "colored": 299,
+          "bounds": [
+            601,
+            383,
+            682,
+            441
+          ],
+          "error": 0,
+          "calls": 3,
+          "triangles": 1610
+        },
+        {
+          "time": 0.8,
+          "visible": 94,
+          "active": true,
+          "colored": 8560,
+          "bounds": [
+            281,
+            156,
+            1056,
+            593
+          ],
+          "error": 0,
+          "calls": 3,
+          "triangles": 13780
+        },
+        {
+          "time": 1.5,
+          "visible": 180,
+          "active": true,
+          "colored": 43557,
+          "bounds": [
+            52,
+            19,
+            1241,
+            758
+          ],
+          "error": 0,
+          "calls": 3,
+          "triangles": 26398
+        },
+        {
+          "time": 2.5,
+          "visible": 180,
+          "active": true,
+          "colored": 82501,
+          "bounds": [
+            34,
+            24,
+            1230,
+            770
+          ],
+          "error": 0,
+          "calls": 3,
+          "triangles": 26398
+        },
+        {
+          "time": 3,
+          "visible": 180,
+          "active": false,
+          "colored": 82833,
+          "bounds": [
+            54,
+            19,
+            1248,
+            773
+          ],
+          "error": 0,
+          "calls": 3,
+          "triangles": 26398
+        },
+        {
+          "time": 5,
+          "visible": 180,
+          "active": false,
+          "colored": 78898,
+          "bounds": [
+            112,
+            38,
+            1159,
+            735
+          ],
+          "error": 0,
+          "calls": 3,
+          "triangles": 26398
+        }
+      ],
+      "contextRestored": true,
+      "windDuringOpening": 0.6699444651603699,
+      "memory": {
+        "geometries": 3,
+        "textures": 0
+      },
+      "errors": []
+    },
+    {
+      "viewport": [
+        390,
+        844
+      ],
+      "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "software": true,
+      "timeline": [
+        {
+          "time": 0.2,
+          "visible": 7,
+          "active": true,
+          "colored": 652,
+          "bounds": [
+            182,
+            386,
+            211,
+            463
+          ],
+          "error": 0,
+          "calls": 3,
+          "triangles": 1026
+        },
+        {
+          "time": 0.8,
+          "visible": 62,
+          "active": true,
+          "colored": 9762,
+          "bounds": [
+            117,
+            275,
+            310,
+            586
+          ],
+          "error": 0,
+          "calls": 3,
+          "triangles": 9080
+        },
+        {
+          "time": 1.5,
+          "visible": 120,
+          "active": true,
+          "colored": 35760,
+          "bounds": [
+            17,
+            44,
+            389,
+            816
+          ],
+          "error": 0,
+          "calls": 3,
+          "triangles": 17596
+        },
+        {
+          "time": 2.5,
+          "visible": 120,
+          "active": true,
+          "colored": 59763,
+          "bounds": [
+            0,
+            39,
+            387,
+            803
+          ],
+          "error": 0,
+          "calls": 3,
+          "triangles": 17596
+        },
+        {
+          "time": 3,
+          "visible": 120,
+          "active": false,
+          "colored": 58290,
+          "bounds": [
+            0,
+            76,
+            389,
+            818
+          ],
+          "error": 0,
+          "calls": 3,
+          "triangles": 17596
+        },
+        {
+          "time": 5,
+          "visible": 120,
+          "active": false,
+          "colored": 58515,
+          "bounds": [
+            13,
+            62,
+            389,
+            765
+          ],
+          "error": 0,
+          "calls": 3,
+          "triangles": 17596
+        }
+      ],
+      "contextRestored": true,
+      "windDuringOpening": 2.22647762298584,
+      "memory": {
+        "geometries": 3,
+        "textures": 0
+      },
+      "errors": []
+    }
+  ]
+}

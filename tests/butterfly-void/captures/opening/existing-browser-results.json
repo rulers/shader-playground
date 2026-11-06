@@ -1,0 +1,70 @@
+{
+  "browser": "155.0.8059.79",
+  "renderer": "Chromium ANGLE / SwiftShader (software GPU)",
+  "results": [
+    {
+      "viewport": "1280x800",
+      "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "software": true,
+      "count": 180,
+      "calls": 3,
+      "triangles": 26398,
+      "initialStats": {
+        "active": 89685,
+        "colored": 87360,
+        "white": 0,
+        "hues": [
+          "red",
+          "blue",
+          "green"
+        ],
+        "blackFraction": 0.9124169921875
+      },
+      "whiteStats": {
+        "active": 86424,
+        "colored": 0,
+        "white": 73536,
+        "hues": [],
+        "blackFraction": 0.9156015625
+      },
+      "softwareFps": 7.3,
+      "heapBytes": 4650300,
+      "contextRestored": true,
+      "errors": [],
+      "warnings": [],
+      "readbackWarnings": []
+    },
+    {
+      "viewport": "390x844",
+      "gpu": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+      "software": true,
+      "count": 120,
+      "calls": 3,
+      "triangles": 17596,
+      "initialStats": {
+        "active": 64514,
+        "colored": 63026,
+        "white": 0,
+        "hues": [
+          "green",
+          "blue",
+          "red"
+        ],
+        "blackFraction": 0.8040041317292502
+      },
+      "whiteStats": {
+        "active": 54684,
+        "colored": 0,
+        "white": 47852,
+        "hues": [],
+        "blackFraction": 0.8338680277068903
+      },
+      "softwareFps": 14.6,
+      "heapBytes": 5010544,
+      "contextRestored": true,
+      "errors": [],
+      "warnings": [],
+      "readbackWarnings": []
+    }
+  ]
+}

@@ -18,7 +18,7 @@ const server=http.createServer((req,res)=>{
  page.on('pageerror',e=>errors.push(e.message));
  page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
  await page.route('**/motion-review.html',r=>r.fulfill({contentType:'text/html',body:`<!doctype html><title>Motion comparison</title><style>body{margin:0;background:#000}iframe{position:absolute;top:40px;border:0;width:640px;height:400px}#after{left:640px}canvas{display:none}</style><iframe id="before" src="butterfly-void/index.html?before"></iframe><iframe id="after" src="butterfly-void/index.html?after"></iframe><canvas width="1280" height="440"></canvas>`}));
- await page.route('**/butterfly-void/main.js',r=>r.fulfill({contentType:'text/javascript',body:"import {mount} from './app.js';window.__void=mount({initialPaused:true});"}));
+ await page.route('**/butterfly-void/main.js',r=>r.fulfill({contentType:'text/javascript',body:"import {mount} from './app.js';window.__void=mount({initialPaused:true,opening:false});"}));
  await page.route('**/butterfly-void/app.js',r=>r.fulfill({contentType:'text/javascript',body:fs.readFileSync(path.join(root,'butterfly-void/app.js'),'utf8').replace('antialias:true,alpha:false','antialias:true,alpha:false,preserveDrawingBuffer:true')}));
  await page.route('**/butterfly-void/simulation.mjs',r=>r.fulfill({contentType:'text/javascript',body:r.request().frame().url().endsWith('?before')?before:fs.readFileSync(path.join(root,'butterfly-void/simulation.mjs'),'utf8')}));
  await page.goto(`http://127.0.0.1:${server.address().port}/motion-review.html`);
