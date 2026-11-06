@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#071a22">
+  <meta name="description" content="太陽色の鳥が空の奥からこちらへ飛んでくる。羽ばたきと視線に触れる3Dフライト・スケッチ。">
+  <title>CONURE FLIGHT — Shader Playground</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <canvas id="stage" tabindex="0" aria-label="太陽色の鳥が羽ばたきながらカメラへ近づきます。ポインターで進路を誘導し、クリック・タップで再飛行できます。" aria-describedby="instructions"></canvas>
+  <div id="fallback" role="alert" hidden>WebGLを利用できません。対応ブラウザーで開いてください。</div>
+  <header class="masthead"><a href="../">↖ SHADER PLAYGROUND</a><span>EXP. 22 / THREE.JS + GLSL</span></header>
+  <main class="copy">
+    <p class="eyebrow">A STUDY OF APPROACH AND STILLNESS</p>
+    <h1>CONURE<br><em>FLIGHT.</em></h1>
+    <p class="subcopy">空の向こうから、<br>一羽の色彩がやってくる。</p>
+  </main>
+  <div class="guide" aria-hidden="true">MOVE TO GUIDE <span>↗</span> TAP TO REPLAY</div>
+  <div class="panel-dock">
+    <button id="settings-toggle" type="button" aria-label="調整UIを開く" aria-controls="settings" aria-expanded="false">＋</button>
+    <section id="settings" aria-label="フライト調整" hidden>
+      <div class="panel-heading"><strong>FLIGHT CONTROL</strong><button id="settings-close" type="button" aria-label="調整UIを閉じる">×</button></div>
+      <label for="speed">飛行スピード <output id="speed-value">1.0×</output></label>
+      <input id="speed" type="range" min="0.6" max="1.6" step="0.1" value="1">
+      <label class="check"><input id="loop" type="checkbox"> 繰り返し飛行する</label>
+      <div class="actions"><button id="pause" type="button" aria-pressed="false">一時停止</button><button id="replay" type="button">もう一度飛ばす ↗</button></div>
+      <p id="instructions">指やポインターで進路を変えます。鳥をタップして再飛行。Space：停止／再開、R：再飛行、Esc：閉じる。動きを減らす設定では静止状態で開始します。</p>
+    </section>
+  </div>
+  <footer><span id="status" role="status">空を準備しています…</span><span>AN ORIGINAL PROCEDURAL BIRD · NO VIDEO ASSETS</span></footer>
+  <noscript><p class="no-script">この作品にはJavaScriptとWebGLが必要です。</p></noscript>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
