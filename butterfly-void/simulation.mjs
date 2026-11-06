@@ -13,6 +13,7 @@ export function createFlock(count = 180, aspect = 1.6) {
   resetFlock(state); return state;
 }
 export function resetFlock(s) {
+  s.openingReturn?.fill(0);
   const rng = random(); s.time = s.flightTime = 0; s.wind.vx = s.wind.vy = 0; s.gust.fill(0);
   const placement = random(915731), placedX = new Float32Array(s.count), placedY = new Float32Array(s.count), radii = new Float32Array(s.count);
   for (let i = 0; i < s.count; i++) {
@@ -54,15 +55,16 @@ export function setWind(s, x, y, vx, vy) {
   s.wind.vx = clamp(vx, -5, 5); s.wind.vy = clamp(vy, -5, 5);
 }
 export function clearWind(s) { s.wind.vx = s.wind.vy = 0; }
-export function advance(s, seconds, activity = 1, strength = .8) {
+export function advance(s, seconds, activity = 1, strength = .8, controlled = null) {
   const duration = clamp(seconds, 0, .1), steps = Math.max(1, Math.ceil(duration * 60)), dt = duration / steps;
-  for (let k = 0; k < steps; k++) integrate(s, dt, activity, strength);
+  for (let k = 0; k < steps; k++) integrate(s, dt, activity, strength, controlled);
 }
-function integrate(s, dt, activity, strength) {
+function integrate(s, dt, activity, strength, controlled) {
   s.time += dt;
   s.flightTime += dt * activity;
   const follow = 1 - Math.exp(-dt * 2.8), turn = 1 - Math.exp(-dt * 7), decay = Math.exp(-dt * 2.6);
   for (let i = 0; i < s.count; i++) {
+    if(controlled && controlled[i])continue;
     const k = i * 3, p = i * 2;
     s.remaining[i] -= dt * activity;
     if (s.remaining[i] <= 0) { s.goal[i] += (next(s, i) - .5) * 2.8; s.remaining[i] = .7 + next(s, i) * 1.5; }
@@ -96,8 +98,12 @@ function integrate(s, dt, activity, strength) {
     s.gust[p] = clamp(s.gust[p] * decay + s.wind.vx * halfH * weight * dt * 1.4, -3, 3);
     s.gust[p + 1] = clamp(s.gust[p + 1] * decay + s.wind.vy * halfH * weight * dt * 1.4, -3, 3);
     const vx = s.velocity[k] * activity + s.gust[p], vy = s.velocity[k + 1] * activity + s.gust[p + 1];
-    s.positions[k] = clamp(x + vx * dt, -boundX * .98, boundX * .98);
-    s.positions[k + 1] = clamp(y + vy * dt, -boundY * .98, boundY * .98);
+    // Opening leaders turn back outside the frame. Clamping an already-outside
+    // arrival to .98 would teleport it to the rim and pin it there while turning.
+    const returning = s.openingReturn?.[i];
+    s.positions[k] = returning ? x + vx * dt : clamp(x + vx * dt, -boundX * .98, boundX * .98);
+    s.positions[k + 1] = returning ? y + vy * dt : clamp(y + vy * dt, -boundY * .98, boundY * .98);
+    if(returning && Math.abs(s.positions[k]) < boundX * .90 && Math.abs(s.positions[k+1]) < boundY * .90)s.openingReturn[i]=0;
     if (vx * vx + vy * vy > .0004) {
       const heading = Math.atan2(-vx, vy), delta = Math.atan2(Math.sin(heading - s.pose[p]), Math.cos(heading - s.pose[p]));
       s.pose[p] += delta * turn;

@@ -1,0 +1,9 @@
+AssertionError [ERR_ASSERTION]: shapes-folded.png/2/0: {"pass":false,"changed":0.04747012174690048,"mean":5.010015264901895}
+    at /tmp/void-opening-baseline/tests/butterfly-void/shapes-browser.cjs:74:7 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}

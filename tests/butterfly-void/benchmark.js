@@ -3,7 +3,7 @@ import { mount } from '../../butterfly-void/app.js';
 const report=document.querySelector('#report');
 const source=new DOMParser().parseFromString(await (await fetch('../../butterfly-void/index.html')).text(),'text/html');
 for(const node of [...source.body.children])if(node.tagName!=='SCRIPT')document.body.append(node);
-const app=mount({initialPaused:true}),canvas=document.querySelector('#view');
+const app=mount({initialPaused:true,opening:false}),canvas=document.querySelector('#view');
 const gl=canvas.getContext('webgl2'),debug=gl.getExtension('WEBGL_debug_renderer_info');
 const gpu=debug?gl.getParameter(debug.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER);
 const software=/swiftshader|llvmpipe|software/i.test(gpu);

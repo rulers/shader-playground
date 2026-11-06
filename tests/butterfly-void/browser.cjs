@@ -3,7 +3,7 @@
 const {chromium}=require('playwright');
 const {PNG}=require('pngjs');
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),http=require('node:http');
-const root=path.resolve(__dirname,'../..'),out=path.join(root,'tests/butterfly-void/captures');fs.mkdirSync(out,{recursive:true});
+const root=path.resolve(__dirname,'../..'),out=process.env.VOID_CAPTURE_DIR||path.join(root,'tests/butterfly-void/captures');fs.mkdirSync(out,{recursive:true});
 const server=http.createServer((req,res)=>{
  const target=path.resolve(root,'.'+decodeURIComponent(req.url.split('?')[0]));
  if(!target.startsWith(root+path.sep)){res.writeHead(403);return res.end();}
@@ -26,7 +26,7 @@ function pixelStats(image){let active=0,colored=0,white=0;const hues=new Set();
   const page=await context.newPage(),errors=[],warnings=[],readbackWarnings=[],requests=[];
   page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());if(m.type()==='warning')(/GPU stall due to ReadPixels/.test(m.text())?readbackWarnings:warnings).push(m.text());});
   page.on('request',r=>requests.push(r.url()));
-  await page.route('**/butterfly-void/main.js',r=>r.fulfill({contentType:'text/javascript',body:"import {mount} from './app.js';window.__void=mount({initialPaused:true});"}));
+  await page.route('**/butterfly-void/main.js',r=>r.fulfill({contentType:'text/javascript',body:"import {mount} from './app.js';window.__void=mount({initialPaused:true,opening:false});"}));
   await page.goto(base+'/butterfly-void/');await page.waitForFunction(()=>window.__void&&!__void.snapshot().failed);
   const snapshot=()=>page.evaluate(()=>__void.snapshot());
   async function pixels(){return page.evaluate(()=>{
