@@ -1,4 +1,6 @@
-PASS: 180 / 1.600: individual births, no waves, 7782 overtakes, max view fraction 0.959, deterministic reset, resize, activity and wind, identical normal flight
-PASS: 120 / 0.462: individual births, no waves, 2920 overtakes, max view fraction 0.931, deterministic reset, resize, activity and wind, identical normal flight
+PASS: 180 / 1.600: individual births, no waves, 7782 overtakes, max view fraction 1.371, deterministic reset, resize, activity and wind, identical normal flight
+PASS: 120 / 0.462: individual births, no waves, 2920 overtakes, max view fraction 1.380, deterministic reset, resize, activity and wind, identical normal flight
 PASS: position/velocity/depth continuity at early/middle/last handoffs; reduced-motion static composition
 PASS: slow-frame redraw and activity-zero entrance remain stationary
+PASS: aspect 1.600: all 37 leaders exit, no rim snap, normal flight restored
+PASS: aspect 0.462: all 26 leaders exit, no rim snap, normal flight restored

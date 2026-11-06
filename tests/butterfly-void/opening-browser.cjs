@@ -30,7 +30,10 @@ const server=http.createServer((req,res)=>{
    assert.equal(s.opening.visible,s.opening.starts.filter(t=>t<=s.opening.time).length);
    assert.equal(s.memory.geometries,3);assert.equal(s.memory.textures,0);assert.equal(s.programs,1);assert(s.calls<=3);
    if(time>=3)assert.equal(s.opening.active,false);
-   timeline.push({time,visible:s.opening.visible,active:s.opening.active,...p,calls:s.calls,triangles:s.triangles});
+   let outside=0;
+   for(let i=0;i<s.count;i++)if(s.opening.starts[i]<=s.opening.time){const k=i*3,h=(26-s.positions[k+2])*Math.tan(Math.PI/8);if(Math.max(Math.abs(s.positions[k])/(h*width/height),Math.abs(s.positions[k+1])/h)>1.2)outside++;}
+   if(time===1.5)assert(outside>=5,'early butterflies fly beyond the frame instead of stopping at corners');
+   timeline.push({time,visible:s.opening.visible,active:s.opening.active,outside,...p,calls:s.calls,triangles:s.triangles});
    await page.screenshot({path:path.join(out,`${width}-${time.toFixed(1)}.png`)});
   }
   assert(timeline[0].visible<15);assert(timeline[1].visible>initial.count*.4&&timeline[1].visible<initial.count*.7);

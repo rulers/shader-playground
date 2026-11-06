@@ -16,6 +16,8 @@ export class Opening {
     this.offsets=new Float64Array(n*2);this.mask=new Uint8Array(n);
     this.released=new Uint8Array(n);this.floor=new Float32Array(n);
     this.order=new Uint16Array(n);this.sampled=new Float64Array(6);
+    // Early arrivals leave the viewport before the normal inward turn takes over.
+    state.openingReturn=new Uint8Array(n);
     this.reset(enabled);
   }
   // Call only after resetFlock, so the existing composition is captured as the
@@ -23,7 +25,7 @@ export class Opening {
   reset(enabled=true) {
     const s=this.state,n=s.count,rng=random(0x42565254);
     this.time=0;this.depthRate=1;this.active=enabled;this.visible=enabled?1:n;
-    this.offsets.fill(0);this.mask.fill(enabled?1:0);
+    this.offsets.fill(0);this.mask.fill(enabled?1:0);s.openingReturn.fill(0);
     this.released.fill(enabled?0:1);this.floor.fill(enabled?0:1);
     for(let i=0;i<n;i++)this.order[i]=i;
     for(let i=n-1;i>0;i--){const j=Math.floor(rng()*(i+1)),id=this.order[i];this.order[i]=this.order[j];this.order[j]=id;}
@@ -37,6 +39,10 @@ export class Opening {
       this.durations[i]=Math.min(.90+rng()*.80,OPENING_SECONDS-.05-this.starts[i]);
       const k=i*3,p=i*2,z=s.depth[i],halfH=(CAMERA_Z-z)*TAN;
       this.targets[p]=s.positions[k]/(halfH*s.aspect);this.targets[p+1]=s.positions[k+1]/halfH;
+      if(enabled&&fraction<.22){
+        const outward=1.35/Math.max(Math.abs(this.targets[p]),Math.abs(this.targets[p+1]),.0001);
+        this.targets[p]*=outward;this.targets[p+1]*=outward;s.openingReturn[i]=1;
+      }
       this.sources[k]=(rng()-.5)*.65;this.sources[k+1]=(rng()-.5)*.65;this.sources[k+2]=-31-rng()*8;
       const tx=s.positions[k],ty=s.positions[k+1],length=Math.hypot(tx,ty)||1;
       const angle=Math.atan2(-tx,ty)+(rng()-.5)*.8,speed=s.speed[i]*(.65+rng()*.25);

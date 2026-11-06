@@ -13,6 +13,7 @@ export function createFlock(count = 180, aspect = 1.6) {
   resetFlock(state); return state;
 }
 export function resetFlock(s) {
+  s.openingReturn?.fill(0);
   const rng = random(); s.time = s.flightTime = 0; s.wind.vx = s.wind.vy = 0; s.gust.fill(0);
   const placement = random(915731), placedX = new Float32Array(s.count), placedY = new Float32Array(s.count), radii = new Float32Array(s.count);
   for (let i = 0; i < s.count; i++) {
@@ -97,8 +98,12 @@ function integrate(s, dt, activity, strength, controlled) {
     s.gust[p] = clamp(s.gust[p] * decay + s.wind.vx * halfH * weight * dt * 1.4, -3, 3);
     s.gust[p + 1] = clamp(s.gust[p + 1] * decay + s.wind.vy * halfH * weight * dt * 1.4, -3, 3);
     const vx = s.velocity[k] * activity + s.gust[p], vy = s.velocity[k + 1] * activity + s.gust[p + 1];
-    s.positions[k] = clamp(x + vx * dt, -boundX * .98, boundX * .98);
-    s.positions[k + 1] = clamp(y + vy * dt, -boundY * .98, boundY * .98);
+    // Opening leaders turn back outside the frame. Clamping an already-outside
+    // arrival to .98 would teleport it to the rim and pin it there while turning.
+    const returning = s.openingReturn?.[i];
+    s.positions[k] = returning ? x + vx * dt : clamp(x + vx * dt, -boundX * .98, boundX * .98);
+    s.positions[k + 1] = returning ? y + vy * dt : clamp(y + vy * dt, -boundY * .98, boundY * .98);
+    if(returning && Math.abs(s.positions[k]) < boundX * .90 && Math.abs(s.positions[k+1]) < boundY * .90)s.openingReturn[i]=0;
     if (vx * vx + vy * vy > .0004) {
       const heading = Math.atan2(-vx, vy), delta = Math.atan2(Math.sin(heading - s.pose[p]), Math.cos(heading - s.pose[p]));
       s.pose[p] += delta * turn;

@@ -36,7 +36,7 @@ for(const [count,aspect] of [[180,1.6],[120,390/844]]) {
     }
   }
   assert(!op.active);assert.equal(op.visible,count);assert(passes>0,'later fast butterflies genuinely overtake earlier ones in z');
-  assert(maxProjected<1.1,`opening stays within the view: ${maxProjected}`);
+  assert(maxProjected>1.30&&maxProjected<1.6,`leaders actually pass outside the view: ${maxProjected}`);
   assert.deepEqual(Array.from(s.sizes),sizes);assert.deepEqual(Array.from(s.wing),wings);assert.deepEqual(Array.from(s.shapes),types);
   const reference=structuredClone(s);
   for(let i=0;i<120;i++){op.advance(1/60);advance(reference,1/60);}
@@ -77,3 +77,23 @@ slowOpening.advance(.5);const slowPosition=Array.from(slowState.positions);
 slowOpening.advance(0);assert.deepEqual(Array.from(slowState.positions),slowPosition);
 slowOpening.advance(.5,0,0);assert.deepEqual(Array.from(slowState.positions),slowPosition);
 console.log('PASS: slow-frame redraw and activity-zero entrance remain stationary');
+
+// Track every leader across the viewport: no hard clamp at a corner, and no
+// persistent outside mode after the ordinary turn brings it back into the scene.
+for(const aspect of [1.6,390/844]){
+ const s=createFlock(aspect>1?180:120,aspect),op=new Opening(s);
+ const leaders=Array.from(s.openingReturn),exited=new Set();
+ let maxStep=0;
+ for(let frame=0;frame<1200;frame++){
+  const before=Array.from(s.positions);op.advance(1/120);
+  for(let i=0;i<s.count;i++)if(leaders[i]){
+   const k=i*3,h=(CAMERA_Z-s.positions[k+2])*TAN;
+   if(Math.max(Math.abs(s.positions[k])/(h*aspect),Math.abs(s.positions[k+1])/h)>1.2)exited.add(i);
+   // A 1/120s step cannot teleport a butterfly from outside to .98.
+   if(!op.mask[i])maxStep=Math.max(maxStep,Math.hypot(s.positions[k]-before[k],s.positions[k+1]-before[k+1]));
+  }
+ }
+ assert.equal(exited.size,leaders.filter(Boolean).length);assert(maxStep<.15,`no edge teleport: ${maxStep}`);
+ assert(s.openingReturn.every(x=>x===0),'every leader returns naturally to ordinary flight');
+ console.log(`PASS: aspect ${aspect.toFixed(3)}: all ${exited.size} leaders exit, no rim snap, normal flight restored`);
+}

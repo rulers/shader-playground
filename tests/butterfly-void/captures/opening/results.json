@@ -14,12 +14,13 @@
           "time": 0.2,
           "visible": 11,
           "active": true,
-          "colored": 299,
+          "outside": 0,
+          "colored": 309,
           "bounds": [
-            601,
+            593,
             383,
-            682,
-            441
+            688,
+            448
           ],
           "error": 0,
           "calls": 3,
@@ -29,12 +30,13 @@
           "time": 0.8,
           "visible": 94,
           "active": true,
-          "colored": 8560,
+          "outside": 0,
+          "colored": 8918,
           "bounds": [
-            281,
-            156,
-            1056,
-            593
+            121,
+            21,
+            1261,
+            726
           ],
           "error": 0,
           "calls": 3,
@@ -44,12 +46,13 @@
           "time": 1.5,
           "visible": 180,
           "active": true,
-          "colored": 43557,
+          "outside": 30,
+          "colored": 31402,
           "bounds": [
-            52,
-            19,
-            1241,
-            758
+            205,
+            0,
+            1279,
+            799
           ],
           "error": 0,
           "calls": 3,
@@ -59,12 +62,13 @@
           "time": 2.5,
           "visible": 180,
           "active": true,
-          "colored": 82501,
+          "outside": 6,
+          "colored": 71108,
           "bounds": [
             34,
-            24,
-            1230,
-            770
+            0,
+            1264,
+            799
           ],
           "error": 0,
           "calls": 3,
@@ -74,12 +78,13 @@
           "time": 3,
           "visible": 180,
           "active": false,
-          "colored": 82833,
+          "outside": 0,
+          "colored": 80955,
           "bounds": [
-            54,
-            19,
-            1248,
-            773
+            0,
+            0,
+            1279,
+            799
           ],
           "error": 0,
           "calls": 3,
@@ -89,11 +94,12 @@
           "time": 5,
           "visible": 180,
           "active": false,
-          "colored": 78898,
+          "outside": 0,
+          "colored": 79407,
           "bounds": [
-            112,
+            73,
             38,
-            1159,
+            1166,
             735
           ],
           "error": 0,
@@ -102,7 +108,7 @@
         }
       ],
       "contextRestored": true,
-      "windDuringOpening": 0.6699444651603699,
+      "windDuringOpening": 2.220402717590332,
       "memory": {
         "geometries": 3,
         "textures": 0
@@ -121,12 +127,13 @@
           "time": 0.2,
           "visible": 7,
           "active": true,
-          "colored": 652,
+          "outside": 0,
+          "colored": 662,
           "bounds": [
-            182,
-            386,
-            211,
-            463
+            175,
+            382,
+            215,
+            470
           ],
           "error": 0,
           "calls": 3,
@@ -136,12 +143,13 @@
           "time": 0.8,
           "visible": 62,
           "active": true,
-          "colored": 9762,
+          "outside": 0,
+          "colored": 10147,
           "bounds": [
-            117,
-            275,
-            310,
-            586
+            67,
+            46,
+            389,
+            720
           ],
           "error": 0,
           "calls": 3,
@@ -151,12 +159,13 @@
           "time": 1.5,
           "visible": 120,
           "active": true,
-          "colored": 35760,
+          "outside": 16,
+          "colored": 23345,
           "bounds": [
-            17,
-            44,
+            0,
+            122,
             389,
-            816
+            755
           ],
           "error": 0,
           "calls": 3,
@@ -166,12 +175,13 @@
           "time": 2.5,
           "visible": 120,
           "active": true,
-          "colored": 59763,
+          "outside": 1,
+          "colored": 57532,
           "bounds": [
             0,
-            39,
-            387,
-            803
+            29,
+            389,
+            838
           ],
           "error": 0,
           "calls": 3,
@@ -181,12 +191,13 @@
           "time": 3,
           "visible": 120,
           "active": false,
-          "colored": 58290,
+          "outside": 0,
+          "colored": 57603,
           "bounds": [
             0,
-            76,
+            0,
             389,
-            818
+            843
           ],
           "error": 0,
           "calls": 3,
@@ -196,9 +207,10 @@
           "time": 5,
           "visible": 120,
           "active": false,
-          "colored": 58515,
+          "outside": 0,
+          "colored": 59286,
           "bounds": [
-            13,
+            4,
             62,
             389,
             765
@@ -209,7 +221,7 @@
         }
       ],
       "contextRestored": true,
-      "windDuringOpening": 2.22647762298584,
+      "windDuringOpening": 2.1314260959625244,
       "memory": {
         "geometries": 3,
         "textures": 0
