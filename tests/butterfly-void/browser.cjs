@@ -80,6 +80,23 @@ function pixelStats(image){let active=0,colored=0,white=0;const hues=new Set();
   await page.waitForFunction(()=>Math.max(...__void.snapshot().gust.map(Math.abs))>.015);
   const windy=await snapshot();assert(Math.max(...windy.gust.map(Math.abs))>.015,`pointer/touch wind in ${width}x${height}: ${JSON.stringify(windy.wind)}`);
   await page.screenshot({path:path.join(out,`${width}-wind.png`)});
+  // Reset a running, wind-disturbed flock after changing flight/color controls. Capture
+  // the UI handler's result in the same task, before the next animation frame.
+  const resetAfterWind=await page.evaluate(()=>{
+   const input=(id,value,event)=>{const element=document.getElementById(id);element.value=value;element.dispatchEvent(new Event(event,{bubbles:true}));};
+   input('activity','1.7','input');input('wind','1.4','input');input('mode','white','change');
+   const before=__void.snapshot();document.getElementById('reset').click();
+   return {before,after:__void.snapshot(),controls:['activity','wind','mode'].map(id=>document.getElementById(id).value),labels:['activity-value','wind-value'].map(id=>document.getElementById(id).textContent)};
+  });
+  assert.equal(resetAfterWind.before.mode,'white');assert.equal(resetAfterWind.before.white,true);assert(resetAfterWind.before.time>0);
+  assert(resetAfterWind.before.gust.some(value=>value!==0),'reset starts with wind-disturbed butterflies');
+  const resetState=resetAfterWind.after;
+  assert.equal(resetState.time,0);assert.equal(resetState.simulationTime,0);assert.equal(resetState.mode,'auto');assert.equal(resetState.white,false);
+  for(const key of ['positions','velocity','pose','wing','sizes'])assert.deepEqual(resetState[key],initial[key],`reset restores ${key}`);
+  assert(resetState.gust.every(value=>value===0));assert.equal(resetState.wind.vx,0);assert.equal(resetState.wind.vy,0);
+  assert.equal(resetState.wind.x,resetAfterWind.before.wind.x);assert.equal(resetState.wind.y,resetAfterWind.before.wind.y);
+  assert.equal(resetState.count,initial.count);assert.equal(resetState.paused,false,'reset preserves playback');
+  assert.deepEqual(resetAfterWind.controls,['1','0.8','auto']);assert.deepEqual(resetAfterWind.labels,['1.00','0.80']);
   await page.keyboard.press('Space');assert.equal((await snapshot()).paused,true);const memory=(await snapshot()).memory;
   await page.evaluate(()=>{for(let i=0;i<240;i++)__void.step(1/60);});assert.deepEqual((await snapshot()).memory,memory,'no accumulating geometries or textures');
   // Browser-driven context loss and recovery (the extension may be absent on some GPUs).
