@@ -21,6 +21,16 @@
 - 古い検証記録や企画書は履歴として保持する。現在のコードと不一致なら状態・根拠・未確認箇所を明記する。
 - 検証：`python3 tools/check_ai_docs.py`。対象はAIドキュメントのローカルリンク、SKILL・OKFの基本構造。外部仕様への適合認証や実描画の検証ではない。
 
+## RTK（Rust Token Killer）
+
+- RTK本体は開発用CLIとして別途インストールする。この設定は `rtk 0.50.0` で確認した。
+- プロジェクト設定は `.codex/hooks.json` とルートの `RTK.md`。`AGENTS.md` から参照する。
+- 設定追加後はCodexを再起動し、プロジェクトフックの信頼を求められた場合は内容を確認して許可する。
+- lean-ctxを使う環境では、引き続き `ctx_shell`・`ctx_read`・`ctx_search` を使う。RTKフックは対応するBash呼び出しを対象とし、MCP呼び出し全般の変換は前提にしない。
+- 手動確認：`rtk --version`、`rtk git status`、`rtk hook check 'git status'`。
+- 設定の再適用：`rtk init --codex`。解除：`rtk init --codex --uninstall`。
+- [公式導入手順](https://github.com/rtk-ai/rtk/blob/develop/docs/guide/getting-started/supported-agents.md#codex-cli)
+
 ## 依頼例
 
 「`AGENTS.md`と制作SKILLを読み、`butterfly-void/`の主操作を保って演出を追加する。検証SKILLで確認し、判断が変われば対応するOKFを更新する。」
