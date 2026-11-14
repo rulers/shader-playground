@@ -33,6 +33,7 @@ WebGL・three.js・Canvas 2Dなどを使った、ブラウザー表現の実験�
 | [磁力のモアレ](https://rulers.github.io/shader-playground/magnetic-moire/) | [操作と仕組み](magnetic-moire/README.md) | [MIT](LICENSE) |
 | [矛盾する部屋](https://rulers.github.io/shader-playground/paradox-room/) | [操作と仕組み](paradox-room/README.md) | [MIT](LICENSE) |
 | [時間の残響](https://rulers.github.io/shader-playground/echo-of-time/) | [操作と仕組み](echo-of-time/README.md) | [MIT](LICENSE) |
+| [色彩の飛来](https://rulers.github.io/shader-playground/conure-flight/) | [操作と仕組み](conure-flight/README.md) | [MIT](LICENSE)／[three.js MIT](third_party/three/LICENSE) |
 
 ## ローカルで動かす
 
